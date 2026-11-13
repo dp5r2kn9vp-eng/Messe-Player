@@ -5,7 +5,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Über CueView: Icon, Wortmarke, Version, Copyright und Website.
+- Hilfe (⌘?): Handbuch mit sieben Themen von „Erste Schritte“ bis „Checkliste Messe-Aufbau“, dazu die Tastenkürzel.
+- Tastenkürzel-Übersicht (⌘/) im Hilfe-Menü.
+- Willkommensfenster beim Start ohne offenes Projekt: Neues Projekt, Öffnen, Zuletzt geöffnet, Beispielprojekt, Hilfe.
+- Beispielprojekt „CueView Beispiel“ mit Gruppe, Logo, Texten und Animationen.
+
 ### Geändert
+- Kopfzeile: CueView-Icon und Wortmarke.
 - Die Software heißt jetzt **CueView**: eigenes App-Icon (Bildschirm mit Play und KlangNIVEAU-Schwung), Wortmarke in der Kopfzeile, App-Datei `CueView.app`. Einstellungen und zuletzt geöffnetes Projekt bleiben erhalten.
 
 ## [1.1.1] – 2026-11-13

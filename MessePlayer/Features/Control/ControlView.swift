@@ -83,13 +83,8 @@ extension ControlView {
 private struct ControlHeaderView: View {
     var body: some View {
         HStack(spacing: Theme.Spacing.l) {
-            Image(.cueViewWordmark)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 40)
-                .accessibilityLabel("CueView")
-            Divider().frame(height: 28)
-            BrandLogo(width: 96)
+            AppIconImage(size: 36)
+            CueViewWordmark(height: 40)
             Spacer()
             DisplayPicker()
             BlackButton()

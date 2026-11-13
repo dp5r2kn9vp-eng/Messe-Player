@@ -26,6 +26,12 @@ enum SessionStore {
         defaults.set(try? JSONEncoder().encode(snapshot), forKey: key)
     }
 
+    /// Zuletzt genutztes Projekt, falls es noch existiert.
+    static var lastProjectURL: URL? {
+        guard let path = load()?.projectPath, FileManager.default.fileExists(atPath: path) else { return nil }
+        return URL(filePath: path)
+    }
+
     /// Name statt ID, weil sich Bildschirm-IDs nach einem Neustart ändern können.
     static var outputDisplayName: String? {
         get { UserDefaults.standard.string(forKey: displayKey) }
