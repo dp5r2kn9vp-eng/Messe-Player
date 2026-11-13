@@ -21,6 +21,7 @@ struct LayerInspector: View {
                     }
                 }
             }
+            AnimationSection(animation: animation, isText: isText)
             Section("Platz") {
                 LabeledContent("Breite") {
                     Slider(value: $layer.width, in: 0.05...1)
@@ -31,6 +32,15 @@ struct LayerInspector: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Eigene Bindung, weil `$layer.animation` mit `Binding.animation(_:)` kollidiert.
+    private var animation: Binding<LayerAnimation> {
+        Binding(get: { layer.animation }, set: { layer.animation = $0 })
+    }
+
+    private var isText: Bool {
+        if case .text = layer.content { true } else { false }
     }
 
     private var textStyle: Binding<TextStyle> {
@@ -98,5 +108,78 @@ private struct TextStyleSection: View {
             get: { Color(style.background ?? .black) },
             set: { style.background = RGBAColor($0) }
         )
+    }
+}
+
+/// Erscheinen, Verzögerung, Dauereffekt und Ausblenden einer Ebene.
+private struct AnimationSection: View {
+    @Binding var animation: LayerAnimation
+    let isText: Bool
+
+    var body: some View {
+        Section("Animation") {
+            Picker("Erscheinen", selection: $animation.entrance) {
+                ForEach(LayerAnimation.Entrance.allCases.filter { isText || $0 != .typewriter }, id: \.self) { entrance in
+                    Text(entrance.title).tag(entrance)
+                }
+            }
+            LabeledContent("Verzögerung") {
+                DurationField(seconds: $animation.delay, range: LayerAnimation.delayRange, step: 0.5)
+            }
+            if animation.entrance != .none {
+                LabeledContent("Dauer") {
+                    DurationField(seconds: $animation.duration, range: LayerAnimation.durationRange, step: 0.1)
+                }
+            }
+            Picker("Effekt", selection: $animation.effect) {
+                ForEach(LayerAnimation.Effect.allCases, id: \.self) { effect in
+                    Text(effect.title).tag(effect)
+                }
+            }
+            if animation.effect != .none {
+                LabeledContent("Tempo") {
+                    DurationField(seconds: $animation.effectPeriod, range: LayerAnimation.periodRange, step: 0.1)
+                }
+            }
+            Toggle("Wieder ausblenden", isOn: hidesAgain)
+            if animation.visibleFor != nil {
+                LabeledContent("nach") {
+                    DurationField(seconds: visibleFor, range: LayerAnimation.visibleRange, step: 1)
+                }
+            }
+        }
+    }
+
+    private var hidesAgain: Binding<Bool> {
+        Binding(get: { animation.visibleFor != nil }, set: { animation.visibleFor = $0 ? 5 : nil })
+    }
+
+    private var visibleFor: Binding<TimeInterval> {
+        Binding(get: { animation.visibleFor ?? 5 }, set: { animation.visibleFor = $0 })
+    }
+}
+
+extension LayerAnimation.Entrance {
+    var title: LocalizedStringKey {
+        switch self {
+        case .none: "Sofort"
+        case .fade: "Einblenden"
+        case .slideUp: "Von unten"
+        case .slideDown: "Von oben"
+        case .slideLeft: "Von rechts"
+        case .slideRight: "Von links"
+        case .zoom: "Zoom"
+        case .typewriter: "Schreibmaschine"
+        }
+    }
+}
+
+extension LayerAnimation.Effect {
+    var title: LocalizedStringKey {
+        switch self {
+        case .none: "Keiner"
+        case .blink: "Blinken"
+        case .pulse: "Pulsieren"
+        }
     }
 }

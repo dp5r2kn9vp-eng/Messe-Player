@@ -3,15 +3,18 @@ import SwiftUI
 /// Editor für die Ebenen eines Eintrags: große Vorschau, Ebenenliste, Eigenschaften.
 struct LayerEditorView: View {
     @Binding var entry: Entry
-    let document: ProjectDocument
+    @Binding var document: ProjectDocument
     let packageURL: URL?
 
     @Environment(\.dismiss) private var dismiss
     @State private var selection: Layer.ID?
+    @State private var animationStart: Date?
+    @State private var isPickingImage = false
+    @State private var importErrors: [String] = []
 
-    init(entry: Binding<Entry>, document: ProjectDocument, packageURL: URL?, selection: Layer.ID? = nil) {
+    init(entry: Binding<Entry>, document: Binding<ProjectDocument>, packageURL: URL?, selection: Layer.ID? = nil) {
         _entry = entry
-        self.document = document
+        _document = document
         self.packageURL = packageURL
         _selection = State(initialValue: selection)
     }
@@ -22,13 +25,12 @@ struct LayerEditorView: View {
                 LayerCanvas(
                     item: medium.flatMap { document.playable($0, in: packageURL) },
                     layers: document.renderLayers(entry.layers, in: packageURL),
-                    selection: $selection
+                    selection: $selection,
+                    animationStart: animationStart
                 ) { id, position in
                     entry.updateLayer(id) { $0.position = position }
                 }
-                Text("Ebenen in der Vorschau mit der Maus verschieben.")
-                    .font(.caption)
-                    .foregroundStyle(Color.mutedLight)
+                previewControls
             }
             .padding(Theme.Spacing.l)
             .frame(minWidth: 640)
@@ -37,6 +39,10 @@ struct LayerEditorView: View {
         }
         .frame(minWidth: 1000, minHeight: 560)
         .background(Color.brandDark)
+        .fileImporter(isPresented: $isPickingImage, allowedContentTypes: [.image]) { result in
+            if case .success(let url) = result { addImage(from: url) }
+        }
+        .importErrorAlert($importErrors)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Fertig") { dismiss() }
@@ -50,6 +56,7 @@ struct LayerEditorView: View {
                 Menu("Ebene hinzufügen", systemImage: "plus") {
                     Button("Text", systemImage: "textformat") { add(.text(String(localized: "Neuer Text"))) }
                     Button("KlangNIVEAU-Logo", systemImage: "seal") { add(.logo()) }
+                    Button("Bild aus Datei …", systemImage: "folder") { isPickingImage = true }
                     Menu("Bild aus Bibliothek") {
                         ForEach(imageMedia) { medium in
                             Button(medium.displayName) { add(.image(medium.id)) }
@@ -95,6 +102,30 @@ struct LayerEditorView: View {
             get: { entry.layers.first { $0.id == id } ?? current },
             set: { newValue in entry.updateLayer(id) { $0 = newValue } }
         )
+    }
+
+    private var previewControls: some View {
+        HStack(spacing: Theme.Spacing.s) {
+            if animationStart == nil {
+                Button("Animation ansehen", systemImage: "play.fill") { animationStart = Date() }
+            } else {
+                Button("Neu starten", systemImage: "arrow.counterclockwise") { animationStart = Date() }
+                Button("Bearbeiten", systemImage: "stop.fill") { animationStart = nil }
+            }
+            Spacer()
+            Text(animationStart == nil ? "Ebenen mit der Maus verschieben." : "Vorschau läuft wie auf dem Ausgang.")
+                .font(.caption)
+                .foregroundStyle(Color.mutedLight)
+        }
+    }
+
+    /// Übernimmt ein Bild in die Bibliothek und legt es direkt als Ebene an.
+    private func addImage(from url: URL) {
+        let result = document.importMedia(from: [url], at: document.project.media.count)
+        importErrors = result.errors.map(\.localizedDescription)
+        if let medium = result.added.first {
+            add(.image(medium.id))
+        }
     }
 
     private func add(_ layer: Layer) {

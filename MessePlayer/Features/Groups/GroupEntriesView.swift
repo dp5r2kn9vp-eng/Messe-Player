@@ -50,7 +50,7 @@ struct GroupEntriesView: View {
         }
         .importErrorAlert($importErrors)
         .sheet(item: $editing) { reference in
-            LayerEditorView(entry: binding(for: reference.id), document: document, packageURL: packageURL)
+            LayerEditorView(entry: binding(for: reference.id), document: $document, packageURL: packageURL)
         }
     }
 

@@ -64,7 +64,7 @@ struct DurationField: View {
 
     var body: some View {
         HStack(spacing: Theme.Spacing.xs) {
-            TextField("Dauer", value: $seconds, format: .number.precision(.fractionLength(0...1)))
+            TextField("Dauer", value: clampedSeconds, format: .number.precision(.fractionLength(0...1)))
                 .labelsHidden()
                 .multilineTextAlignment(.trailing)
                 .frame(width: 48)
@@ -72,5 +72,10 @@ struct DurationField: View {
             Stepper("Dauer", value: $seconds, in: range, step: step)
                 .labelsHidden()
         }
+    }
+
+    /// Eingetippte Werte werden auf den erlaubten Bereich begrenzt.
+    private var clampedSeconds: Binding<TimeInterval> {
+        Binding(get: { seconds }, set: { seconds = $0.clamped(to: range) })
     }
 }
