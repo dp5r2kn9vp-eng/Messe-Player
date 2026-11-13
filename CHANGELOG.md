@@ -5,6 +5,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Mehrfachauswahl in Gruppen: Bei mehreren ausgewählten Einträgen erscheint im Gruppenkopf ein Dauerfeld für alle; auch eine Dauer-Änderung direkt an einem der ausgewählten Einträge gilt für alle ausgewählten Bilder.
+
 ## [1.0.0] – 2026-11-13
 
 ### Hinzugefügt

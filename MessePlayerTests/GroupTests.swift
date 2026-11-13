@@ -65,4 +65,12 @@ struct GroupTests {
         #expect(group.entries.first?.layers == [])
         #expect(group.entries.first?.imageDuration == 4)
     }
+
+    @Test func durationChangeAppliesToAllSelectedEntries() {
+        var group = MediaGroup(id: UUID(), name: "Loop")
+        group.entries = (0..<4).map { _ in Entry(id: UUID(), mediumID: UUID()) }
+        let selected: Set<Entry.ID> = [group.entries[0].id, group.entries[2].id]
+        group.setImageDuration(15, for: selected)
+        #expect(group.entries.map(\.imageDuration) == [15, Entry.defaultImageDuration, 15, Entry.defaultImageDuration])
+    }
 }
