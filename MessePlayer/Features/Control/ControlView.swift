@@ -16,12 +16,13 @@ struct ControlView: View {
     @State private var cueSelection = Set<UUID>()
     @AppStorage("showsMediaPanel") private var showsMedia = true
     @AppStorage("showsInspector") private var showsInspector = true
+    @AppStorage("showsTimeline") private var showsTimeline = false
     /// Kennung dieses Fensters gegenüber der Engine (es gibt eine Engine für alle offenen Projekte).
     @State private var windowID = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlHeaderView(showsMedia: $showsMedia, showsInspector: $showsInspector, showsOutputSetup: $showsOutputSetup)
+            ControlHeaderView(showsMedia: $showsMedia, showsInspector: $showsInspector, showsTimeline: $showsTimeline, showsOutputSetup: $showsOutputSetup)
             Divider()
             HStack(spacing: 0) {
                 if showsMedia {
@@ -36,7 +37,13 @@ struct ControlView: View {
                     .frame(width: 300)
                     Divider()
                 }
-                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine, selection: $cueSelection)
+                VStack(spacing: 0) {
+                    CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine, selection: $cueSelection)
+                    if showsTimeline {
+                        Divider()
+                        TimelinePanel(show: currentShow, selection: $cueSelection)
+                    }
+                }
                 if showsInspector {
                     Divider()
                     InspectorPanel(document: $document, packageURL: packageURL, selection: cueSelection)
@@ -120,6 +127,7 @@ extension ControlView {
 private struct ControlHeaderView: View {
     @Binding var showsMedia: Bool
     @Binding var showsInspector: Bool
+    @Binding var showsTimeline: Bool
     @Binding var showsOutputSetup: Bool
 
     var body: some View {
@@ -131,6 +139,10 @@ private struct ControlHeaderView: View {
             AppIconImage(size: 36)
             CueViewWordmark(height: 40)
             Spacer()
+            Button("Zeitstrahl", systemImage: "chart.bar.xaxis") { showsTimeline.toggle() }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+                .help(showsTimeline ? "Show-Zeitstrahl ausblenden" : "Show-Zeitstrahl einblenden")
             Button("Ausgänge …", systemImage: "display.2") { showsOutputSetup = true }
                 .help("Ausgänge anlegen und auf diesem Rechner Bildschirmen zuordnen")
             Button("Inspektor", systemImage: "sidebar.right") { showsInspector.toggle() }

@@ -2,33 +2,6 @@ import Foundation
 import Testing
 @testable import MessePlayer
 
-/// Zeitgeber mit virtueller Uhr: `advance(by:)` führt alle fälligen Schritte in zeitlicher Reihenfolge aus.
-final class VirtualClock: StepScheduler {
-    private(set) var now = Date(timeIntervalSince1970: 1_000)
-    private var pending: [(id: Int, fireAt: Date, action: () -> Void)] = []
-    private var nextID = 0
-
-    var pendingCount: Int { pending.count }
-
-    func schedule(after delay: Duration, _ action: @escaping () -> Void) -> Cancellation {
-        nextID += 1
-        let id = nextID
-        let seconds = Double(delay.components.seconds) + Double(delay.components.attoseconds) / 1e18
-        pending.append((id, now + seconds, action))
-        return Cancellation { [weak self] in self?.pending.removeAll { $0.id == id } }
-    }
-
-    func advance(by seconds: TimeInterval) {
-        let target = now + seconds
-        while let next = pending.min(by: { ($0.fireAt, $0.id) < ($1.fireAt, $1.id) }), next.fireAt <= target {
-            pending.removeAll { $0.id == next.id }
-            now = next.fireAt
-            next.action()
-        }
-        now = target
-    }
-}
-
 /// Bausteine für Test-Shows ohne Projektdatei.
 enum ShowFixture {
     static let outputA1 = UUID()

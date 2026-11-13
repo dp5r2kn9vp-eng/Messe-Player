@@ -25,6 +25,9 @@ Farben ausschließlich über `Theme` (Asset-Katalog), nie als Hex im Code.
 | `brandPaper` | #f2f1ef | Primärtext auf Dunkel, helle Flächen |
 | `mutedLight` | #bdb6b3 | Sekundärtext auf Dunkel |
 | `mutedDark` | #6f6866 | Trennlinien, deaktiviert, Sekundärtext auf Hell |
+| `outputBlue` | #3d9bff | Kennfarbe Ausgang 2 (Ausgang 1 = `brandOrange`) |
+| `outputGreen` | #3cc27a | Kennfarbe Ausgang 3 |
+| `outputViolet` | #a57cff | Kennfarbe Ausgang 4 |
 
 ### Typografie
 - UI: **SF Pro** (Systemschrift, `.font(.body)` etc.), Dynamic Type der macOS-Textstile nutzen.
