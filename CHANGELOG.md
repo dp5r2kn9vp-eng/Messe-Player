@@ -5,8 +5,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [1.0.0] – 2026-11-13
+
 ### Hinzugefügt
-- Grundgerüst der App: Steuerfenster, Ausgabefenster auf externem Bildschirm (rahmenlos, ohne Mauszeiger) oder als Testfenster, Bildschirmauswahl, Black-Button (auch Taste B), KlangNIVEAU-Farb-Tokens.
+- Grundgerüst der App: Steuerfenster, Ausgabefenster auf externem Bildschirm (rahmenlos, ohne Mauszeiger), Bildschirmauswahl, Black-Button (auch Taste B), KlangNIVEAU-Farb-Tokens.
 - Projektformat `.klangshow`: ein Paket mit `project.json` und allen Medien im Ordner `Media/` – im Finder eine Datei, auf andere Macs kopierbar. Projekte aus neueren App-Versionen werden mit klarer Meldung abgelehnt.
 - Medienbibliothek: Bilder und Videos per Drag & Drop aus dem Finder oder über + hinzufügen, Vorschaubilder, Reihenfolge per Drag & Drop, Entfernen per Löschtaste oder Kontextmenü. Nicht unterstützte Dateien werden gemeldet.
 - Einzelanzeige: Doppelklick oder Return auf ein Medium zeigt es dauerhaft auf dem Ausgang (Videos in nahtloser Endlosschleife); das laufende Medium ist orange markiert. Black bleibt dabei aktiv.
@@ -30,3 +32,6 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 ### Geändert
 
 ### Behoben
+
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/releases/tag/v1.0.0
