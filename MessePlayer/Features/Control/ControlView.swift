@@ -17,15 +17,22 @@ struct ControlView: View {
     @AppStorage("showsMediaPanel") private var showsMedia = true
     @AppStorage("showsInspector") private var showsInspector = true
     @AppStorage("showsTimeline") private var showsTimeline = false
+    @AppStorage(TransportSettings.tradeShowModeKey) private var isTradeShowMode = false
     /// Kennung dieses Fensters gegenüber der Engine (es gibt eine Engine für alle offenen Projekte).
     @State private var windowID = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlHeaderView(showsMedia: $showsMedia, showsInspector: $showsInspector, showsTimeline: $showsTimeline, showsOutputSetup: $showsOutputSetup)
+            ControlHeaderView(
+                showsMedia: $showsMedia,
+                showsInspector: $showsInspector,
+                showsTimeline: $showsTimeline,
+                showsOutputSetup: $showsOutputSetup,
+                isTradeShowMode: $isTradeShowMode
+            )
             Divider()
             HStack(spacing: 0) {
-                if showsMedia {
+                if showsMedia && !isTradeShowMode {
                     MediaLibraryView(
                         document: $document,
                         packageURL: packageURL,
@@ -38,13 +45,13 @@ struct ControlView: View {
                     Divider()
                 }
                 VStack(spacing: 0) {
-                    CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine, selection: $cueSelection)
-                    if showsTimeline {
+                    CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine, selection: $cueSelection, isLocked: isTradeShowMode)
+                    if showsTimeline && !isTradeShowMode {
                         Divider()
                         TimelinePanel(show: currentShow, selection: $cueSelection)
                     }
                 }
-                if showsInspector {
+                if showsInspector && !isTradeShowMode {
                     Divider()
                     InspectorPanel(document: $document, packageURL: packageURL, selection: cueSelection)
                         .frame(width: 320)
@@ -54,7 +61,7 @@ struct ControlView: View {
             Divider()
             OutputsBar()
             Divider()
-            TransportBar(claim: claimEngine)
+            TransportBar(claim: claimEngine, isTradeShowMode: isTradeShowMode)
         }
         .environment(\.cueNames, cueName)
         .frame(minWidth: 1100, minHeight: 520)
@@ -129,27 +136,47 @@ private struct ControlHeaderView: View {
     @Binding var showsInspector: Bool
     @Binding var showsTimeline: Bool
     @Binding var showsOutputSetup: Bool
+    @Binding var isTradeShowMode: Bool
 
     var body: some View {
         HStack(spacing: Theme.Spacing.l) {
-            Button("Medienbereich", systemImage: "sidebar.left") { showsMedia.toggle() }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-                .help(showsMedia ? "Medienbereich ausblenden" : "Medienbereich einblenden")
+            if !isTradeShowMode {
+                Button("Medienbereich", systemImage: "sidebar.left") { showsMedia.toggle() }
+                    .labelStyle(.iconOnly)
+                    .buttonStyle(.borderless)
+                    .help(showsMedia ? "Medienbereich ausblenden" : "Medienbereich einblenden")
+            }
             AppIconImage(size: 36)
             CueViewWordmark(height: 40)
             Spacer()
-            Button("Zeitstrahl", systemImage: "chart.bar.xaxis") { showsTimeline.toggle() }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-                .help(showsTimeline ? "Show-Zeitstrahl ausblenden" : "Show-Zeitstrahl einblenden")
-            Button("Ausgänge …", systemImage: "display.2") { showsOutputSetup = true }
-                .help("Ausgänge anlegen und auf diesem Rechner Bildschirmen zuordnen")
-            Button("Inspektor", systemImage: "sidebar.right") { showsInspector.toggle() }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-                .help(showsInspector ? "Inspektor ausblenden" : "Inspektor einblenden")
+            tradeShowToggle
+            if !isTradeShowMode { editingButtons }
         }
         .padding(Theme.Spacing.l)
+    }
+
+    private var tradeShowToggle: some View {
+        Toggle(isOn: $isTradeShowMode) {
+            Label("Messe-Modus", systemImage: isTradeShowMode ? "lock.fill" : "lock.open")
+        }
+        .toggleStyle(.button)
+        .tint(Color.brandOrange)
+        .help(isTradeShowMode
+            ? "Messe-Modus beenden: Liste wieder bearbeitbar (⇧⌘M)"
+            : "Messe-Modus: Liste sperren, nur GO, Stopp und Black zeigen (⇧⌘M)")
+    }
+
+    @ViewBuilder
+    private var editingButtons: some View {
+        Button("Zeitstrahl", systemImage: "chart.bar.xaxis") { showsTimeline.toggle() }
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .help(showsTimeline ? "Show-Zeitstrahl ausblenden" : "Show-Zeitstrahl einblenden")
+        Button("Ausgänge …", systemImage: "display.2") { showsOutputSetup = true }
+            .help("Ausgänge anlegen und auf diesem Rechner Bildschirmen zuordnen")
+        Button("Inspektor", systemImage: "sidebar.right") { showsInspector.toggle() }
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .help(showsInspector ? "Inspektor ausblenden" : "Inspektor einblenden")
     }
 }

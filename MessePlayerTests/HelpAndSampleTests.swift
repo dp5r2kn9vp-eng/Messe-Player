@@ -10,9 +10,18 @@ struct HelpAndSampleTests {
     }
 
     @Test func allHelpTopicsAreBundledWithTitles() {
-        #expect(HelpTopic.all.count == 7)
+        #expect(HelpTopic.all.count == 9)
         #expect(HelpTopic.all.first?.title == "Erste Schritte")
         #expect(HelpTopic.all.allSatisfy { !$0.blocks.isEmpty })
+    }
+
+    /// Die Übersicht nennt jede Taste der v2-Belegung genau einmal.
+    @Test func shortcutOverviewListsTransportKeys() {
+        let keys = ShortcutInfo.all.map(\.keys)
+        for key in ["P", "B", "⇧B", "⌘.", "Esc", "↑ / ↓", "⌘G / ⇧⌘G", "⇧⌘M"] {
+            #expect(keys.contains(key), "\(key) fehlt")
+        }
+        #expect(Set(keys).count == keys.count)
     }
 
     @Test func sampleProjectOpensWithGroupTextsAndAnimation() throws {

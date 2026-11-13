@@ -17,7 +17,7 @@ struct MessePlayerApp: App {
         }
         .commands {
             ArchiveCommands()
-            PlaybackCommands(engine: appDelegate.engine)
+            TransportCommands(engine: appDelegate.engine)
             InfoCommands()
         }
         Window("Willkommen bei CueView", id: WindowID.welcome) {

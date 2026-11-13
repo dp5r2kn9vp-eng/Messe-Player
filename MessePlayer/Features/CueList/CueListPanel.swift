@@ -10,6 +10,8 @@ struct CueListPanel: View {
     let claim: () -> Void
     /// Auswahl der Liste; der Inspektor zeigt sie.
     @Binding var selection: Set<UUID>
+    /// Messe-Modus: Liste gesperrt – Klick setzt den Abspielkopf, Doppelklick startet, sonst nichts.
+    var isLocked = false
 
     @Environment(CueEngine.self) private var engine
     @Environment(MediaLengths.self) private var mediaLengths
@@ -21,7 +23,9 @@ struct CueListPanel: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PanelHeader(title: "Cue-Liste", count: project.cues.count) { actions }
+            PanelHeader(title: "Cue-Liste", count: project.cues.count) {
+                if !isLocked { actions }
+            }
             CueColumnHeader(visibility: $columns)
             Divider()
             if project.cues.isEmpty {
@@ -69,13 +73,19 @@ struct CueListPanel: View {
             onRemove: remove,
             onMove: { offsets, destination in move(offsets, to: destination, in: rows) },
             primaryAction: start,
+            isEditable: !isLocked,
             menu: contextMenu,
             row: row
         )
     }
 
-    @ViewBuilder
     private func row(_ row: CueListRow) -> some View {
+        editableRow(row)
+            .allowsHitTesting(!isLocked)
+    }
+
+    @ViewBuilder
+    private func editableRow(_ row: CueListRow) -> some View {
         switch row {
         case .group(let group):
             CueGroupHeaderRow(
@@ -94,11 +104,16 @@ struct CueListPanel: View {
 
     @ViewBuilder
     private func contextMenu(_ ids: Set<UUID>) -> some View {
-        let cueIDs = project.cueIDs(inSelection: ids)
         Button("Starten", systemImage: "play.fill") { start(ids) }
             .disabled(ids.count != 1)
         Button("Abspielkopf hierher", systemImage: "play") { setPlayhead(ids) }
             .disabled(ids.count != 1)
+        if !isLocked { editingMenu(ids) }
+    }
+
+    @ViewBuilder
+    private func editingMenu(_ ids: Set<UUID>) -> some View {
+        let cueIDs = project.cueIDs(inSelection: ids)
         Button("Texte & Ebenen bearbeiten …", systemImage: "textformat") { editingLayers = cueIDs.first.map(CueReference.init) }
             .disabled(cueIDs.count != 1)
         Divider()
@@ -119,6 +134,7 @@ struct CueListPanel: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .dropDestination(for: CueListDrop.self) { drops, _ in
+            guard !isLocked else { return false }
             insert(drops, at: CueDropTarget(offset: 0, groupID: nil))
             return true
         }
