@@ -54,4 +54,13 @@ struct CueFrame: Equatable {
     let item: PlayableMedium
     var layers: [RenderLayer] = []
     let step: Int
+    var playback = PlaybackSettings()
+}
+
+/// Darstellung und Ton eines Cues im Renderer.
+struct PlaybackSettings: Equatable {
+    var scaling = ContentScaling.fit
+    var audio = AudioLevel()
+    /// Spielzeit für den Fade aus; `nil`, solange die Länge unbekannt ist.
+    var playLength: TimeInterval?
 }

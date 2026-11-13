@@ -5,6 +5,7 @@ import SwiftUI
 struct FrameView: View {
     let item: PlayableMedium
     let layers: [RenderLayer]
+    var playback = PlaybackSettings()
     var onFinish: (() -> Void)?
     var isPaused = false
 
@@ -13,7 +14,7 @@ struct FrameView: View {
 
     var body: some View {
         ZStack {
-            MediaView(item: item, onFinish: onFinish, isPaused: isPaused)
+            MediaView(item: item, playback: playback, onFinish: onFinish, isPaused: isPaused)
             LayerOverlay(layers: layers, startedAt: startedAt)
         }
     }

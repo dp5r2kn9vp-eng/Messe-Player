@@ -104,13 +104,13 @@ struct CueRow: View {
         case .name:
             nameCell
         case .output:
-            outputPicker
+            CueOutputPicker(model: model, onEdit: onEdit)
         case .wait:
             DurationField(seconds: Binding(get: { cue.wait }, set: { onEdit(.wait($0)) }), range: Cue.waitRange)
         case .duration:
-            durationCell
+            CueDurationField(model: model, onEdit: onEdit)
         case .followAction:
-            followPicker
+            CueFollowPicker(model: model, onEdit: onEdit)
         case .remaining:
             if let progress = model.progress {
                 StepProgressBar(progress: progress)
@@ -127,48 +127,6 @@ struct CueRow: View {
                 .textFieldStyle(.plain)
                 .foregroundStyle(model.isMissing ? Color.brandRed : Color.primary)
         }
-    }
-
-    @ViewBuilder
-    private var outputPicker: some View {
-        if model.isAudio {
-            Text(verbatim: "–").foregroundStyle(Color.mutedLight)
-        } else {
-            Picker("Ausgang", selection: Binding(get: { model.cue.outputID }, set: { onEdit(.output($0)) })) {
-                ForEach(model.outputs) { output in
-                    Text(output.name).tag(OutputDefinition.ID?.some(output.id))
-                }
-            }
-            .labelsHidden()
-        }
-    }
-
-    @ViewBuilder
-    private var durationCell: some View {
-        if let duration = model.duration, model.cue.mediumID != nil, !model.isMissing {
-            DurationField(
-                seconds: Binding(get: { duration }, set: { onEdit(.duration($0)) }),
-                range: model.medium?.kind == .image ? Cue.stillDurationRange : 0...(24 * 3600)
-            )
-        } else {
-            Text(model.duration.map(TimeFormat.string(from:)) ?? "–")
-                .monospacedDigit()
-                .foregroundStyle(Color.mutedLight)
-        }
-    }
-
-    private var followPicker: some View {
-        Picker("Danach", selection: Binding(
-            get: { model.followIsSetByGroup ? .followOnEnd : model.cue.followAction },
-            set: { onEdit(.followAction($0)) }
-        )) {
-            ForEach(FollowAction.allCases, id: \.self) { action in
-                Text(action.title).tag(action)
-            }
-        }
-        .labelsHidden()
-        .disabled(model.followIsSetByGroup)
-        .help(model.followIsSetByGroup ? "In einer Loop-Gruppe geht es immer weiter nach Ende." : "Was nach dem Cue passiert")
     }
 }
 

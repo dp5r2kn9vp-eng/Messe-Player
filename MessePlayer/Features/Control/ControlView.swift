@@ -13,13 +13,15 @@ struct ControlView: View {
     @State private var showsOutputSetup = false
     @State private var librarySelection = Set<Medium.ID>()
     @State private var showsFormatNotice = false
+    @State private var cueSelection = Set<UUID>()
     @AppStorage("showsMediaPanel") private var showsMedia = true
+    @AppStorage("showsInspector") private var showsInspector = true
     /// Kennung dieses Fensters gegenüber der Engine (es gibt eine Engine für alle offenen Projekte).
     @State private var windowID = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlHeaderView(showsMedia: $showsMedia, showsOutputSetup: $showsOutputSetup)
+            ControlHeaderView(showsMedia: $showsMedia, showsInspector: $showsInspector, showsOutputSetup: $showsOutputSetup)
             Divider()
             HStack(spacing: 0) {
                 if showsMedia {
@@ -34,7 +36,12 @@ struct ControlView: View {
                     .frame(width: 300)
                     Divider()
                 }
-                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine)
+                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine, selection: $cueSelection)
+                if showsInspector {
+                    Divider()
+                    InspectorPanel(document: $document, packageURL: packageURL, selection: cueSelection)
+                        .frame(width: 320)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             Divider()
@@ -43,7 +50,7 @@ struct ControlView: View {
             TransportBar(claim: claimEngine)
         }
         .environment(\.cueNames, cueName)
-        .frame(minWidth: 1000, minHeight: 520)
+        .frame(minWidth: 1100, minHeight: 520)
         .onChange(of: currentShow) { updateEngine() }
         .onChange(of: engine.snapshot(projectPath: packageURL?.path)) { saveSession() }
         .task {
@@ -112,6 +119,7 @@ extension ControlView {
 
 private struct ControlHeaderView: View {
     @Binding var showsMedia: Bool
+    @Binding var showsInspector: Bool
     @Binding var showsOutputSetup: Bool
 
     var body: some View {
@@ -125,6 +133,10 @@ private struct ControlHeaderView: View {
             Spacer()
             Button("Ausgänge …", systemImage: "display.2") { showsOutputSetup = true }
                 .help("Ausgänge anlegen und auf diesem Rechner Bildschirmen zuordnen")
+            Button("Inspektor", systemImage: "sidebar.right") { showsInspector.toggle() }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+                .help(showsInspector ? "Inspektor ausblenden" : "Inspektor einblenden")
         }
         .padding(Theme.Spacing.l)
     }

@@ -10,11 +10,23 @@ nonisolated enum FollowAction: String, Codable, CaseIterable {
     case continueWithNext
 }
 
+/// Wie ein Bild oder Video den Ausgang füllt.
+nonisolated enum ContentScaling: String, Codable, CaseIterable {
+    /// Ganz sichtbar im Seitenverhältnis, Rest schwarz.
+    case fit
+    /// Füllt den Ausgang im Seitenverhältnis, Ränder werden beschnitten.
+    case fill
+}
+
 /// Eine Zeile der Cue-Liste: ein Ereignis mit Nummer, Medium, Ausgang, Zeiten und Folgeaktion.
 nonisolated struct Cue: Codable, Equatable, Identifiable {
     static let defaultStillDuration: TimeInterval = 5
     static let stillDurationRange: ClosedRange<TimeInterval> = 0.1...3600
     static let volumeRange: ClosedRange<Double> = 0...1
+    /// Lautstärke-Rampen (Fade ein/aus) in Sekunden.
+    static let fadeRange: ClosedRange<TimeInterval> = 0...60
+    /// Bild-Blenden (Blende ein/aus) in Sekunden.
+    static let blendRange: ClosedRange<TimeInterval> = 0...10
 
     let id: UUID
     /// Als String, damit Cues später eingefügt werden können („1.5“), ohne umzunummerieren.
@@ -37,8 +49,24 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
     var volume = 1.0 {
         didSet { volume = volume.clamped(to: Self.volumeRange) }
     }
-    var fadeIn: TimeInterval = 0
-    var fadeOut: TimeInterval = 0
+    /// Lautstärke-Rampe beim Start (linear von 0 auf `volume`).
+    var fadeIn: TimeInterval = 0 {
+        didSet { fadeIn = fadeIn.clamped(to: Self.fadeRange) }
+    }
+    /// Lautstärke-Rampe vor dem Ende (linear von `volume` auf 0).
+    var fadeOut: TimeInterval = 0 {
+        didSet { fadeOut = fadeOut.clamped(to: Self.fadeRange) }
+    }
+    var isMuted = false
+    /// Bild-Blende beim Erscheinen außerhalb von Gruppen.
+    var blendIn: TimeInterval = 0 {
+        didSet { blendIn = blendIn.clamped(to: Self.blendRange) }
+    }
+    /// Bild-Blende, wenn ein Video am Ende auf Schwarz geht.
+    var blendOut: TimeInterval = 0 {
+        didSet { blendOut = blendOut.clamped(to: Self.blendRange) }
+    }
+    var scaling = ContentScaling.fit
     var layers: [Layer] = []
     var notes = ""
     var color: RGBAColor?
@@ -66,6 +94,10 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
         volume = try container.decodeIfPresent(Double.self, forKey: .volume) ?? 1
         fadeIn = try container.decodeIfPresent(TimeInterval.self, forKey: .fadeIn) ?? 0
         fadeOut = try container.decodeIfPresent(TimeInterval.self, forKey: .fadeOut) ?? 0
+        isMuted = try container.decodeIfPresent(Bool.self, forKey: .isMuted) ?? false
+        blendIn = try container.decodeIfPresent(TimeInterval.self, forKey: .blendIn) ?? 0
+        blendOut = try container.decodeIfPresent(TimeInterval.self, forKey: .blendOut) ?? 0
+        scaling = try container.decodeIfPresent(ContentScaling.self, forKey: .scaling) ?? .fit
         layers = try container.decodeIfPresent([Layer].self, forKey: .layers) ?? []
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         color = try container.decodeIfPresent(RGBAColor.self, forKey: .color)

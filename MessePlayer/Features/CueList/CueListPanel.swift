@@ -8,11 +8,12 @@ struct CueListPanel: View {
     let librarySelection: Set<Medium.ID>
     /// Lädt diese Cue-Liste in die Engine, bevor gestartet wird.
     let claim: () -> Void
+    /// Auswahl der Liste; der Inspektor zeigt sie.
+    @Binding var selection: Set<UUID>
 
     @Environment(CueEngine.self) private var engine
     @Environment(MediaLengths.self) private var mediaLengths
     @AppStorage("cueListColumns") private var columns = CueColumnVisibility()
-    @State private var selection = Set<UUID>()
     @State private var importErrors: [String] = []
     @State private var editingLayers: CueReference?
 
@@ -32,7 +33,7 @@ struct CueListPanel: View {
         .importErrorAlert($importErrors)
         .onChange(of: selection) { followSelectionWithPlayhead() }
         .sheet(item: $editingLayers) { reference in
-            LayerEditorView(cue: cueBinding(reference.id), document: $document, packageURL: packageURL)
+            LayerEditorView(cue: $document.cue(reference.id), document: $document, packageURL: packageURL)
         }
     }
 
@@ -78,7 +79,7 @@ struct CueListPanel: View {
         switch row {
         case .group(let group):
             CueGroupHeaderRow(
-                group: groupBinding(group.id),
+                group: $document.group(group.id),
                 status: project.members(of: group).lazy.compactMap(status).first { $0 != .missing },
                 outputID: commonOutput(of: group),
                 outputs: project.outputs,
@@ -126,16 +127,12 @@ struct CueListPanel: View {
     // MARK: Zeilen-Daten
 
     private func rowModel(_ cue: Cue, bracket: GroupBracket?) -> CueRowModel {
-        let medium = cue.mediumID.flatMap(project.medium(withID:))
-        return CueRowModel(
-            cue: cue,
-            medium: medium,
+        document.rowModel(
+            cue,
+            mediaLength: mediaLength(of: cue),
             bracket: bracket,
             status: status(of: cue),
-            progress: isEngineShowingThisList ? engine.running[cue.id]?.progress : nil,
-            duration: project.duration(of: cue, mediaLength: mediaLength(of: cue)),
-            followIsSetByGroup: project.followActionIsSetByGroup(cue),
-            outputs: project.outputs
+            progress: isEngineShowingThisList ? engine.running[cue.id]?.progress : nil
         )
     }
 
@@ -155,8 +152,7 @@ struct CueListPanel: View {
     }
 
     private func mediaLength(of cue: Cue) -> TimeInterval? {
-        guard let medium = cue.mediumID.flatMap(project.medium(withID:)), medium.kind != .image else { return nil }
-        return mediaLengths.length(of: document.media.url(for: medium, in: packageURL))
+        document.mediaLength(of: cue, in: packageURL, lengths: mediaLengths)
     }
 
     private func commonOutput(of group: CueGroup) -> OutputDefinition.ID? {
@@ -172,28 +168,6 @@ struct CueListPanel: View {
 
     private func canDissolve(_ ids: Set<UUID>) -> Bool {
         project.groups.contains { ids.contains($0.id) } || project.cueIDs(inSelection: ids).contains { project.group(containing: $0) != nil }
-    }
-
-    // MARK: Bindungen
-
-    private func groupBinding(_ id: CueGroup.ID) -> Binding<CueGroup> {
-        Binding(
-            get: { document.project.groups.first { $0.id == id } ?? .empty(id: id, name: "") },
-            set: { newValue in
-                guard let index = document.project.groups.firstIndex(where: { $0.id == id }) else { return }
-                document.project.groups[index] = newValue
-            }
-        )
-    }
-
-    private func cueBinding(_ id: Cue.ID) -> Binding<Cue> {
-        Binding(
-            get: { document.project.cue(withID: id) ?? Cue(id: id, number: "") },
-            set: { newValue in
-                guard let index = document.project.cues.firstIndex(where: { $0.id == id }) else { return }
-                document.project.cues[index] = newValue
-            }
-        )
     }
 
     // MARK: Aktionen
