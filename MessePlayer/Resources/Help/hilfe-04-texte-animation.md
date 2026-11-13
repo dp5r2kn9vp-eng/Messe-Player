@@ -1,8 +1,10 @@
 # Texte, Logo & Animation
 
+Jede Ebene gehört zu einem Cue. Ebenen liegen über Bild oder Video.
+
 ## Ebenen öffnen
 
-Klicke am Eintrag auf „Ebenen“. Alternativ wählst du per Rechtsklick „Texte & Ebenen bearbeiten …“.
+Markiere einen Cue und öffne im Inspektor den Reiter „Texte & Ebenen“.
 
 ## Ebenen hinzufügen
 
@@ -25,4 +27,4 @@ Du kannst einstellen: Text, Schrift, Größe, Fett, Farbe, Ausrichtung, Schatten
 
 „Animation ansehen“ unter der Vorschau zeigt den Ablauf so, wie er auf dem Fernseher aussieht. „Bearbeiten“ stoppt ihn.
 
-Animationen starten bei jedem Loop-Eintrag neu. Textänderungen am laufenden Eintrag erscheinen sofort.
+Animationen starten bei jedem Cue neu. Textänderungen am laufenden Cue erscheinen sofort.
