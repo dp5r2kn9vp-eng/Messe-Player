@@ -11,6 +11,8 @@ struct MediaRow: View {
         HStack(spacing: Theme.Spacing.m) {
             MediaThumbnail(url: url, isLive: isLive)
                 .frame(width: 64)
+                .draggable(MediumReference(id: medium.id))
+                .help("In die Cue-Liste ziehen, um einen Cue anzulegen")
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                 Text(medium.displayName)
                     .lineLimit(1)

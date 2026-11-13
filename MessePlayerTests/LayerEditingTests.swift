@@ -6,7 +6,7 @@ import Testing
 @MainActor
 struct LayerEditingTests {
     @Test func updatesOnlyTheGivenLayer() {
-        var entry = Entry(id: UUID(), mediumID: UUID())
+        var entry = Cue(number: "1")
         let a = Layer.text("A"), b = Layer.text("B")
         entry.layers = [a, b]
         entry.updateLayer(b.id) { $0.position = RelativePoint(x: 0.1, y: 0.9) }

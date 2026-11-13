@@ -9,25 +9,27 @@ struct ControlView: View {
     @Environment(OutputController.self) private var output
     @Environment(HotkeyService.self) private var hotkeys
     @State private var librarySelection = Set<Medium.ID>()
-    @State private var selectedGroupID: MediaGroup.ID?
     @State private var showsFormatNotice = false
+    @AppStorage("showsMediaPanel") private var showsMedia = true
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlHeaderView()
+            ControlHeaderView(showsMedia: $showsMedia)
             Divider()
             HStack(spacing: 0) {
-                MediaLibraryView(
-                    document: $document,
-                    packageURL: packageURL,
-                    selection: $librarySelection,
-                    onAddToGroup: selectedGroupID.map { groupID in
-                        { ids in document.project.addEntries(for: document.project.orderedMediumIDs(ids), toGroup: groupID) }
-                    }
-                )
-                .frame(width: 320)
-                Divider()
-                GroupsPanel(document: $document, packageURL: packageURL, selectedGroupID: $selectedGroupID)
+                if showsMedia {
+                    MediaLibraryView(
+                        document: $document,
+                        packageURL: packageURL,
+                        selection: $librarySelection,
+                        onAddCues: { ids in
+                            document.project.insertCues(for: document.project.orderedMediumIDs(ids), at: document.project.cues.count)
+                        }
+                    )
+                    .frame(width: 300)
+                    Divider()
+                }
+                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -88,8 +90,14 @@ extension ControlView {
 }
 
 private struct ControlHeaderView: View {
+    @Binding var showsMedia: Bool
+
     var body: some View {
         HStack(spacing: Theme.Spacing.l) {
+            Button("Medienbereich", systemImage: "sidebar.left") { showsMedia.toggle() }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+                .help(showsMedia ? "Medienbereich ausblenden" : "Medienbereich einblenden")
             AppIconImage(size: 36)
             CueViewWordmark(height: 40)
             Spacer()

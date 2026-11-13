@@ -11,6 +11,7 @@ struct MessePlayerApp: App {
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindow)
                 .environment(appDelegate.hotkeys)
+                .environment(appDelegate.mediaLengths)
                 .focusedSceneValue(\.projectPackageURL, file.fileURL)
         }
         .commands {

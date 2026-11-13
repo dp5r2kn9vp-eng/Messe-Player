@@ -19,3 +19,10 @@ enum Theme {
 
     static let minHitSize: CGFloat = 28
 }
+
+extension Color {
+    /// Klammer und Kopfzeile einer Cue-Gruppe.
+    static let groupBracket = Color.brandOrange
+    /// Abspielkopf („Als Nächstes“) in der Cue-Liste.
+    static let playhead = Color.brandOrange
+}
