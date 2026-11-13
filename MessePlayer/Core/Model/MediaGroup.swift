@@ -2,9 +2,16 @@ import Foundation
 
 /// Eine Gruppe (Loop): geordnete Einträge, die nacheinander laufen.
 nonisolated struct MediaGroup: Codable, Equatable, Identifiable {
+    static let defaultCrossfade: TimeInterval = 0.5
+    static let crossfadeRange: ClosedRange<TimeInterval> = 0...5
+
     let id: UUID
     var name: String
     var entries: [Entry] = []
+    /// Überblendzeit zwischen den Einträgen in Sekunden (0 = harter Schnitt).
+    var crossfade: TimeInterval = MediaGroup.defaultCrossfade {
+        didSet { crossfade = crossfade.clamped(to: Self.crossfadeRange) }
+    }
 }
 
 /// Ein Platz in einer Gruppe. Verweist auf ein Medium; Bilder haben eine Standdauer, Videos laufen komplett.

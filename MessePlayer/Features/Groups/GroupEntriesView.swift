@@ -19,6 +19,11 @@ struct GroupEntriesView: View {
                 Text("\(group.entries.count) Einträge")
                     .font(.caption)
                     .foregroundStyle(Color.mutedLight)
+                Spacer()
+                Text("Überblendung").font(.caption).foregroundStyle(Color.mutedLight)
+                DurationField(seconds: $group.crossfade, range: MediaGroup.crossfadeRange, step: 0.5)
+                    .help("Überblendung zwischen den Einträgen (0 = harter Schnitt)")
+                playButton
             }
             .padding(Theme.Spacing.m)
             if group.entries.isEmpty {
@@ -30,15 +35,29 @@ struct GroupEntriesView: View {
         .importErrorAlert($importErrors)
     }
 
+    @ViewBuilder
+    private var playButton: some View {
+        if output.playingGroupID == group.id {
+            Button("Stopp", systemImage: "stop.fill") { output.stop() }
+        } else {
+            Button("Starten", systemImage: "play.fill") { startLoop() }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.brandOrange)
+                .disabled(group.entries.isEmpty)
+        }
+    }
+
     private var list: some View {
         ReorderableList(
             items: $group.entries,
             selection: $selection,
             onInsert: importFiles,
             onRemove: remove,
-            primaryAction: showOnOutput,
+            primaryAction: { ids in startLoop(at: ids.first) },
             menu: { ids in
-                Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
+                Button("Loop ab hier starten", systemImage: "play.fill") { startLoop(at: ids.first) }
+                    .disabled(ids.count != 1)
+                Button("Einzeln auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
                     .disabled(ids.count != 1)
                 Button("Aus Gruppe entfernen", systemImage: "minus.circle", role: .destructive) { remove(ids) }
             },
@@ -48,7 +67,7 @@ struct GroupEntriesView: View {
                     entry: binding(for: entry.id),
                     medium: medium,
                     url: medium.flatMap { document.media.url(for: $0, in: packageURL) },
-                    isLive: medium.map(output.isLive) ?? false
+                    isLive: output.isLive(entry: entry.id)
                 )
             }
         )
@@ -88,6 +107,10 @@ struct GroupEntriesView: View {
     private func remove(_ ids: Set<Entry.ID>) {
         group.entries.removeAll { ids.contains($0.id) }
         selection.subtract(ids)
+    }
+
+    private func startLoop(at entryID: Entry.ID? = nil) {
+        output.startLoop(document.playlist(for: group, in: packageURL), at: entryID)
     }
 
     private func showOnOutput(_ ids: Set<Entry.ID>) {

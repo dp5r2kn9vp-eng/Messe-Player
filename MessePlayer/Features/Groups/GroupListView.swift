@@ -6,6 +6,8 @@ struct GroupListView: View {
     @Binding var selection: MediaGroup.ID?
     let onAdd: () -> Void
 
+    @Environment(OutputController.self) private var output
+
     var body: some View {
         VStack(spacing: 0) {
             PanelHeader(title: "Gruppen", count: groups.count) {
@@ -13,11 +15,19 @@ struct GroupListView: View {
             }
             List(selection: $selection) {
                 ForEach(groups) { group in
-                    VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                        Text(group.name).lineLimit(1)
-                        Text("\(group.entries.count) Einträge")
-                            .font(.caption)
-                            .foregroundStyle(Color.mutedLight)
+                    HStack {
+                        VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                            Text(group.name).lineLimit(1)
+                            Text("\(group.entries.count) Einträge")
+                                .font(.caption)
+                                .foregroundStyle(Color.mutedLight)
+                        }
+                        Spacer(minLength: 0)
+                        if output.playingGroupID == group.id {
+                            Image(systemName: "play.fill")
+                                .foregroundStyle(Color.brandOrange)
+                                .help("Läuft gerade")
+                        }
                     }
                     .tag(group.id)
                     .contextMenu {

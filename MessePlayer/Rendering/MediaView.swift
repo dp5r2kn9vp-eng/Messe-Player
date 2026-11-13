@@ -4,15 +4,17 @@ import SwiftUI
 /// Gemeinsamer Renderer für Ausgang und Vorschau.
 struct MediaView: View {
     let item: PlayableMedium
+    /// `nil`: Video in Endlosschleife (Einzelanzeige). Sonst einmal abspielen und danach – oder bei einem Fehler – melden.
+    var onFinish: (() -> Void)?
 
     var body: some View {
         ZStack {
             Color.black
             switch item.medium.kind {
             case .image:
-                StillImageView(url: item.url)
+                StillImageView(url: item.url, onFailure: onFinish)
             case .video:
-                VideoSurface(url: item.url)
+                VideoSurface(url: item.url, onFinish: onFinish)
             }
         }
     }
@@ -20,15 +22,13 @@ struct MediaView: View {
 
 private struct StillImageView: View {
     let url: URL
-
-    @State private var image: NSImage?
+    let onFailure: (() -> Void)?
 
     var body: some View {
-        Group {
-            if let image {
-                Image(nsImage: image).resizable().scaledToFit()
-            }
+        if let image = ImageCache.shared.image(for: url) {
+            Image(nsImage: image).resizable().scaledToFit()
+        } else {
+            Color.black.onAppear { onFailure?() }
         }
-        .task(id: url) { image = NSImage(contentsOf: url) }
     }
 }

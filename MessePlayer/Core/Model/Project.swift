@@ -19,7 +19,7 @@ nonisolated struct Project: Codable, Equatable {
     }
 }
 
-extension Project {
+nonisolated extension Project {
     func medium(withID id: Medium.ID) -> Medium? {
         media.first { $0.id == id }
     }

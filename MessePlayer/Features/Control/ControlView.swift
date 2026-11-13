@@ -6,6 +6,7 @@ struct ControlView: View {
     /// Speicherort des Pakets; `nil`, solange das Projekt noch nie gespeichert wurde.
     let packageURL: URL?
 
+    @Environment(OutputController.self) private var output
     @State private var librarySelection = Set<Medium.ID>()
     @State private var selectedGroupID: MediaGroup.ID?
 
@@ -28,8 +29,19 @@ struct ControlView: View {
             }
         }
         .frame(minWidth: 1000, minHeight: 520)
+        .onChange(of: document.project.groups) { refreshRunningLoop() }
         .background(Color.brandDark)
         .preferredColorScheme(.dark)
+    }
+}
+
+extension ControlView {
+    /// Änderungen an der laufenden Gruppe (Reihenfolge, Dauer) wirken sofort.
+    private func refreshRunningLoop() {
+        guard let id = output.playingGroupID,
+              let group = document.project.groups.first(where: { $0.id == id })
+        else { return }
+        output.updateLoop(document.playlist(for: group, in: packageURL))
     }
 }
 

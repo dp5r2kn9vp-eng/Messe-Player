@@ -19,7 +19,8 @@ struct EntryRow: View {
             }
             Spacer(minLength: Theme.Spacing.s)
             if medium?.kind == .image {
-                DurationField(seconds: $entry.imageDuration)
+                DurationField(seconds: $entry.imageDuration, range: Entry.durationRange)
+                    .help("Wie lange das Bild im Loop stehen bleibt")
             }
         }
         .padding(.vertical, Theme.Spacing.xs)
@@ -41,6 +42,8 @@ struct EntryRow: View {
 /// Eingabe einer Dauer in Sekunden mit Stepper.
 struct DurationField: View {
     @Binding var seconds: TimeInterval
+    let range: ClosedRange<TimeInterval>
+    var step: TimeInterval = 1
 
     var body: some View {
         HStack(spacing: Theme.Spacing.xs) {
@@ -49,9 +52,8 @@ struct DurationField: View {
                 .multilineTextAlignment(.trailing)
                 .frame(width: 48)
             Text("s").foregroundStyle(Color.mutedLight)
-            Stepper("Dauer", value: $seconds, in: Entry.durationRange, step: 1)
+            Stepper("Dauer", value: $seconds, in: range, step: step)
                 .labelsHidden()
         }
-        .help("Wie lange das Bild im Loop stehen bleibt")
     }
 }
