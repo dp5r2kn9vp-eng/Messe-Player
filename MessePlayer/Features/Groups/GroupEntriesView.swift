@@ -11,15 +11,30 @@ struct GroupEntriesView: View {
     @State private var importErrors: [String] = []
     @State private var editing: EntryReference?
 
+    init(document: Binding<ProjectDocument>, group: Binding<MediaGroup>, packageURL: URL?, initialSelection: Set<Entry.ID> = []) {
+        _document = document
+        _group = group
+        self.packageURL = packageURL
+        _selection = State(initialValue: initialSelection)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: Theme.Spacing.s) {
                 TextField("Gruppenname", text: $group.name)
                     .textFieldStyle(.plain)
                     .font(.headline)
-                Text("\(group.entries.count) Einträge")
-                    .font(.caption)
-                    .foregroundStyle(Color.mutedLight)
+                if selection.count > 1 {
+                    Text("\(selection.count) ausgewählt · Dauer")
+                        .font(.caption)
+                        .foregroundStyle(Color.brandOrange)
+                    DurationField(seconds: selectionDuration, range: Entry.durationRange)
+                        .help("Standdauer für alle ausgewählten Bilder")
+                } else {
+                    Text("\(group.entries.count) Einträge")
+                        .font(.caption)
+                        .foregroundStyle(Color.mutedLight)
+                }
                 Spacer()
                 Text("Überblendung").font(.caption).foregroundStyle(Color.mutedLight)
                 DurationField(seconds: $group.crossfade, range: MediaGroup.crossfadeRange, step: 0.5)
@@ -100,12 +115,27 @@ struct GroupEntriesView: View {
         }
     }
 
+    /// Dauer der Mehrfachauswahl: zeigt die des ersten ausgewählten Eintrags, setzt sie für alle.
+    private var selectionDuration: Binding<TimeInterval> {
+        Binding(
+            get: { group.entries.first { selection.contains($0.id) }?.imageDuration ?? Entry.defaultImageDuration },
+            set: { group.setImageDuration($0, for: selection) }
+        )
+    }
+
     private func binding(for id: Entry.ID) -> Binding<Entry> {
         Binding(
             get: { group.entries.first { $0.id == id } ?? Entry(id: id, mediumID: UUID()) },
             set: { newValue in
                 guard let index = group.entries.firstIndex(where: { $0.id == id }) else { return }
-                group.entries[index] = newValue
+                var updated = group
+                let durationChanged = updated.entries[index].imageDuration != newValue.imageDuration
+                updated.entries[index] = newValue
+                // Bei Mehrfachauswahl gilt eine geänderte Dauer für alle ausgewählten Einträge.
+                if durationChanged, selection.count > 1, selection.contains(id) {
+                    updated.setImageDuration(newValue.imageDuration, for: selection)
+                }
+                group = updated
             }
         )
     }

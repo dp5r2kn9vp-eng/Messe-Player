@@ -38,6 +38,16 @@ nonisolated extension MediaGroup {
     }
 }
 
+nonisolated extension MediaGroup {
+    /// Setzt die Standdauer für mehrere Einträge auf einmal, z. B. für eine Mehrfachauswahl.
+    /// Videos ignorieren den Wert, weil sie immer komplett laufen.
+    mutating func setImageDuration(_ seconds: TimeInterval, for ids: Set<Entry.ID>) {
+        for index in entries.indices where ids.contains(entries[index].id) {
+            entries[index].imageDuration = seconds
+        }
+    }
+}
+
 nonisolated extension Entry {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
