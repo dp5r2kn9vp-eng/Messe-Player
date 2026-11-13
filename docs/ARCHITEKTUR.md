@@ -56,7 +56,7 @@ Projekt.klangshow/
   Media/           # alle verwendeten Dateien (beim Hinzufügen kopiert)
 ```
 Medien werden beim Hinzufügen lazy referenziert und erst beim Speichern ins Paket geschrieben (`MediaStore`); nicht mehr verwendete Dateien fallen beim Speichern weg.
-Export: `.zip` des Pakets; Import entpackt und validiert `schemaVersion` (Migration bei älterer Version).
+Export (`ProjectArchive`): `.zip` des gespeicherten Pakets über `NSFileCoordinator(.forUploading)` – offene Änderungen werden vorher gespeichert. Import entpackt mit `ditto` neben die Zip-Datei, prüft Aufbau und `schemaVersion`, vergibt bei Namensgleichheit „Name 2“ und öffnet das Projekt.
 
 ## Ordnerstruktur
 ```
