@@ -9,7 +9,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         _ = outputWindow
-        hotkeys.register("b") { [output] in output.toggleBlack() }
+        hotkeys.register("b") { [output] in
+            output.toggleBlack()
+            return true
+        }
+        hotkeys.register(HotkeyService.escape) { [output] in
+            guard output.state.content != .idle else { return false }
+            output.stop()
+            return true
+        }
         hotkeys.start()
     }
 }

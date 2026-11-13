@@ -11,4 +11,4 @@ xcodebuild -scheme MessePlayer -destination 'platform=macOS' build
 xcodebuild -scheme MessePlayer -destination 'platform=macOS' test
 ```
 
-Ohne externen Bildschirm läuft der Ausgang als Testfenster. Regeln für die Mitarbeit: `CLAUDE.md`, `docs/STYLEGUIDE.md`, `docs/ARCHITEKTUR.md`.
+Ohne externen Bildschirm läuft der Ausgang im Vollbild auf dem MacBook-Bildschirm, sobald etwas abgespielt wird – Esc beendet. Regeln für die Mitarbeit: `CLAUDE.md`, `docs/STYLEGUIDE.md`, `docs/ARCHITEKTUR.md`.
