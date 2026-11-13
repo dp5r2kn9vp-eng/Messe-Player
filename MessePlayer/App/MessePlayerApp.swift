@@ -10,6 +10,10 @@ struct MessePlayerApp: App {
                 .environment(appDelegate.output)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindow)
+                .focusedSceneValue(\.projectPackageURL, file.fileURL)
+        }
+        .commands {
+            ArchiveCommands()
         }
     }
 }
