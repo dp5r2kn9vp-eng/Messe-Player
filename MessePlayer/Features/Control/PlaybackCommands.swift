@@ -6,7 +6,7 @@ struct PlaybackCommands: Commands {
 
     var body: some Commands {
         CommandMenu("Wiedergabe") {
-            Button("Wiedergabe beenden", action: engine.stopAll)
+            Button("Wiedergabe beenden", action: engine.emergencyStop)
                 .keyboardShortcut(".", modifiers: .command)
         }
     }

@@ -35,7 +35,7 @@ struct ShowCue: Equatable {
     var wait: TimeInterval = 0
     /// `nil`, solange die Medienlänge unbekannt ist.
     var duration: TimeInterval?
-    /// Video ohne Out-Punkt: Das Ende meldet der Renderer, die Dauer dient nur der Restzeit-Anzeige.
+    /// Video oder Audio ohne Out-Punkt: Das Ende meldet der Player, die Dauer dient nur der Restzeit-Anzeige.
     var endsWithMedia = false
     var followAction = FollowAction.hold
     /// Überblendung beim Erscheinen, wenn der Cue nicht in einer Gruppe läuft.
@@ -56,6 +56,8 @@ struct ShowCue: Equatable {
     }
 
     var isVideo: Bool { item?.medium.kind == .video }
+
+    var isAudio: Bool { item?.medium.kind == .audio }
 }
 
 struct ShowGroup: Equatable {
@@ -92,7 +94,7 @@ extension ProjectDocument {
         show.content = .media(item, layers: renderLayers(cue.layers, in: packageURL))
         show.outputID = medium.kind == .audio ? nil : cue.outputID ?? primaryOutputID
         show.duration = project.duration(of: cue, mediaLength: mediaLength(item.url))
-        show.endsWithMedia = medium.kind == .video && cue.outPoint == nil
+        show.endsWithMedia = medium.kind != .image && cue.outPoint == nil
         return show
     }
 }

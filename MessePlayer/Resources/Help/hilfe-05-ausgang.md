@@ -14,7 +14,7 @@ Mit einem externen Bildschirm zeigt der Ausgang ohne Wiedergabe das KlangNIVEAU-
 ## Mit externem Bildschirm
 
 - Esc hat dann keine Wirkung.
-- Der Notfall-Stopp ist immer **⌘.** (auch im Menü Wiedergabe → Wiedergabe beenden).
+- Der Notfall-Stopp ist immer **⌘.** (auch im Menü Wiedergabe → Wiedergabe beenden) und schneidet auch Audio sofort ab; „Stopp alle“ blendet Audio kurz (0,2 s) aus.
 
 ## Black
 

@@ -20,7 +20,7 @@ struct MediaView: View {
             case .video:
                 VideoSurface(url: item.url, playback: playback, onFinish: onFinish, isMuted: isMuted, isPaused: isPaused)
             case .audio:
-                // Audio hat kein Bild; Wiedergabe übernimmt später der Audio-Player der Cue-Engine.
+                // Audio hat kein Bild; den Ton spielt `AudioCuePlayers` über die Cue-Engine.
                 EmptyView()
             }
         }

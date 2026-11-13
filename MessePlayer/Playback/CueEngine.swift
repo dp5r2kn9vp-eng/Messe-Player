@@ -28,7 +28,7 @@ struct GroupRun: Equatable {
 }
 
 /// Cue-Engine: Abspielkopf, GO, Warten, Dauer, Folgeaktionen, Gruppen-Loop, Pause, Stopp, Black.
-/// Ohne UI-Abhängigkeit; Zeit über `StepScheduler` und `now`, damit Tests ohne Echtzeit laufen.
+/// Ohne UI-Abhängigkeit; Zeit über `StepScheduler` und `now`, Ton über `AudioCueOutput`, damit Tests ohne Echtzeit laufen.
 @Observable
 final class CueEngine {
     /// Inhalt und Überblendung eines Ausgangs.
@@ -54,13 +54,24 @@ final class CueEngine {
 
     @ObservationIgnored private let scheduler: any StepScheduler
     @ObservationIgnored private let now: () -> Date
+    @ObservationIgnored private let audio: any AudioCueOutput
+    /// Hörbare Audio-Cues mit der Kennung ihres Starts.
+    @ObservationIgnored private var audibleSteps: [Cue.ID: Int] = [:]
     @ObservationIgnored private var handles: [Cue.ID: Cancellation] = [:]
     @ObservationIgnored private var step = 0
     @ObservationIgnored private var pausedAt: Date?
 
-    init(scheduler: any StepScheduler = TaskStepScheduler(), now: @escaping () -> Date = Date.init) {
+    /// Kurzes Ausblenden der Audio-Cues bei „Stopp alle“; der Notfall-Stopp schneidet hart.
+    static let audioStopFade: TimeInterval = 0.2
+
+    init(
+        scheduler: any StepScheduler = TaskStepScheduler(),
+        now: @escaping () -> Date = Date.init,
+        audio: any AudioCueOutput = AudioCuePlayers()
+    ) {
         self.scheduler = scheduler
         self.now = now
+        self.audio = audio
     }
 
     // MARK: Cue-Liste
@@ -78,9 +89,11 @@ final class CueEngine {
         let oldPlayheadIndex = playheadIndex
         show = newShow
         for id in running.keys where newShow.index(of: id) == nil {
+            stopAudio(id, fadeOut: Self.audioStopFade)
             cancel(id)
         }
         refreshVisibleFrames()
+        refreshAudio()
         refreshUnknownDurations()
         if let playheadID, newShow.index(of: playheadID) == nil {
             self.playheadID = oldPlayheadIndex.flatMap { newShow.cues.indices.contains($0) ? newShow.cues[$0].id : nil }
@@ -127,8 +140,21 @@ final class CueEngine {
         return true
     }
 
-    /// Beendet alle Cues und Loops; die Ausgänge zeigen das Ruhebild, der Abspielkopf bleibt.
+    /// Beendet alle Cues und Loops; Audio blendet kurz aus, die Ausgänge zeigen das Ruhebild, der Abspielkopf bleibt.
     func stopAll() {
+        stop(audioFade: Self.audioStopFade)
+    }
+
+    /// Notfall-Stopp (⌘.): wie „Stopp alle“, aber auch Audio endet sofort ohne Ausblenden.
+    func emergencyStop() {
+        stop(audioFade: 0)
+    }
+
+    private func stop(audioFade: TimeInterval) {
+        for id in audibleSteps.keys {
+            stopAudio(id, fadeOut: audioFade)
+        }
+        if isPaused { audio.setPaused(false) }
         handles.values.forEach { $0.cancel() }
         handles = [:]
         running = [:]
@@ -231,6 +257,7 @@ final class CueEngine {
 
     private func launch(at index: Int, groupRun: GroupRun?, manual: Bool) {
         let cue = show.cues[index]
+        stopAudio(cue.id, fadeOut: Self.audioStopFade)
         cancel(cue.id)
         if case .missing = cue.content {
             if manual { missingCueID = cue.id }
@@ -270,6 +297,10 @@ final class CueEngine {
     }
 
     private func display(_ cue: ShowCue, step: Int, groupRun: GroupRun?) {
+        if cue.isAudio {
+            startAudio(cue, step: step)
+            return
+        }
         guard cue.isVisual, case .media(let item, let layers) = cue.content, let outputID = outputKey(of: cue) else { return }
         for other in running.values where other.cueID != cue.id && other.phase == .running {
             if let otherCue = show.index(of: other.cueID).map({ show.cues[$0] }), otherCue.isVisual, outputKey(of: otherCue) == outputID {
@@ -285,6 +316,7 @@ final class CueEngine {
     /// Ende der Dauer: Folgeaktion; ein Video geht auf Schwarz, wenn nicht sofort ein Folgecue erscheint.
     private func end(_ id: Cue.ID) {
         guard let runningCue = running[id], let index = show.index(of: id) else { return }
+        stopAudio(id, fadeOut: 0)
         cancel(id)
         let cue = show.cues[index]
         finish(at: index, groupRun: runningCue.groupRun)
@@ -335,6 +367,7 @@ final class CueEngine {
         let time = now()
         isPaused = true
         pausedAt = time
+        audio.setPaused(true)
         handles.values.forEach { $0.cancel() }
         handles = [:]
         for id in running.keys {
@@ -347,6 +380,7 @@ final class CueEngine {
         let pausedFor = pausedAt.map { time.timeIntervalSince($0) } ?? 0
         isPaused = false
         pausedAt = nil
+        audio.setPaused(false)
         for (id, runningCue) in running {
             var resumed = runningCue
             resumed.progress = runningCue.progress?.resumed(at: time)
@@ -375,6 +409,20 @@ final class CueEngine {
         handles[id] = scheduler.schedule(after: .seconds(seconds), action)
     }
 
+    private func startAudio(_ cue: ShowCue, step: Int) {
+        guard let item = cue.item else { return }
+        audibleSteps[cue.id] = step
+        let playback = AudioCuePlayback(cueID: cue.id, item: item, step: step, playback: cue.playbackSettings)
+        audio.play(playback) { [weak self] in
+            self?.mediaDidFinish(cueID: cue.id, step: step)
+        }
+    }
+
+    private func stopAudio(_ id: Cue.ID, fadeOut: TimeInterval) {
+        guard audibleSteps.removeValue(forKey: id) != nil else { return }
+        audio.stop(id, fadeOut: fadeOut)
+    }
+
     /// Entfernt einen Cue ohne Folgeaktion (ersetzt, gelöscht oder neu gestartet).
     private func cancel(_ id: Cue.ID) {
         handles.removeValue(forKey: id)?.cancel()
@@ -398,6 +446,14 @@ final class CueEngine {
         }
     }
 
+    /// Lautstärke, Fades und nachträglich bekannte Länge an laufende Audio-Cues weitergeben.
+    private func refreshAudio() {
+        for id in audibleSteps.keys {
+            guard let cue = show.index(of: id).map({ show.cues[$0] }) else { continue }
+            audio.update(id, playback: cue.playbackSettings)
+        }
+    }
+
     /// Restzeit für Videos nachtragen, deren Länge erst jetzt bekannt ist.
     private func refreshUnknownDurations() {
         for (id, runningCue) in running where runningCue.phase == .running && runningCue.progress == nil {
@@ -409,9 +465,15 @@ final class CueEngine {
     }
 }
 
+private extension ShowCue {
+    var playbackSettings: PlaybackSettings {
+        PlaybackSettings(scaling: scaling, audio: audio, playLength: duration)
+    }
+}
+
 private extension CueFrame {
     /// Übernimmt Darstellung und Lautstärke aus der Liste (auch während der Cue läuft).
     mutating func apply(_ cue: ShowCue) {
-        playback = PlaybackSettings(scaling: cue.scaling, audio: cue.audio, playLength: cue.duration)
+        playback = cue.playbackSettings
     }
 }

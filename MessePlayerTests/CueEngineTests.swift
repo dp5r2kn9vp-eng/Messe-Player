@@ -67,7 +67,7 @@ struct CueEngineTests {
 
     init() {
         let clock = clock
-        engine = CueEngine(scheduler: clock, now: { clock.now })
+        engine = CueEngine(scheduler: clock, now: { clock.now }, audio: RecordingAudioOutput())
     }
 
     private func visible(on output: UUID = ShowFixture.outputA1) -> Cue.ID? {
