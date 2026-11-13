@@ -16,18 +16,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         reopenLastProject()
     }
 
-    /// Kein leeres Projekt und kein Öffnen-Dialog, wenn das letzte Projekt wieder geöffnet wird.
+    /// Kein leeres Projekt und kein Öffnen-Dialog – stattdessen öffnet sich das letzte Projekt oder das Willkommensfenster.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-        lastProjectURL == nil
-    }
-
-    private var lastProjectURL: URL? {
-        guard let path = SessionStore.load()?.projectPath, FileManager.default.fileExists(atPath: path) else { return nil }
-        return URL(filePath: path)
+        false
     }
 
     private func reopenLastProject() {
-        guard let url = lastProjectURL, NSDocumentController.shared.documents.isEmpty else { return }
+        guard let url = SessionStore.lastProjectURL, NSDocumentController.shared.documents.isEmpty else { return }
         NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
     }
 
