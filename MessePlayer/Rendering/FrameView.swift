@@ -6,10 +6,11 @@ struct FrameView: View {
     let item: PlayableMedium
     let layers: [RenderLayer]
     var onFinish: (() -> Void)?
+    var isPaused = false
 
     var body: some View {
         ZStack {
-            MediaView(item: item, onFinish: onFinish)
+            MediaView(item: item, onFinish: onFinish, isPaused: isPaused)
             LayerOverlay(layers: layers)
         }
     }

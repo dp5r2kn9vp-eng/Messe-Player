@@ -8,6 +8,7 @@ struct MediaView: View {
     var onFinish: (() -> Void)?
     /// Vorschauen laufen stumm, damit der Ton nur vom Ausgang kommt.
     var isMuted = false
+    var isPaused = false
 
     var body: some View {
         ZStack {
@@ -16,7 +17,7 @@ struct MediaView: View {
             case .image:
                 StillImageView(url: item.url, onFailure: onFinish)
             case .video:
-                VideoSurface(url: item.url, onFinish: onFinish, isMuted: isMuted)
+                VideoSurface(url: item.url, onFinish: onFinish, isMuted: isMuted, isPaused: isPaused)
             }
         }
     }

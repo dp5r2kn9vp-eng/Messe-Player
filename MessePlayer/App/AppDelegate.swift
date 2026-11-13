@@ -4,20 +4,45 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let output = OutputController()
     let displays = DisplayService()
+    let hotkeys = HotkeyService()
     private(set) lazy var outputWindow = OutputWindowController(output: output, displays: displays)
-    private let hotkeys = HotkeyService()
+    private let sleepGuard = SleepGuard()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         _ = outputWindow
+        sleepGuard.start()
+        registerHotkeys()
+        hotkeys.start()
+        reopenLastProject()
+    }
+
+    /// Kein leeres Projekt und kein Öffnen-Dialog, wenn das letzte Projekt wieder geöffnet wird.
+    func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        lastProjectURL == nil
+    }
+
+    private var lastProjectURL: URL? {
+        guard let path = SessionStore.load()?.projectPath, FileManager.default.fileExists(atPath: path) else { return nil }
+        return URL(filePath: path)
+    }
+
+    private func reopenLastProject() {
+        guard let url = lastProjectURL, NSDocumentController.shared.documents.isEmpty else { return }
+        NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
+    }
+
+    private func registerHotkeys() {
         hotkeys.register("b") { [output] in
             output.toggleBlack()
             return true
+        }
+        hotkeys.register(HotkeyService.space) { [output] in
+            output.togglePause()
         }
         hotkeys.register(HotkeyService.escape) { [output] in
             guard output.state.content != .idle else { return false }
             output.stop()
             return true
         }
-        hotkeys.start()
     }
 }

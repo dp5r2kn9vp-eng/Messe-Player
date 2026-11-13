@@ -6,7 +6,10 @@ import Observation
 @Observable
 final class OutputWindowController {
     var displayID: CGDirectDisplayID? {
-        didSet { apply() }
+        didSet {
+            SessionStore.outputDisplayName = displayID.flatMap { id in displays.displays.first { $0.id == id }?.name }
+            apply()
+        }
     }
 
     /// `false`, wenn der gewählte Bildschirm abgesteckt ist; der Ausgang wartet dann auf ihn.
@@ -22,7 +25,8 @@ final class OutputWindowController {
     init(output: OutputController, displays: DisplayService) {
         self.output = output
         self.displays = displays
-        displayID = displays.preferredOutput?.id
+        let remembered = displays.displays.first { $0.name == SessionStore.outputDisplayName }
+        displayID = (remembered ?? displays.preferredOutput)?.id
         contentView = OutputHostingView(rootView: OutputView(output: output))
         window = NSWindow(contentRect: .zero, styleMask: [.borderless], backing: .buffered, defer: false)
         window.contentView = contentView

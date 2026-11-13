@@ -7,6 +7,7 @@ struct VideoSurface: NSViewRepresentable {
     let url: URL
     var onFinish: (() -> Void)?
     var isMuted = false
+    var isPaused = false
 
     func makeNSView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
@@ -17,6 +18,7 @@ struct VideoSurface: NSViewRepresentable {
     func updateNSView(_ view: PlayerLayerView, context: Context) {
         view.isMuted = isMuted
         view.play(url, onFinish: onFinish)
+        view.isPaused = isPaused
     }
 
     static func dismantleNSView(_ view: PlayerLayerView, coordinator: ()) {
@@ -35,6 +37,13 @@ final class PlayerLayerView: NSView {
     var isMuted: Bool {
         get { player.isMuted }
         set { player.isMuted = newValue }
+    }
+
+    var isPaused = false {
+        didSet {
+            guard isPaused != oldValue else { return }
+            isPaused ? player.pause() : player.play()
+        }
     }
 
     override init(frame: NSRect) {

@@ -1,12 +1,15 @@
 import AppKit
+import Observation
 
 /// Ein-Tasten-Kürzel ohne Modifier (z. B. „B“ für Black, Esc für Stopp).
 /// Greift nicht, solange ein Textfeld aktiv ist. Liefert eine Aktion `false`, behält die Taste ihre normale Funktion.
+@Observable
 final class HotkeyService {
     static let escape = "\u{1b}"
+    static let space = " "
 
-    private var actions: [String: () -> Bool] = [:]
-    private var monitor: Any?
+    @ObservationIgnored private var actions: [String: () -> Bool] = [:]
+    @ObservationIgnored private var monitor: Any?
 
     func register(_ key: String, action: @escaping () -> Bool) {
         actions[key.lowercased()] = action

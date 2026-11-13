@@ -6,11 +6,11 @@ struct StepProgressBar: View {
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 0.1)) { context in
-            let elapsed = context.date.timeIntervalSince(progress.startedAt)
+            let elapsed = (progress.pausedAt ?? context.date).timeIntervalSince(progress.startedAt)
             let remaining = max(progress.duration - elapsed, 0)
             HStack(spacing: Theme.Spacing.s) {
                 bar(fraction: progress.duration > 0 ? min(elapsed / progress.duration, 1) : 1)
-                Text("noch \(Int(remaining.rounded(.up))) s")
+                Text(progress.pausedAt == nil ? "noch \(Int(remaining.rounded(.up))) s" : "Pause")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(Color.brandOrange)
                     .frame(minWidth: 52, alignment: .trailing)

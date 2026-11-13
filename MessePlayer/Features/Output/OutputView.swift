@@ -27,11 +27,11 @@ struct OutputView: View {
         case .idle:
             IdleView()
         case .single(let item):
-            MediaView(item: item)
+            MediaView(item: item, isPaused: output.state.isPaused)
         case .loop(let frame) where frame.isGap:
             Color.black
         case .loop(let frame):
-            FrameView(item: frame.item, layers: frame.layers) { output.mediaDidFinish(step: frame.step) }
+            FrameView(item: frame.item, layers: frame.layers, onFinish: { output.mediaDidFinish(step: frame.step) }, isPaused: output.state.isPaused)
         }
     }
 

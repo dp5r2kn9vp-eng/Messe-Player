@@ -18,6 +18,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Ausgang: Auswahl zeigt nur die angeschlossenen Bildschirme, der Ausgang läuft dort immer im Vollbild (Testfenster entfällt). Liegt er auf dem Bildschirm des Steuerfensters, erscheint er erst beim Start. Esc beendet Loop oder Einzelanzeige.
 - KlangNIVEAU-Branding: App-Icon aus dem Logo, Logo in der Kopfzeile, Ruhebild des Ausgangs (Logo auf Dunkel) und fertige Logo-Ebene im Editor.
 - Ablage → „Projekt als Zip exportieren …“ / „Projekt aus Zip importieren …“: komplettes Projekt inkl. Medien weitergeben oder sichern. Import prüft das Archiv, überschreibt nichts und öffnet das Projekt direkt.
+- Messe-Absicherung: Mac und Bildschirm gehen nicht in den Ruhezustand, solange die App läuft. Beim Start werden letztes Projekt, Ausgabezustand (Loop, Einzelanzeige, Black) und Ausgabe-Bildschirm wiederhergestellt. Tastenkürzel: B Black, Leertaste Pause/Weiter, Esc Stopp, 1–9 Gruppe starten. Pause-/Weiter-Knopf im Gruppenkopf.
 
 ### Behoben
 - Ältere Projektdateien mit Gruppen ließen sich nach Einführung der Ebenen nicht mehr öffnen.
