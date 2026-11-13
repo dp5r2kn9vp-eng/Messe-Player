@@ -39,8 +39,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotkeys.register(HotkeyService.space) { [output] in
             output.togglePause()
         }
-        hotkeys.register(HotkeyService.escape) { [output] in
-            guard output.state.content != .idle else { return false }
+        // Esc nur, wenn der Ausgang den Bildschirm des Steuerfensters blockiert.
+        // Mit externem Bildschirm stoppt Esc nicht versehentlich – dafür gibt es den Notfall-Stopp ⌘.
+        hotkeys.register(HotkeyService.escape) { [output, unowned self] in
+            guard output.state.content != .idle, outputWindow.sharesControlScreen else { return false }
             output.stop()
             return true
         }

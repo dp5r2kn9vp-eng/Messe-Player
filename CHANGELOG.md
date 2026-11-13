@@ -5,6 +5,12 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Notfall-Stopp: Menü „Wiedergabe → Wiedergabe beenden“ mit ⌘. (Cmd+Punkt) beendet die Wiedergabe jederzeit.
+
+### Geändert
+- Esc beendet die Wiedergabe nur noch, wenn der Ausgang auf dem Bildschirm des Steuerfensters liegt (nur ein Bildschirm). Mit externem Bildschirm hat Esc keine Wirkung auf die Wiedergabe.
+
 ## [1.1.0] – 2026-11-13
 
 ### Hinzugefügt

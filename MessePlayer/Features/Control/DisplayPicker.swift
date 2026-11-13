@@ -17,12 +17,10 @@ struct DisplayPicker: View {
                 }
             }
             .frame(maxWidth: 320)
-            if outputWindow.sharesControlScreen {
-                Text("Steuerbildschirm: Vollbild beim Start · Esc beendet")
-                    .font(.caption)
-                    .foregroundStyle(Color.mutedLight)
-            }
+            Text(outputWindow.sharesControlScreen ? "Steuerbildschirm: Vollbild beim Start · Esc beendet" : "Notfall-Stopp: ⌘.")
+                .font(.caption)
+                .foregroundStyle(Color.mutedLight)
         }
-        .help("Bildschirm, auf dem der Ausgang im Vollbild läuft. Esc beendet Loop oder Einzelanzeige.")
+        .help("Bildschirm, auf dem der Ausgang im Vollbild läuft. ⌘. beendet die Wiedergabe immer; Esc nur, wenn der Ausgang auf dem Steuerbildschirm liegt.")
     }
 }

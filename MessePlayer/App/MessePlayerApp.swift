@@ -15,6 +15,7 @@ struct MessePlayerApp: App {
         }
         .commands {
             ArchiveCommands()
+            PlaybackCommands(output: appDelegate.output)
         }
     }
 }
