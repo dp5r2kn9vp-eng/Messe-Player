@@ -53,4 +53,15 @@ extension ProjectDocument {
     func playable(_ medium: Medium, in packageURL: URL?) -> PlayableMedium? {
         media.url(for: medium, in: packageURL).map { PlayableMedium(medium: medium, url: $0) }
     }
+
+    /// Löst eine Gruppe zum Abspielen auf; Einträge ohne Medium werden übersprungen.
+    func playlist(for group: MediaGroup, in packageURL: URL?) -> LoopPlaylist {
+        let items = group.entries.compactMap { entry -> LoopItem? in
+            guard let medium = project.medium(withID: entry.mediumID),
+                  let item = playable(medium, in: packageURL)
+            else { return nil }
+            return LoopItem(entryID: entry.id, item: item, imageDuration: entry.imageDuration)
+        }
+        return LoopPlaylist(groupID: group.id, crossfade: group.crossfade, items: items)
+    }
 }

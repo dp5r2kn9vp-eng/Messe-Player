@@ -1,18 +1,20 @@
 import AVFoundation
 import SwiftUI
 
-/// Video ohne Bedienelemente, hardwarebeschleunigt über `AVPlayerLayer`, in nahtloser Endlosschleife.
+/// Video ohne Bedienelemente, hardwarebeschleunigt über `AVPlayerLayer`.
+/// Ohne `onFinish` läuft es nahtlos in Endlosschleife, sonst einmal und meldet dann Ende oder Fehler.
 struct VideoSurface: NSViewRepresentable {
     let url: URL
+    var onFinish: (() -> Void)?
 
     func makeNSView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
-        view.play(url)
+        view.play(url, onFinish: onFinish)
         return view
     }
 
     func updateNSView(_ view: PlayerLayerView, context: Context) {
-        view.play(url)
+        view.play(url, onFinish: onFinish)
     }
 
     static func dismantleNSView(_ view: PlayerLayerView, coordinator: ()) {
@@ -24,6 +26,9 @@ final class PlayerLayerView: NSView {
     private let player = AVQueuePlayer()
     private var looper: AVPlayerLooper?
     private var currentURL: URL?
+    private var onFinish: (() -> Void)?
+    private var endObservers: [NSObjectProtocol] = []
+    private var statusObservation: NSKeyValueObservation?
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -38,10 +43,18 @@ final class PlayerLayerView: NSView {
         nil
     }
 
-    func play(_ url: URL) {
+    func play(_ url: URL, onFinish: (() -> Void)?) {
+        self.onFinish = onFinish
         guard url != currentURL else { return }
+        stop()
         currentURL = url
-        looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
+        let item = AVPlayerItem(url: url)
+        if onFinish == nil {
+            looper = AVPlayerLooper(player: player, templateItem: item)
+        } else {
+            player.insert(item, after: nil)
+            observeEnd(of: item)
+        }
         player.play()
     }
 
@@ -49,6 +62,22 @@ final class PlayerLayerView: NSView {
         player.pause()
         looper = nil
         player.removeAllItems()
+        endObservers.forEach(NotificationCenter.default.removeObserver)
+        endObservers = []
+        statusObservation = nil
         currentURL = nil
+    }
+
+    private func observeEnd(of item: AVPlayerItem) {
+        let names = [AVPlayerItem.didPlayToEndTimeNotification, AVPlayerItem.failedToPlayToEndTimeNotification]
+        endObservers = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: item, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.onFinish?() }
+            }
+        }
+        statusObservation = item.observe(\.status) { [weak self] item, _ in
+            guard item.status == .failed, let self else { return }
+            Task { @MainActor in self.onFinish?() }
+        }
     }
 }
