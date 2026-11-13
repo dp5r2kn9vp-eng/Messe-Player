@@ -124,8 +124,8 @@ nonisolated extension Project {
 }
 
 nonisolated extension CueGroup {
-    /// Leere Gruppe: beide Grenzen zeigen auf die eigene ID.
-    /// Nur nötig, solange die alte Gruppen-Oberfläche Gruppen ohne Einträge kennt (bis zur Cue-Liste).
+    /// Leere Gruppe: beide Grenzen zeigen auf die eigene ID (z. B. aus einer leeren v1-Gruppe).
+    /// Die Cue-Liste blendet leere Gruppen aus.
     static func empty(id: UUID = UUID(), name: String) -> CueGroup {
         CueGroup(id: id, name: name, firstCueID: id, lastCueID: id)
     }

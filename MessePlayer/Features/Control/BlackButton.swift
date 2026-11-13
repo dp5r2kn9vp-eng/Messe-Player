@@ -2,11 +2,11 @@ import SwiftUI
 
 /// Schaltet den Ausgang sofort schwarz. Immer sichtbar, auch per Taste B.
 struct BlackButton: View {
-    @Environment(OutputController.self) private var output
+    @Environment(CueEngine.self) private var engine
 
     var body: some View {
-        let isBlack = output.state.isBlack
-        Button(action: output.toggleBlack) {
+        let isBlack = engine.isBlack
+        Button(action: engine.toggleBlack) {
             Label("Black", systemImage: isBlack ? "rectangle.fill" : "rectangle")
                 .font(.headline)
                 .frame(minWidth: 88, minHeight: Theme.minHitSize)

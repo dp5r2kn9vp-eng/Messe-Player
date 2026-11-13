@@ -6,11 +6,13 @@ struct ControlView: View {
     /// Speicherort des Pakets; `nil`, solange das Projekt noch nie gespeichert wurde.
     let packageURL: URL?
 
-    @Environment(OutputController.self) private var output
-    @Environment(HotkeyService.self) private var hotkeys
+    @Environment(CueEngine.self) private var engine
+    @Environment(MediaLengths.self) private var mediaLengths
     @State private var librarySelection = Set<Medium.ID>()
     @State private var showsFormatNotice = false
     @AppStorage("showsMediaPanel") private var showsMedia = true
+    /// Kennung dieses Fensters gegenüber der Engine (es gibt eine Engine für alle offenen Projekte).
+    @State private var windowID = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,15 +31,18 @@ struct ControlView: View {
                     .frame(width: 300)
                     Divider()
                 }
-                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection)
+                CueListPanel(document: $document, packageURL: packageURL, librarySelection: librarySelection, claim: claimEngine)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Divider()
+            TransportBar(claim: claimEngine)
         }
+        .environment(\.cueNames, cueName)
         .frame(minWidth: 1000, minHeight: 520)
-        .onChange(of: document.project.legacyGroups) { refreshRunningLoop() }
-        .onChange(of: output.state) { saveSession() }
-        .task(id: document.project.legacyGroups.map(\.id)) { registerGroupHotkeys() }
+        .onChange(of: currentShow) { updateEngine() }
+        .onChange(of: engine.snapshot(projectPath: packageURL?.path)) { saveSession() }
         .task {
+            if engine.ownerID == nil { claimEngine() }
             restoreSessionOnce()
             saveSession()
             showsFormatNotice = document.isConvertedFromFormat1
@@ -56,36 +61,39 @@ struct ControlView: View {
 @MainActor private var didRestoreSession = false
 
 extension ControlView {
+    private var currentShow: CueShow {
+        document.show(in: packageURL, mediaLength: mediaLengths.length(of:))
+    }
+
+    /// Lädt diese Cue-Liste in die Engine, falls gerade ein anderes Fenster sie nutzt.
+    private func claimEngine() {
+        guard engine.ownerID != windowID else { return }
+        engine.load(currentShow, owner: windowID)
+    }
+
+    /// Änderungen an der Liste wirken sofort, ohne laufende Cues zu unterbrechen.
+    private func updateEngine() {
+        guard engine.ownerID == windowID else { return }
+        engine.update(currentShow)
+    }
+
+    private func cueName(_ id: Cue.ID) -> String {
+        guard let cue = document.project.cue(withID: id) else { return "" }
+        let name = cue.name.isEmpty ? cue.mediumID.flatMap(document.project.medium(withID:))?.displayName ?? "" : cue.name
+        return "\(cue.number) „\(name)“"
+    }
+
     private func saveSession() {
-        guard let packageURL else { return }
-        SessionStore.save(output.snapshot(projectPath: packageURL.path))
+        guard let packageURL, engine.ownerID == windowID else { return }
+        SessionStore.save(engine.snapshot(projectPath: packageURL.path))
     }
 
     private func restoreSessionOnce() {
         guard !didRestoreSession, let packageURL else { return }
         didRestoreSession = true
         guard let snapshot = SessionStore.load(), snapshot.projectPath == packageURL.path else { return }
-        output.restore(snapshot, from: document, packageURL: packageURL)
-    }
-
-    /// Tasten 1–9 starten die Gruppen in ihrer Reihenfolge.
-    private func registerGroupHotkeys() {
-        for number in 1...9 {
-            hotkeys.register(String(number)) { [document = $document, packageURL, output] in
-                let groups = document.wrappedValue.project.legacyGroups
-                guard number <= groups.count else { return false }
-                output.startLoop(document.wrappedValue.playlist(for: groups[number - 1], in: packageURL))
-                return true
-            }
-        }
-    }
-
-    /// Änderungen an der laufenden Gruppe (Reihenfolge, Dauer) wirken sofort.
-    private func refreshRunningLoop() {
-        guard let id = output.playingGroupID,
-              let group = document.project.legacyGroups.first(where: { $0.id == id })
-        else { return }
-        output.updateLoop(document.playlist(for: group, in: packageURL))
+        claimEngine()
+        engine.restore(snapshot)
     }
 }
 
@@ -102,7 +110,6 @@ private struct ControlHeaderView: View {
             CueViewWordmark(height: 40)
             Spacer()
             DisplayPicker()
-            BlackButton()
         }
         .padding(Theme.Spacing.l)
     }

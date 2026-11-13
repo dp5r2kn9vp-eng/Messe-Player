@@ -2,15 +2,22 @@ import Foundation
 
 /// Was beim nächsten Start wiederhergestellt wird: Projekt, Ausgabezustand und Bildschirm.
 struct SessionSnapshot: Codable, Equatable {
-    enum Mode: Codable, Equatable {
-        case idle
-        case single(Medium.ID)
-        case loop(MediaGroup.ID, Entry.ID?)
-    }
-
     var projectPath: String?
-    var mode = Mode.idle
+    /// Cues, deren Inhalt auf einem Ausgang zu sehen war.
+    var visibleCueIDs: [Cue.ID] = []
+    var playheadID: Cue.ID?
     var isBlack = false
+}
+
+extension SessionSnapshot {
+    /// Ältere Schnappschüsse (Gruppen-Loop) behalten Projekt und Black; der Ausgang startet im Ruhezustand.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        projectPath = try container.decodeIfPresent(String.self, forKey: .projectPath)
+        visibleCueIDs = try container.decodeIfPresent([Cue.ID].self, forKey: .visibleCueIDs) ?? []
+        playheadID = try container.decodeIfPresent(Cue.ID.self, forKey: .playheadID)
+        isBlack = try container.decodeIfPresent(Bool.self, forKey: .isBlack) ?? false
+    }
 }
 
 /// Speichert den Sitzungsstand in den Benutzereinstellungen.

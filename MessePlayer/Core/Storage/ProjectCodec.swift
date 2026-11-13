@@ -9,7 +9,7 @@ nonisolated enum ProjectCodec {
     /// Format 1: Gruppen mit Einträgen statt Cue-Liste.
     private struct ProjectV1: Decodable {
         var media: [Medium]?
-        var groups: [MediaGroup]?
+        var groups: [V1Group]?
     }
 
     static func encode(_ project: Project) throws -> Data {

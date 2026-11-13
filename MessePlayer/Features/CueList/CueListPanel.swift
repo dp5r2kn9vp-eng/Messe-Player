@@ -6,8 +6,10 @@ struct CueListPanel: View {
     let packageURL: URL?
     /// Auswahl im Medienbereich, für „+ Cue“.
     let librarySelection: Set<Medium.ID>
+    /// Lädt diese Cue-Liste in die Engine, bevor gestartet wird.
+    let claim: () -> Void
 
-    @Environment(OutputController.self) private var output
+    @Environment(CueEngine.self) private var engine
     @Environment(MediaLengths.self) private var mediaLengths
     @AppStorage("cueListColumns") private var columns = CueColumnVisibility()
     @State private var selection = Set<UUID>()
@@ -28,6 +30,7 @@ struct CueListPanel: View {
             }
         }
         .importErrorAlert($importErrors)
+        .onChange(of: selection) { followSelectionWithPlayhead() }
         .sheet(item: $editingLayers) { reference in
             LayerEditorView(cue: cueBinding(reference.id), document: $document, packageURL: packageURL)
         }
@@ -93,6 +96,8 @@ struct CueListPanel: View {
         let cueIDs = project.cueIDs(inSelection: ids)
         Button("Starten", systemImage: "play.fill") { start(ids) }
             .disabled(ids.count != 1)
+        Button("Abspielkopf hierher", systemImage: "play") { setPlayhead(ids) }
+            .disabled(ids.count != 1)
         Button("Texte & Ebenen bearbeiten …", systemImage: "textformat") { editingLayers = cueIDs.first.map(CueReference.init) }
             .disabled(cueIDs.count != 1)
         Divider()
@@ -122,13 +127,12 @@ struct CueListPanel: View {
 
     private func rowModel(_ cue: Cue, bracket: GroupBracket?) -> CueRowModel {
         let medium = cue.mediumID.flatMap(project.medium(withID:))
-        let isLive = output.isLive(entry: cue.id)
         return CueRowModel(
             cue: cue,
             medium: medium,
             bracket: bracket,
             status: status(of: cue),
-            progress: isLive && !output.state.isBlack ? output.stepProgress : nil,
+            progress: isEngineShowingThisList ? engine.running[cue.id]?.progress : nil,
             duration: project.duration(of: cue, mediaLength: mediaLength(of: cue)),
             followIsSetByGroup: project.followActionIsSetByGroup(cue),
             outputs: project.outputs
@@ -137,8 +141,17 @@ struct CueListPanel: View {
 
     private func status(of cue: Cue) -> CueStatus? {
         if let mediumID = cue.mediumID, project.medium(withID: mediumID) == nil { return .missing }
-        guard output.isLive(entry: cue.id) else { return nil }
-        return output.state.isPaused ? .paused : .running
+        guard isEngineShowingThisList else { return nil }
+        if let running = engine.running[cue.id] {
+            if engine.isPaused { return .paused }
+            return running.phase == .waiting ? .waiting : .running
+        }
+        return engine.playheadID == cue.id ? .playhead : nil
+    }
+
+    /// Die Engine zeigt Status nur für die Liste, die sie gerade abspielt.
+    private var isEngineShowingThisList: Bool {
+        engine.show.cues.map(\.id) == project.cues.map(\.id)
     }
 
     private func mediaLength(of cue: Cue) -> TimeInterval? {
@@ -244,15 +257,28 @@ struct CueListPanel: View {
         document.project.dissolveGroups(touching: selection)
     }
 
-    /// Startet einen Cue sofort. Bis zur Cue-Engine: Cues in Gruppen starten deren Loop ab diesem Cue.
+    /// Startet einen Cue bzw. eine Gruppe (Kopfzeile) sofort.
     private func start(_ ids: Set<UUID>) {
         guard ids.count == 1, let id = ids.first else { return }
-        if let group = project.legacyGroups.first(where: { $0.id == id || $0.entries.contains { $0.id == id } }) {
-            output.startLoop(document.playlist(for: group, in: packageURL), at: group.id == id ? nil : id)
-        } else if let medium = project.cue(withID: id)?.mediumID.flatMap(project.medium(withID:)),
-                  let item = document.playable(medium, in: packageURL) {
-            output.showSingle(item)
+        claim()
+        if let group = project.groups.first(where: { $0.id == id }), let first = project.members(of: group).first {
+            engine.start(first.id)
+        } else {
+            engine.start(id)
         }
+    }
+
+    /// Klick auf eine Zeile setzt den Abspielkopf, ohne zu starten.
+    private func followSelectionWithPlayhead() {
+        guard selection.count == 1, isEngineShowingThisList else { return }
+        setPlayhead(selection)
+    }
+
+    private func setPlayhead(_ ids: Set<UUID>) {
+        guard let id = ids.first else { return }
+        claim()
+        let group = project.groups.first { $0.id == id }
+        engine.setPlayhead(group.flatMap { project.members(of: $0).first?.id } ?? id)
     }
 }
 

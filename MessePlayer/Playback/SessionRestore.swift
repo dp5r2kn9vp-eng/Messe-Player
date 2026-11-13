@@ -1,32 +1,21 @@
 import Foundation
 
-extension OutputController {
+extension CueEngine {
     /// Aktueller Zustand als speicherbarer Schnappschuss.
     func snapshot(projectPath: String?) -> SessionSnapshot {
-        let mode: SessionSnapshot.Mode = switch state.content {
-        case .idle: .idle
-        case .single(let item): .single(item.medium.id)
-        case .loop(let frame): .loop(frame.groupID, frame.entryID)
-        }
-        return SessionSnapshot(projectPath: projectPath, mode: mode, isBlack: state.isBlack)
+        SessionSnapshot(projectPath: projectPath, visibleCueIDs: visibleCueIDs, playheadID: playheadID, isBlack: isBlack)
     }
 
-    /// Stellt einen gespeicherten Zustand für das passende Projekt wieder her.
-    /// Fehlen Gruppe oder Medium inzwischen, bleibt der Ausgang im Ruhezustand.
-    func restore(_ snapshot: SessionSnapshot, from document: ProjectDocument, packageURL: URL?) {
-        switch snapshot.mode {
-        case .idle:
-            break
-        case .single(let mediumID):
-            if let medium = document.project.medium(withID: mediumID), let item = document.playable(medium, in: packageURL) {
-                showSingle(item)
-            }
-        case .loop(let groupID, let entryID):
-            if let group = document.project.legacyGroups.first(where: { $0.id == groupID }) {
-                startLoop(document.playlist(for: group, in: packageURL), at: entryID)
-            }
+    /// Startet die zuletzt sichtbaren Cues neu und stellt Abspielkopf und Black wieder her.
+    /// Fehlen Cues inzwischen, bleibt der Ausgang im Ruhezustand.
+    func restore(_ snapshot: SessionSnapshot) {
+        for id in snapshot.visibleCueIDs {
+            start(id)
         }
-        if snapshot.isBlack != state.isBlack {
+        if let playheadID = snapshot.playheadID, show.index(of: playheadID) != nil {
+            setPlayhead(playheadID)
+        }
+        if snapshot.isBlack != isBlack {
             toggleBlack()
         }
     }

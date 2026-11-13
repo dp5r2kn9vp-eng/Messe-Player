@@ -2,11 +2,11 @@ import SwiftUI
 
 /// Menü „Wiedergabe“ mit dem Notfall-Stopp. ⌘. funktioniert immer, auch mit externem Bildschirm.
 struct PlaybackCommands: Commands {
-    let output: OutputController
+    let engine: CueEngine
 
     var body: some Commands {
         CommandMenu("Wiedergabe") {
-            Button("Wiedergabe beenden", action: output.stop)
+            Button("Wiedergabe beenden", action: engine.stopAll)
                 .keyboardShortcut(".", modifiers: .command)
         }
     }

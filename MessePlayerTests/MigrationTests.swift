@@ -8,7 +8,7 @@ struct MigrationTests {
     private struct FileV1: Encodable {
         var schemaVersion = 1
         var media: [Medium]
-        var groups: [MediaGroup]
+        var groups: [V1Group]
     }
 
     private let image = Medium(id: UUID(), kind: .image, fileName: "a.png", displayName: "A")
@@ -19,14 +19,14 @@ struct MigrationTests {
         animated.animation.entrance = .slideUp
         animated.animation.effect = .pulse
         animated.animation.visibleFor = 4
-        var first = MediaGroup(id: UUID(), name: "Begrüßung", crossfade: 1)
+        var first = V1Group(id: UUID(), name: "Begrüßung", crossfade: 1)
         first.entries = [
-            Entry(id: UUID(), mediumID: image.id, layers: [animated, .logo()], imageDuration: 12),
-            Entry(id: UUID(), mediumID: video.id),
+            V1Entry(id: UUID(), mediumID: image.id, layers: [animated, .logo()], imageDuration: 12),
+            V1Entry(id: UUID(), mediumID: video.id),
         ]
-        var second = MediaGroup(id: UUID(), name: "Pause", crossfade: 0)
-        second.entries = [Entry(id: UUID(), mediumID: image.id, layers: [.image(image.id)], imageDuration: 3)]
-        let empty = MediaGroup(id: UUID(), name: "Leer")
+        var second = V1Group(id: UUID(), name: "Pause", crossfade: 0)
+        second.entries = [V1Entry(id: UUID(), mediumID: image.id, layers: [.image(image.id)], imageDuration: 3)]
+        let empty = V1Group(id: UUID(), name: "Leer")
         let file = FileV1(media: [image, video], groups: [first, second, empty])
         return (file, try JSONEncoder().encode(file))
     }
@@ -60,11 +60,6 @@ struct MigrationTests {
         #expect(project.groups.allSatisfy { $0.mode == .loop && !$0.isCollapsed })
         #expect(project.groups.map { project.cueRange(of: $0) } == [0...1, 2...2, nil])
         #expect(project.groups[2].isEmpty)
-    }
-
-    @Test func oldUIStillSeesTheSameGroupsThroughTheBridge() throws {
-        let (file, data) = try fixture()
-        #expect(try ProjectCodec.decode(data).legacyGroups == file.groups)
     }
 
     @Test func realLegacyProjectLoadsWithoutLoss() throws {

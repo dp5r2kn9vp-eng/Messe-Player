@@ -17,17 +17,17 @@ final class OutputWindowController {
     /// Der Ausgang liegt auf dem Bildschirm des Steuerfensters.
     private(set) var sharesControlScreen = false
 
-    @ObservationIgnored private let output: OutputController
+    @ObservationIgnored private let engine: CueEngine
     @ObservationIgnored private let displays: DisplayService
     @ObservationIgnored private let contentView: OutputHostingView
     @ObservationIgnored private let window: NSWindow
 
-    init(output: OutputController, displays: DisplayService) {
-        self.output = output
+    init(engine: CueEngine, displays: DisplayService) {
+        self.engine = engine
         self.displays = displays
         let remembered = displays.displays.first { $0.name == SessionStore.outputDisplayName }
         displayID = (remembered ?? displays.preferredOutput)?.id
-        contentView = OutputHostingView(rootView: OutputView(output: output))
+        contentView = OutputHostingView(rootView: OutputView(engine: engine))
         window = NSWindow(contentRect: .zero, styleMask: [.borderless], backing: .buffered, defer: false)
         window.contentView = contentView
         window.isReleasedWhenClosed = false
@@ -43,7 +43,7 @@ final class OutputWindowController {
 
     private func observeOutput() {
         withObservationTracking {
-            _ = output.state.content
+            _ = engine.state.content
         } onChange: { [weak self] in
             guard let self else { return }
             Task { @MainActor in
@@ -62,7 +62,7 @@ final class OutputWindowController {
         }
         isTargetConnected = true
         sharesControlScreen = displays.isControlScreen(screen)
-        if sharesControlScreen && output.state.content == .idle {
+        if sharesControlScreen && engine.state.content == .idle {
             window.orderOut(nil)
         } else {
             window.setFrame(screen.frame, display: true)

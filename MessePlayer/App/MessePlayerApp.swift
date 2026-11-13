@@ -7,7 +7,7 @@ struct MessePlayerApp: App {
     var body: some Scene {
         DocumentGroup(newDocument: ProjectDocument()) { file in
             ControlView(document: file.$document, packageURL: file.fileURL)
-                .environment(appDelegate.output)
+                .environment(appDelegate.engine)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindow)
                 .environment(appDelegate.hotkeys)
@@ -16,7 +16,7 @@ struct MessePlayerApp: App {
         }
         .commands {
             ArchiveCommands()
-            PlaybackCommands(output: appDelegate.output)
+            PlaybackCommands(engine: appDelegate.engine)
             InfoCommands()
         }
         Window("Willkommen bei CueView", id: WindowID.welcome) {

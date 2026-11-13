@@ -67,15 +67,4 @@ extension ProjectDocument {
             return RenderLayer(layer: layer, imageURL: url)
         }
     }
-
-    /// Löst eine Gruppe zum Abspielen auf; Einträge ohne Medium werden übersprungen.
-    func playlist(for group: MediaGroup, in packageURL: URL?) -> LoopPlaylist {
-        let items = group.entries.compactMap { entry -> LoopItem? in
-            guard let medium = project.medium(withID: entry.mediumID),
-                  let item = playable(medium, in: packageURL)
-            else { return nil }
-            return LoopItem(entryID: entry.id, item: item, imageDuration: entry.imageDuration, layers: renderLayers(entry.layers, in: packageURL))
-        }
-        return LoopPlaylist(groupID: group.id, crossfade: group.crossfade, items: items)
-    }
 }
