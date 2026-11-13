@@ -16,7 +16,7 @@ struct GroupTests {
         project.addEntries(for: ids, toGroup: groupID)
         project.addEntries(for: [project.media[0].id], toGroup: groupID, at: 1)
 
-        let names = try #require(project.groups.first).entries.compactMap { project.medium(withID: $0.mediumID)?.displayName }
+        let names = try #require(project.legacyGroups.first).entries.compactMap { project.medium(withID: $0.mediumID)?.displayName }
         #expect(names == ["A", "A", "C"])
     }
 
@@ -24,7 +24,7 @@ struct GroupTests {
         var project = Project()
         project.addGroup()
         project.addGroup()
-        #expect(project.groups.map(\.name) == ["Gruppe 1", "Gruppe 2"])
+        #expect(project.legacyGroups.map(\.name) == ["Gruppe 1", "Gruppe 2"])
     }
 
     @Test func removingMediumRemovesItsEntries() throws {
@@ -32,7 +32,7 @@ struct GroupTests {
         let groupID = project.addGroup()
         project.addEntries(for: project.media.map(\.id), toGroup: groupID)
         project.removeMedia([project.media[0].id])
-        #expect(try #require(project.groups.first).entries.count == 1)
+        #expect(try #require(project.legacyGroups.first).entries.count == 1)
     }
 
     @Test func imageDurationIsClampedAndDefaulted() {
@@ -48,7 +48,7 @@ struct GroupTests {
         var project = project(media: ["A"])
         let groupID = project.addGroup()
         project.addEntries(for: [project.media[0].id], toGroup: groupID)
-        project.groups[0].entries[0].imageDuration = 12
+        project.legacyGroups[0].entries[0].imageDuration = 12
         #expect(try ProjectCodec.decode(ProjectCodec.encode(project)) == project)
 
         let legacy = Data(#"{"schemaVersion": 1, "media": []}"#.utf8)
@@ -60,7 +60,7 @@ struct GroupTests {
         {"schemaVersion": 1, "media": [], "groups": [{"id": "\(UUID())", "name": "Alt",
           "entries": [{"id": "\(UUID())", "mediumID": "\(UUID())", "imageDuration": 4}]}]}
         """.utf8)
-        let group = try #require(ProjectCodec.decode(json).groups.first)
+        let group = try #require(ProjectCodec.decode(json).legacyGroups.first)
         #expect(group.crossfade == MediaGroup.defaultCrossfade)
         #expect(group.entries.first?.layers == [])
         #expect(group.entries.first?.imageDuration == 4)

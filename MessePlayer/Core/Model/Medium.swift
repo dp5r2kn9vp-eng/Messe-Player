@@ -1,11 +1,13 @@
 import Foundation
 import UniformTypeIdentifiers
 
-/// Ein Bild oder Video des Projekts. Die Datei liegt unter `fileName` im Ordner `Media/` des Pakets.
+/// Ein Bild, Video oder Audio des Projekts. Die Datei liegt unter `fileName` im Ordner `Media/` des Pakets.
 nonisolated struct Medium: Codable, Equatable, Identifiable {
     enum Kind: String, Codable {
         case image
         case video
+        /// Audio-Cues (Systemausgabe). Import folgt mit den Audio-Cues; bis dahin nur im Modell.
+        case audio
 
         /// `nil` für Dateitypen, die der Player nicht abspielen kann.
         init?(contentType: UTType) {

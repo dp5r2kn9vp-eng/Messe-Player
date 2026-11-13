@@ -1,6 +1,7 @@
 import Foundation
 
-/// Eine Gruppe (Loop): geordnete Einträge, die nacheinander laufen.
+/// Gruppe im Format v1 und Sicht der alten Gruppen-Oberfläche auf die Cue-Liste (siehe `Project.legacyGroups`).
+/// Entfällt, sobald Cue-Liste und Cue-Engine die alte Oberfläche ersetzen.
 nonisolated struct MediaGroup: Codable, Equatable, Identifiable {
     static let defaultCrossfade: TimeInterval = 0.5
     static let crossfadeRange: ClosedRange<TimeInterval> = 0...5
@@ -14,9 +15,9 @@ nonisolated struct MediaGroup: Codable, Equatable, Identifiable {
     }
 }
 
-/// Ein Platz in einer Gruppe. Verweist auf ein Medium; Bilder haben eine Standdauer, Videos laufen komplett.
+/// Ein Platz in einer v1-Gruppe; in Schema 2 ein `Cue` (gleiche ID).
 nonisolated struct Entry: Codable, Equatable, Identifiable {
-    static let defaultImageDuration: TimeInterval = 8
+    static let defaultImageDuration: TimeInterval = Cue.defaultStillDuration
     static let durationRange: ClosedRange<TimeInterval> = 1...3600
 
     let id: UUID

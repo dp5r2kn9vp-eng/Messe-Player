@@ -5,6 +5,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Geändert
+- Projektformat 2 (Cue-Liste): Gruppen und Einträge werden beim Öffnen verlustfrei in nummerierte Cues mit Loop-Gruppen auf Ausgang 1 umgewandelt. Beim Öffnen eines alten Projekts erscheint ein Hinweis; beim Speichern bleibt `project.v1.json` als Sicherung im Paket. Ältere CueView-Versionen können umgestellte Projekte nicht mehr öffnen.
+- Neue Bilder in Gruppen stehen standardmäßig 5 statt 8 Sekunden.
+
 ## [1.2.0] – 2026-11-13
 
 ### Hinzugefügt

@@ -17,7 +17,7 @@ struct SessionTests {
     @Test func loopWithBlackSurvivesRestart() {
         let document = document()
         let before = OutputController(scheduler: ManualScheduler())
-        let group = document.project.groups[0]
+        let group = document.project.legacyGroups[0]
         before.startLoop(document.playlist(for: group, in: package), at: group.entries[1].id)
         before.toggleBlack()
 
