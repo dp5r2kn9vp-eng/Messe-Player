@@ -1,30 +1,35 @@
 import Foundation
 
-/// Was der Ausgang zeigen soll.
+/// Was ein Ausgang zeigen soll.
 /// `isBlack` liegt über jedem Inhalt, damit nach dem Aufheben der vorherige Inhalt unverändert weiterläuft.
 struct OutputState: Equatable {
     var content: OutputContent = .idle
     var isBlack = false
-    /// Aktuelles Bild/Video angehalten (Leertaste).
+    /// Alle laufenden Cues angehalten (P).
     var isPaused = false
     /// Überblendzeit für den nächsten Inhaltswechsel in Sekunden (0 = harter Schnitt).
     var transition: TimeInterval = 0
 }
 
 enum OutputContent: Equatable {
+    /// Ruhebild (Logo): nichts gestartet oder nach „Stopp alle“.
     case idle
-    /// Ein Medium dauerhaft; Videos laufen in Endlosschleife.
-    case single(PlayableMedium)
-    /// Aktueller Schritt eines laufenden Loops.
-    case loop(LoopFrame)
+    /// Schwarz, z. B. nach dem Ende eines Videos mit „Halten“.
+    case blank(step: Int)
+    /// Inhalt eines Cues.
+    case cue(CueFrame)
 
     /// Jeder Inhaltswechsel bekommt eine neue Identität, damit der Renderer überblendet.
     var transitionID: String {
         switch self {
         case .idle: "idle"
-        case .single(let item): "single-\(item.medium.id)"
-        case .loop(let frame): frame.isGap ? "gap-\(frame.step)" : "step-\(frame.step)"
+        case .blank(let step): "blank-\(step)"
+        case .cue(let frame): "cue-\(frame.step)"
         }
+    }
+
+    var frame: CueFrame? {
+        if case .cue(let frame) = self { frame } else { nil }
     }
 }
 
@@ -32,20 +37,6 @@ enum OutputContent: Equatable {
 struct PlayableMedium: Equatable {
     let medium: Medium
     let url: URL
-}
-
-/// Aufgelöste Gruppe, bereit zum Abspielen.
-struct LoopPlaylist: Equatable {
-    let groupID: MediaGroup.ID
-    let crossfade: TimeInterval
-    let items: [LoopItem]
-}
-
-struct LoopItem: Equatable {
-    let entryID: Entry.ID
-    let item: PlayableMedium
-    let imageDuration: TimeInterval
-    var layers: [RenderLayer] = []
 }
 
 /// Ebene mit aufgelöster Bildadresse, bereit für den Renderer.
@@ -57,13 +48,10 @@ struct RenderLayer: Equatable, Identifiable {
     var id: Layer.ID { layer.id }
 }
 
-/// Ein Schritt im Loop. `step` zählt hoch, damit auch derselbe Eintrag zweimal hintereinander neu startet.
-struct LoopFrame: Equatable {
-    let groupID: MediaGroup.ID
-    let entryID: Entry.ID
+/// Sichtbarer Inhalt eines Cues. `step` zählt hoch, damit auch derselbe Cue zweimal hintereinander neu startet.
+struct CueFrame: Equatable {
+    let cueID: Cue.ID
     let item: PlayableMedium
     var layers: [RenderLayer] = []
     let step: Int
-    /// Schwarze Pause nach einem Video.
-    var isGap = false
 }

@@ -141,27 +141,4 @@ struct CueModelTests {
         #expect(project.nextCueNumber() == "8")
         #expect(Project().nextCueNumber() == "1")
     }
-
-    // MARK: Brücke
-
-    @Test func bridgeKeepsCueFieldsAndUngroupedCues() throws {
-        var project = project(cueCount: 3)
-        project.groups = [CueGroup(name: "A", firstCueID: project.cues[0].id, lastCueID: project.cues[1].id)]
-        project.cues[0].notes = "bleibt"
-        project.cues[0].wait = 2
-        let loose = project.cues[2].id
-
-        project.legacyGroups[0].entries[0].imageDuration = 9
-        project.legacyGroups[0].entries.reverse()
-        project.addEntries(for: [video.id], toGroup: project.groups[0].id)
-
-        #expect(project.cues.count == 4)
-        #expect(project.cues.last?.id == loose)
-        let moved = try #require(project.cues.first { $0.notes == "bleibt" })
-        #expect(moved.wait == 2 && moved.stillDuration == 9)
-        let added = try #require(project.cues.first { $0.mediumID == video.id })
-        #expect(added.number == "4" && added.followAction == .followOnEnd && added.outputID == project.outputs.first?.id)
-        #expect(project.cueRange(of: project.groups[0]) == 0...2)
-        #expect(project.validationIssues.isEmpty)
-    }
 }

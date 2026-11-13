@@ -2,70 +2,73 @@ import Foundation
 import Testing
 @testable import MessePlayer
 
+/// Dokument mit je einem Bild-Cue pro Medium.
+@MainActor
+func documentWithCues(_ media: [Medium]) -> ProjectDocument {
+    var document = ProjectDocument()
+    document.project.media = media
+    document.project.insertCues(for: media.map(\.id), at: 0)
+    return document
+}
+
 @MainActor
 struct LayerTests {
+    private let logo = Medium(id: UUID(), kind: .image, fileName: "l.png", displayName: "Logo")
+    private let package = URL(filePath: "/tmp/Show.klangshow")
+
     @Test func layersSurviveSaveRoundTrip() throws {
-        var project = Project()
-        let logo = Medium(id: UUID(), kind: .image, fileName: "l.png", displayName: "Logo")
-        project.media = [logo]
-        let groupID = project.addGroup()
-        project.addEntries(for: [logo.id], toGroup: groupID)
+        var project = documentWithCues([logo]).project
         var text = Layer.text("Nächster Auftritt 15 Uhr")
         if case .text(var style) = text.content {
             style.fontName = "Avenir Next"
             style.background = RGBAColor(red: 0.9, green: 0.1, blue: 0.1, alpha: 0.8)
             text.content = .text(style)
         }
-        project.legacyGroups[0].entries[0].layers = [text, .image(logo.id)]
+        project.cues[0].layers = [text, .image(logo.id)]
 
         #expect(try ProjectCodec.decode(ProjectCodec.encode(project)) == project)
     }
 
-    @Test func playlistResolvesImageLayersAndKeepsMissingOnes() throws {
-        var document = ProjectDocument()
-        let logo = Medium(id: UUID(), kind: .image, fileName: "l.png", displayName: "Logo")
-        document.project.media = [logo]
-        let groupID = document.project.addGroup()
-        document.project.addEntries(for: [logo.id], toGroup: groupID)
-        document.project.legacyGroups[0].entries[0].layers = [.image(logo.id), .image(UUID()), .text("Hallo")]
+    @Test func showResolvesImageLayersAndKeepsMissingOnes() throws {
+        var document = documentWithCues([logo])
+        document.project.cues[0].layers = [.image(logo.id), .image(UUID()), .text("Hallo")]
 
-        let package = URL(filePath: "/tmp/Show.klangshow")
-        let layers = try #require(document.playlist(for: document.project.legacyGroups[0], in: package).items.first).layers
+        guard case .media(_, let layers) = try #require(document.show(in: package).cues.first).content else {
+            Issue.record("kein Medium")
+            return
+        }
         #expect(layers.map { $0.imageURL?.lastPathComponent } == ["l.png", nil, nil])
     }
 
-    @Test func editingTextOfRunningEntryUpdatesWithoutNewStep() throws {
-        let scheduler = ManualScheduler()
-        let output = OutputController(scheduler: scheduler)
-        let medium = Medium(id: UUID(), kind: .image, fileName: "x", displayName: "x")
-        let playable = PlayableMedium(medium: medium, url: URL(filePath: "/tmp/x"))
-        let entryID = UUID()
-        let groupID = UUID()
-        let before = RenderLayer(layer: .text("15 Uhr"), imageURL: nil)
-        let after = RenderLayer(layer: .text("16 Uhr"), imageURL: nil)
+    @Test func editingTextOfRunningCueUpdatesWithoutNewStep() throws {
+        var document = documentWithCues([logo])
+        document.project.cues[0].layers = [.text("15 Uhr")]
+        let engine = CueEngine(scheduler: VirtualClock())
+        engine.load(document.show(in: package))
+        engine.go()
+        let id = engine.state.content.transitionID
 
-        output.startLoop(LoopPlaylist(groupID: groupID, crossfade: 0, items: [LoopItem(entryID: entryID, item: playable, imageDuration: 5, layers: [before])]))
-        let id = output.state.content.transitionID
-        output.updateLoop(LoopPlaylist(groupID: groupID, crossfade: 0, items: [LoopItem(entryID: entryID, item: playable, imageDuration: 5, layers: [after])]))
+        document.project.cues[0].layers = [.text("16 Uhr")]
+        engine.update(document.show(in: package))
 
-        guard case .loop(let frame) = output.state.content else { Issue.record("kein Loop"); return }
-        #expect(frame.layers == [after])
-        #expect(output.state.content.transitionID == id)
+        let frame = try #require(engine.state.content.frame)
+        #expect(frame.layers.map(\.layer.content) == [Layer.text("16 Uhr").content])
+        #expect(engine.state.content.transitionID == id)
     }
 }
 
 @MainActor
 struct BrandingTests {
     @Test func logoLayerSurvivesRoundTripAndNeedsNoMedium() throws {
-        var document = ProjectDocument()
         let photo = Medium(id: UUID(), kind: .image, fileName: "p.jpg", displayName: "p")
-        document.project.media = [photo]
-        let groupID = document.project.addGroup()
-        document.project.addEntries(for: [photo.id], toGroup: groupID)
-        document.project.legacyGroups[0].entries[0].layers = [.logo()]
+        var document = documentWithCues([photo])
+        document.project.cues[0].layers = [.logo()]
 
         #expect(try ProjectCodec.decode(ProjectCodec.encode(document.project)) == document.project)
-        let layers = try #require(document.playlist(for: document.project.legacyGroups[0], in: URL(filePath: "/tmp/Show.klangshow")).items.first).layers
+        guard case .media(_, let layers) = try #require(document.show(in: URL(filePath: "/tmp/Show.klangshow")).cues.first).content else {
+            Issue.record("kein Medium")
+            return
+        }
         #expect(layers.first?.layer.content == .logo)
         #expect(layers.first?.imageURL == nil)
     }

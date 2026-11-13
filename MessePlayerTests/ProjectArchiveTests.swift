@@ -12,8 +12,8 @@ struct ProjectArchiveTests {
         var media = MediaStore()
         var project = Project()
         project.media = [try media.add(source)]
-        let groupID = project.addGroup()
-        project.addEntries(for: project.media.map(\.id), toGroup: groupID)
+        project.insertCues(for: project.media.map(\.id), at: 0)
+        project.formGroup(from: Set(project.cues.map(\.id)))
         let package = directory.appending(path: "Messe.klangshow")
         try ProjectPackage.write(project, media: media).write(to: package, options: .atomic, originalContentsURL: nil)
         return (package, project)

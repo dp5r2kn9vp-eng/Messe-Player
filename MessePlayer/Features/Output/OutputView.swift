@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Inhalt des Ausgabefensters: Inhalt mit Überblendung, darüber Black.
 struct OutputView: View {
-    let output: OutputController
+    let engine: CueEngine
 
     var body: some View {
-        let state = output.state
+        let state = engine.state
         ZStack {
             ZStack {
-                content(state.content)
+                content(state)
                     .id(state.content.transitionID)
                     .transition(.opacity)
             }
@@ -18,25 +18,28 @@ struct OutputView: View {
             }
         }
         .ignoresSafeArea()
-        .task(id: output.upcoming) { preloadUpcoming() }
+        .task(id: engine.upcoming) { preloadUpcoming() }
     }
 
     @ViewBuilder
-    private func content(_ content: OutputContent) -> some View {
-        switch content {
+    private func content(_ state: OutputState) -> some View {
+        switch state.content {
         case .idle:
             IdleView()
-        case .single(let item):
-            MediaView(item: item, isPaused: output.state.isPaused)
-        case .loop(let frame) where frame.isGap:
+        case .blank:
             Color.black
-        case .loop(let frame):
-            FrameView(item: frame.item, layers: frame.layers, onFinish: { output.mediaDidFinish(step: frame.step) }, isPaused: output.state.isPaused)
+        case .cue(let frame):
+            FrameView(
+                item: frame.item,
+                layers: frame.layers,
+                onFinish: { engine.mediaDidFinish(cueID: frame.cueID, step: frame.step) },
+                isPaused: state.isPaused
+            )
         }
     }
 
     private func preloadUpcoming() {
-        guard let next = output.upcoming, next.medium.kind == .image else { return }
+        guard let next = engine.upcoming, next.medium.kind == .image else { return }
         _ = ImageCache.shared.image(for: next.url)
     }
 }

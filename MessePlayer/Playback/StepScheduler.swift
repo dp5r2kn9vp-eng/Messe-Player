@@ -1,4 +1,4 @@
-/// Zeitgeber der Loop-Engine. Austauschbar, damit Tests ohne echtes Warten laufen.
+/// Zeitgeber der Cue-Engine (ein Handle je Cue). Austauschbar, damit Tests ohne echtes Warten laufen.
 protocol StepScheduler {
     func schedule(after delay: Duration, _ action: @escaping () -> Void) -> Cancellation
 }

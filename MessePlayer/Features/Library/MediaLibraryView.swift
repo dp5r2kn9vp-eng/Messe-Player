@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Medienbibliothek eines Projekts: Dateien aus dem Finder hineinziehen, sortieren, entfernen,
-/// auf dem Ausgang zeigen und als Cues in die Liste übernehmen.
+/// und als Cues in die Liste übernehmen (Doppelklick, Taste ⏎ oder Ziehen).
 struct MediaLibraryView: View {
     @Binding var document: ProjectDocument
     let packageURL: URL?
@@ -9,7 +9,7 @@ struct MediaLibraryView: View {
     /// Legt für die Medien Cues in der Cue-Liste an.
     let onAddCues: (Set<Medium.ID>) -> Void
 
-    @Environment(OutputController.self) private var output
+    @Environment(CueEngine.self) private var engine
     @State private var isPickingFiles = false
     @State private var importErrors: [String] = []
 
@@ -41,10 +41,8 @@ struct MediaLibraryView: View {
             selection: $selection,
             onInsert: importMedia,
             onRemove: remove,
-            primaryAction: showOnOutput,
+            primaryAction: onAddCues,
             menu: { ids in
-                Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
-                    .disabled(ids.count != 1)
                 Button("Als Cues hinzufügen", systemImage: "text.badge.plus") { onAddCues(ids) }
                 Button("Entfernen", systemImage: "trash", role: .destructive) { remove(ids) }
             },
@@ -52,7 +50,7 @@ struct MediaLibraryView: View {
                 MediaRow(
                     medium: medium,
                     url: document.media.url(for: medium, in: packageURL),
-                    isLive: output.isLive(medium)
+                    isLive: engine.isShowing(medium.id)
                 )
             }
         )
@@ -62,7 +60,7 @@ struct MediaLibraryView: View {
         ContentUnavailableView(
             "Medien hierher ziehen",
             systemImage: "square.and.arrow.down",
-            description: Text("Bilder und Videos aus dem Finder ablegen oder mit + auswählen. Doppelklick zeigt ein Medium auf dem Ausgang.")
+            description: Text("Bilder und Videos aus dem Finder ablegen oder mit + auswählen. Doppelklick legt einen Cue an.")
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
@@ -79,15 +77,5 @@ struct MediaLibraryView: View {
     private func remove(_ ids: Set<Medium.ID>) {
         document.project.removeMedia(ids)
         selection.subtract(ids)
-    }
-
-    /// Zeigt genau ein ausgewähltes Medium dauerhaft auf dem Ausgang.
-    private func showOnOutput(_ ids: Set<Medium.ID>) {
-        guard ids.count == 1,
-              let id = ids.first,
-              let medium = document.project.medium(withID: id),
-              let item = document.playable(medium, in: packageURL)
-        else { return }
-        output.showSingle(item)
     }
 }

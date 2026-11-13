@@ -57,12 +57,13 @@ struct ShortcutInfo: Identifiable {
     var id: String { keys }
 
     static let all = [
+        ShortcutInfo(keys: String(localized: "Leertaste"), action: String(localized: "GO: Cue am Abspielkopf starten")),
+        ShortcutInfo(keys: "P", action: String(localized: "Pause / Weiter für alle laufenden Cues")),
         ShortcutInfo(keys: "B", action: String(localized: "Black: Ausgang sofort schwarz, nochmal drücken zeigt wieder das Bild")),
-        ShortcutInfo(keys: String(localized: "Leertaste"), action: String(localized: "Pause / Weiter")),
         ShortcutInfo(keys: "⌘.", action: String(localized: "Notfall-Stopp: beendet die Wiedergabe immer")),
         ShortcutInfo(keys: "Esc", action: String(localized: "Wiedergabe beenden – nur wenn der Ausgang auf dem Steuerbildschirm liegt")),
-        ShortcutInfo(keys: "1–9", action: String(localized: "Gruppe 1–9 starten")),
-        ShortcutInfo(keys: String(localized: "Doppelklick / Return"), action: String(localized: "Medium auf dem Ausgang zeigen bzw. Loop ab diesem Eintrag starten")),
+        ShortcutInfo(keys: String(localized: "Doppelklick / Return"), action: String(localized: "Cue sofort starten")),
+        ShortcutInfo(keys: "⌘G / ⇧⌘G", action: String(localized: "Gruppe bilden / auflösen")),
         ShortcutInfo(keys: "⌘S", action: String(localized: "Projekt speichern")),
         ShortcutInfo(keys: "⌘?", action: String(localized: "Hilfe öffnen")),
     ]

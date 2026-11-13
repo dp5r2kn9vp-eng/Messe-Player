@@ -1,12 +1,12 @@
 import AppKit
 
-/// Hält die app-weiten Dienste. Es gibt genau einen Ausgang, unabhängig davon, welche Projekte offen sind.
+/// Hält die app-weiten Dienste. Es gibt genau eine Cue-Engine, unabhängig davon, welche Projekte offen sind.
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let output = OutputController()
+    let engine = CueEngine()
     let displays = DisplayService()
     let hotkeys = HotkeyService()
     let mediaLengths = MediaLengths()
-    private(set) lazy var outputWindow = OutputWindowController(output: output, displays: displays)
+    private(set) lazy var outputWindow = OutputWindowController(engine: engine, displays: displays)
     private let sleepGuard = SleepGuard()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -28,18 +28,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func registerHotkeys() {
-        hotkeys.register("b") { [output] in
-            output.toggleBlack()
+        hotkeys.register("b") { [engine] in
+            engine.toggleBlack()
             return true
         }
-        hotkeys.register(HotkeyService.space) { [output] in
-            output.togglePause()
+        hotkeys.register(HotkeyService.space) { [engine] in
+            guard engine.playheadID != nil else { return false }
+            engine.go()
+            return true
+        }
+        hotkeys.register("p") { [engine] in
+            engine.togglePause()
         }
         // Esc nur, wenn der Ausgang den Bildschirm des Steuerfensters blockiert.
         // Mit externem Bildschirm stoppt Esc nicht versehentlich – dafür gibt es den Notfall-Stopp ⌘.
-        hotkeys.register(HotkeyService.escape) { [output, unowned self] in
-            guard output.state.content != .idle, outputWindow.sharesControlScreen else { return false }
-            output.stop()
+        hotkeys.register(HotkeyService.escape) { [engine, unowned self] in
+            guard engine.state.content != .idle, outputWindow.sharesControlScreen else { return false }
+            engine.stopAll()
             return true
         }
     }
