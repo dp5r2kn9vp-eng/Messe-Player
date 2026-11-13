@@ -27,6 +27,7 @@ struct ControlView: View {
                 Divider()
                 GroupsPanel(document: $document, packageURL: packageURL, selectedGroupID: $selectedGroupID)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 1000, minHeight: 520)
         .onChange(of: document.project.groups) { refreshRunningLoop() }

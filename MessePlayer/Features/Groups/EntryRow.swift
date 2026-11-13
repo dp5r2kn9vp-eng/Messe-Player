@@ -6,6 +6,7 @@ struct EntryRow: View {
     let medium: Medium?
     let url: URL?
     let isLive: Bool
+    let onEditLayers: () -> Void
 
     var body: some View {
         HStack(spacing: Theme.Spacing.m) {
@@ -18,6 +19,11 @@ struct EntryRow: View {
                 detail
             }
             Spacer(minLength: Theme.Spacing.s)
+            Button(action: onEditLayers) {
+                Label(entry.layers.isEmpty ? "Ebenen" : "\(entry.layers.count)", systemImage: "textformat")
+            }
+            .buttonStyle(.borderless)
+            .help("Texte und Ebenen bearbeiten")
             if medium?.kind == .image {
                 DurationField(seconds: $entry.imageDuration, range: Entry.durationRange)
                     .help("Wie lange das Bild im Loop stehen bleibt")

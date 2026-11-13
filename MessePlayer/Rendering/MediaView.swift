@@ -6,6 +6,8 @@ struct MediaView: View {
     let item: PlayableMedium
     /// `nil`: Video in Endlosschleife (Einzelanzeige). Sonst einmal abspielen und danach – oder bei einem Fehler – melden.
     var onFinish: (() -> Void)?
+    /// Vorschauen laufen stumm, damit der Ton nur vom Ausgang kommt.
+    var isMuted = false
 
     var body: some View {
         ZStack {
@@ -14,7 +16,7 @@ struct MediaView: View {
             case .image:
                 StillImageView(url: item.url, onFailure: onFinish)
             case .video:
-                VideoSurface(url: item.url, onFinish: onFinish)
+                VideoSurface(url: item.url, onFinish: onFinish, isMuted: isMuted)
             }
         }
     }

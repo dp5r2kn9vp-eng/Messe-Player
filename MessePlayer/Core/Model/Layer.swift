@@ -29,6 +29,11 @@ nonisolated struct RelativePoint: Codable, Equatable {
     var y: Double
 
     static let center = RelativePoint(x: 0.5, y: 0.5)
+
+    /// Verschoben um einen relativen Versatz, auf der Bildfläche gehalten.
+    func offset(dx: Double, dy: Double) -> RelativePoint {
+        RelativePoint(x: (x + dx).clamped(to: 0...1), y: (y + dy).clamped(to: 0...1))
+    }
 }
 
 nonisolated struct TextStyle: Codable, Equatable {
