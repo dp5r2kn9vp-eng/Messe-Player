@@ -1,0 +1,15 @@
+import SwiftUI
+
+@main
+struct MessePlayerApp: App {
+    @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
+
+    var body: some Scene {
+        DocumentGroup(newDocument: ProjectDocument()) { file in
+            ControlView(document: file.$document)
+                .environment(appDelegate.output)
+                .environment(appDelegate.displays)
+                .environment(appDelegate.outputWindow)
+        }
+    }
+}

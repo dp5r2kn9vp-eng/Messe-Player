@@ -1,0 +1,34 @@
+import AppKit
+
+/// Ein-Tasten-Kürzel ohne Modifier (z. B. „B“ für Black).
+/// Greift nicht, solange ein Textfeld aktiv ist, damit Tippen keine Aktionen auslöst.
+final class HotkeyService {
+    private var actions: [String: () -> Void] = [:]
+    private var monitor: Any?
+
+    func register(_ key: String, action: @escaping () -> Void) {
+        actions[key.lowercased()] = action
+    }
+
+    func start() {
+        guard monitor == nil else { return }
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let key = event.charactersIgnoringModifiers?.lowercased()
+            let modifiers = event.modifierFlags
+            let handled = MainActor.assumeIsolated { self?.handle(key: key, modifiers: modifiers) ?? false }
+            return handled ? nil : event
+        }
+    }
+
+    private func handle(key: String?, modifiers: NSEvent.ModifierFlags) -> Bool {
+        let relevantModifiers = modifiers.intersection(.deviceIndependentFlagsMask)
+            .subtracting([.capsLock, .numericPad, .function])
+        guard relevantModifiers.isEmpty,
+              !(NSApp.keyWindow?.firstResponder is NSText),
+              let key,
+              let action = actions[key]
+        else { return false }
+        action()
+        return true
+    }
+}
