@@ -28,6 +28,7 @@ Native macOS-App (Swift, SwiftUI + AVFoundation, macOS 26, Xcode 26.6) für Klan
 - Zusammengehörige Tickets (gleiche Dateien/Funktion/Ansicht) im selben Chat, unabhängige in eigener Session.
 - Nie direkt auf `main` committen.
 - Bei jedem Release: `CHANGELOG.md` pflegen und Release Notes erstellen (Haiku).
+- Jeder Release-Build wird zusätzlich lokal unter `~/KlangNIVEAU_Firma/Release/` abgelegt (Zip + entpackte aktuelle App), siehe `docs/RELEASE.md`.
 
 ## Build und Test
 ```sh

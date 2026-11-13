@@ -19,3 +19,9 @@ Versionierung nach SemVer: MAJOR bei inkompatiblen Änderungen (z. B. Projektfor
    ```sh
    gh release create vX.Y.Z Messe-Player-X.Y.Z.zip --title "Messe-Player X.Y.Z" --notes-file docs/releases/vX.Y.Z.md
    ```
+9. Lokale Ablage für das Messe-Team: Zip nach `~/KlangNIVEAU_Firma/Release/` kopieren und dort zusätzlich die aktuelle `MessePlayer.app` entpacken (ersetzt die vorherige):
+   ```sh
+   R=~/KlangNIVEAU_Firma/Release
+   mkdir -p "$R" && cp Messe-Player-X.Y.Z.zip "$R/"
+   rm -rf "$R/MessePlayer.app" && ditto -x -k "$R/Messe-Player-X.Y.Z.zip" "$R/"
+   ```
