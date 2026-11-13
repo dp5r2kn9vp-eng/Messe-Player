@@ -11,6 +11,8 @@ struct LayerInspector: View {
             switch layer.content {
             case .text:
                 TextStyleSection(style: textStyle)
+            case .logo:
+                Text("KlangNIVEAU-Logo (helle Variante)").foregroundStyle(Color.mutedLight)
             case .image(let mediumID):
                 Picker("Bild", selection: imageSource) {
                     ForEach(imageMedia) { Text($0.displayName).tag($0.id) }

@@ -53,3 +53,20 @@ struct LayerTests {
         #expect(output.state.content.transitionID == id)
     }
 }
+
+@MainActor
+struct BrandingTests {
+    @Test func logoLayerSurvivesRoundTripAndNeedsNoMedium() throws {
+        var document = ProjectDocument()
+        let photo = Medium(id: UUID(), kind: .image, fileName: "p.jpg", displayName: "p")
+        document.project.media = [photo]
+        let groupID = document.project.addGroup()
+        document.project.addEntries(for: [photo.id], toGroup: groupID)
+        document.project.groups[0].entries[0].layers = [.logo()]
+
+        #expect(try ProjectCodec.decode(ProjectCodec.encode(document.project)) == document.project)
+        let layers = try #require(document.playlist(for: document.project.groups[0], in: URL(filePath: "/tmp/Show.klangshow")).items.first).layers
+        #expect(layers.first?.layer.content == .logo)
+        #expect(layers.first?.imageURL == nil)
+    }
+}
