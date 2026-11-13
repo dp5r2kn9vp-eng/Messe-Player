@@ -31,7 +31,7 @@ struct OutputView: View {
         case .loop(let frame) where frame.isGap:
             Color.black
         case .loop(let frame):
-            MediaView(item: frame.item) { output.mediaDidFinish(step: frame.step) }
+            FrameView(item: frame.item, layers: frame.layers) { output.mediaDidFinish(step: frame.step) }
         }
     }
 

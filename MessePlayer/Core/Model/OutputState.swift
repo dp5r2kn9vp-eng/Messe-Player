@@ -43,6 +43,16 @@ struct LoopItem: Equatable {
     let entryID: Entry.ID
     let item: PlayableMedium
     let imageDuration: TimeInterval
+    var layers: [RenderLayer] = []
+}
+
+/// Ebene mit aufgelöster Bildadresse, bereit für den Renderer.
+struct RenderLayer: Equatable, Identifiable {
+    let layer: Layer
+    /// Nur bei Bild-Ebenen; `nil`, wenn das Medium fehlt.
+    let imageURL: URL?
+
+    var id: Layer.ID { layer.id }
 }
 
 /// Ein Schritt im Loop. `step` zählt hoch, damit auch derselbe Eintrag zweimal hintereinander neu startet.
@@ -50,6 +60,7 @@ struct LoopFrame: Equatable {
     let groupID: MediaGroup.ID
     let entryID: Entry.ID
     let item: PlayableMedium
+    var layers: [RenderLayer] = []
     let step: Int
     /// Schwarze Pause nach einem Video.
     var isGap = false
