@@ -5,6 +5,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [1.1.0] – 2026-11-13
+
 ### Hinzugefügt
 - Ebenen-Animationen für Text, Bild und Logo: Erscheinen (Einblenden, von unten/oben/links/rechts, Zoom, Schreibmaschine), Verzögerung, Dauer, Dauereffekt Blinken oder Pulsieren, optional wieder ausblenden. Startet mit jedem Loop-Eintrag neu; im Editor per „Animation ansehen“ prüfbar.
 - Editor: „Bild aus Datei …“ legt ein Bild direkt als Ebene an (wird dabei in die Bibliothek übernommen).
@@ -42,6 +44,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/releases/tag/v1.0.0
