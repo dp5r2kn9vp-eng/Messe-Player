@@ -5,6 +5,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [2.0.1] – 2026-11-13
+
+### Hinzugefügt
+- Jeder Build trägt die Commit-ID in der Info.plist (Schlüssel `CueViewGitCommit`, bei uncommitteten Änderungen mit `-dirty`), damit ausgelieferte Pakete einem Stand im Repo zugeordnet werden können.
+
 ## [2.0.0] – 2026-11-13
 
 ### Hinzugefügt
@@ -96,7 +101,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.0...v1.1.1
