@@ -42,7 +42,12 @@ struct GroupEntriesView: View {
     @ViewBuilder
     private var playButton: some View {
         if output.playingGroupID == group.id {
+            Button(output.state.isPaused ? "Weiter" : "Pause", systemImage: output.state.isPaused ? "play.fill" : "pause.fill") {
+                output.togglePause()
+            }
+            .help("Leertaste")
             Button("Stopp", systemImage: "stop.fill") { output.stop() }
+                .help("Esc")
         } else {
             Button("Starten", systemImage: "play.fill") { startLoop() }
                 .buttonStyle(.borderedProminent)

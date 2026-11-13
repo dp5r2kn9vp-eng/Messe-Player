@@ -7,6 +7,7 @@ struct ControlView: View {
     let packageURL: URL?
 
     @Environment(OutputController.self) private var output
+    @Environment(HotkeyService.self) private var hotkeys
     @State private var librarySelection = Set<Medium.ID>()
     @State private var selectedGroupID: MediaGroup.ID?
 
@@ -31,12 +32,45 @@ struct ControlView: View {
         }
         .frame(minWidth: 1000, minHeight: 520)
         .onChange(of: document.project.groups) { refreshRunningLoop() }
+        .onChange(of: output.state) { saveSession() }
+        .task(id: document.project.groups.map(\.id)) { registerGroupHotkeys() }
+        .task {
+            restoreSessionOnce()
+            saveSession()
+        }
         .background(Color.brandDark)
         .preferredColorScheme(.dark)
     }
 }
 
+/// Stellt den letzten Zustand nur einmal pro App-Start wieder her.
+@MainActor private var didRestoreSession = false
+
 extension ControlView {
+    private func saveSession() {
+        guard let packageURL else { return }
+        SessionStore.save(output.snapshot(projectPath: packageURL.path))
+    }
+
+    private func restoreSessionOnce() {
+        guard !didRestoreSession, let packageURL else { return }
+        didRestoreSession = true
+        guard let snapshot = SessionStore.load(), snapshot.projectPath == packageURL.path else { return }
+        output.restore(snapshot, from: document, packageURL: packageURL)
+    }
+
+    /// Tasten 1–9 starten die Gruppen in ihrer Reihenfolge.
+    private func registerGroupHotkeys() {
+        for number in 1...9 {
+            hotkeys.register(String(number)) { [document = $document, packageURL, output] in
+                let groups = document.wrappedValue.project.groups
+                guard number <= groups.count else { return false }
+                output.startLoop(document.wrappedValue.playlist(for: groups[number - 1], in: packageURL))
+                return true
+            }
+        }
+    }
+
     /// Änderungen an der laufenden Gruppe (Reihenfolge, Dauer) wirken sofort.
     private func refreshRunningLoop() {
         guard let id = output.playingGroupID,

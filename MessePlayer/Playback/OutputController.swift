@@ -6,6 +6,8 @@ import Observation
 struct StepProgress: Equatable {
     let startedAt: Date
     let duration: TimeInterval
+    /// Gesetzt, solange pausiert ist; der Balken bleibt dann stehen.
+    var pausedAt: Date?
 }
 
 /// Einzige Quelle des Ausgabezustands und Loop-Engine.
@@ -65,6 +67,38 @@ final class OutputController {
     func stop() {
         stopLoop()
         state.content = .idle
+    }
+
+    /// Hält das aktuelle Bild bzw. Video an oder setzt es fort. Liefert `false`, wenn nichts pausierbar ist.
+    @discardableResult
+    func togglePause() -> Bool {
+        switch state.content {
+        case .idle:
+            return false
+        case .loop(let frame) where frame.isGap:
+            return false
+        default:
+            state.isPaused ? resume() : pause()
+            return true
+        }
+    }
+
+    private func pause() {
+        state.isPaused = true
+        pendingStep?.cancel()
+        pendingStep = nil
+        stepProgress?.pausedAt = now()
+    }
+
+    private func resume() {
+        state.isPaused = false
+        guard let progress = stepProgress, let pausedAt = progress.pausedAt else { return }
+        let resumed = StepProgress(startedAt: progress.startedAt + now().timeIntervalSince(pausedAt), duration: progress.duration)
+        stepProgress = resumed
+        if case .loop(let frame) = state.content, frame.item.medium.kind == .image {
+            let remaining = max(resumed.duration - now().timeIntervalSince(resumed.startedAt), 0)
+            schedule(after: .seconds(remaining))
+        }
     }
 
     /// Startet einen Loop, optional ab einem bestimmten Eintrag.
@@ -142,6 +176,7 @@ final class OutputController {
             layers: current.layers,
             step: step
         ))
+        state.isPaused = false
         upcoming = nextItem
         switch current.item.medium.kind {
         case .image:
@@ -173,6 +208,7 @@ final class OutputController {
     }
 
     private func stopLoop() {
+        state.isPaused = false
         stepProgress = nil
         pendingStep?.cancel()
         pendingStep = nil

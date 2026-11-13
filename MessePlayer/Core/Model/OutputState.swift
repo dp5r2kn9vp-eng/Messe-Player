@@ -5,6 +5,8 @@ import Foundation
 struct OutputState: Equatable {
     var content: OutputContent = .idle
     var isBlack = false
+    /// Aktuelles Bild/Video angehalten (Leertaste).
+    var isPaused = false
     /// Überblendzeit für den nächsten Inhaltswechsel in Sekunden (0 = harter Schnitt).
     var transition: TimeInterval = 0
 }

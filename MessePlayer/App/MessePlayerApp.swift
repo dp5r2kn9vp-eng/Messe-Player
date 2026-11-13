@@ -10,6 +10,7 @@ struct MessePlayerApp: App {
                 .environment(appDelegate.output)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindow)
+                .environment(appDelegate.hotkeys)
                 .focusedSceneValue(\.projectPackageURL, file.fileURL)
         }
         .commands {
