@@ -1,5 +1,12 @@
+import AVFoundation
 import Foundation
 import Observation
+
+/// Laufzeit des aktuellen Loop-Schritts, für den Restzeit-Balken im Steuerfenster.
+struct StepProgress: Equatable {
+    let startedAt: Date
+    let duration: TimeInterval
+}
 
 /// Einzige Quelle des Ausgabezustands und Loop-Engine.
 /// Bilder wechseln nach ihrer Dauer, Videos melden ihr Ende (`mediaDidFinish`), danach folgt eine kurze schwarze Pause.
@@ -11,15 +18,30 @@ final class OutputController {
     private(set) var state = OutputState()
     /// Nächstes Medium im Loop, damit der Renderer es vorladen kann.
     private(set) var upcoming: PlayableMedium?
+    /// Nur während ein Bild oder Video im Loop steht; `nil` in der Pause, bei Einzelanzeige und ohne Loop.
+    private(set) var stepProgress: StepProgress?
     private var playlist: LoopPlaylist?
 
     @ObservationIgnored private let scheduler: any StepScheduler
+    @ObservationIgnored private let videoDuration: (URL) async -> TimeInterval?
+    @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private var index = 0
     @ObservationIgnored private var step = 0
     @ObservationIgnored private var pendingStep: Cancellation?
 
-    init(scheduler: any StepScheduler = TaskStepScheduler()) {
+    init(
+        scheduler: any StepScheduler = TaskStepScheduler(),
+        videoDuration: @escaping (URL) async -> TimeInterval? = OutputController.loadVideoDuration,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.scheduler = scheduler
+        self.videoDuration = videoDuration
+        self.now = now
+    }
+
+    static func loadVideoDuration(_ url: URL) async -> TimeInterval? {
+        guard let duration = try? await AVURLAsset(url: url).load(.duration), duration.isNumeric else { return nil }
+        return duration.seconds
     }
 
     var playingGroupID: MediaGroup.ID? {
@@ -87,6 +109,7 @@ final class OutputController {
         var gap = frame
         gap.isGap = true
         state.content = .loop(gap)
+        stepProgress = nil
         schedule(after: Self.videoGap)
     }
 
@@ -120,8 +143,23 @@ final class OutputController {
             step: step
         ))
         upcoming = nextItem
-        if current.item.medium.kind == .image {
+        switch current.item.medium.kind {
+        case .image:
+            stepProgress = StepProgress(startedAt: now(), duration: current.imageDuration)
             schedule(after: .seconds(current.imageDuration))
+        case .video:
+            stepProgress = nil
+            trackVideoDuration(of: current.item.url, step: step)
+        }
+    }
+
+    private func trackVideoDuration(of url: URL, step videoStep: Int) {
+        let startedAt = now()
+        Task { [weak self, videoDuration] in
+            guard let duration = await videoDuration(url) else { return }
+            // Nur übernehmen, wenn das Video noch läuft.
+            guard let self, case .loop(let frame) = self.state.content, frame.step == videoStep, !frame.isGap else { return }
+            self.stepProgress = StepProgress(startedAt: startedAt, duration: duration)
         }
     }
 
@@ -135,6 +173,7 @@ final class OutputController {
     }
 
     private func stopLoop() {
+        stepProgress = nil
         pendingStep?.cancel()
         pendingStep = nil
         playlist = nil

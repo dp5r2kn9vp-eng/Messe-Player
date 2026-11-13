@@ -6,9 +6,21 @@ struct EntryRow: View {
     let medium: Medium?
     let url: URL?
     let isLive: Bool
+    /// Restzeit, solange dieser Eintrag im Loop sichtbar läuft.
+    let progress: StepProgress?
     let onEditLayers: () -> Void
 
     var body: some View {
+        VStack(spacing: Theme.Spacing.xs) {
+            content
+            if let progress {
+                StepProgressBar(progress: progress)
+            }
+        }
+        .padding(.vertical, Theme.Spacing.xs)
+    }
+
+    private var content: some View {
         HStack(spacing: Theme.Spacing.m) {
             MediaThumbnail(url: url, isLive: isLive)
                 .frame(width: 64)
@@ -29,7 +41,6 @@ struct EntryRow: View {
                     .help("Wie lange das Bild im Loop stehen bleibt")
             }
         }
-        .padding(.vertical, Theme.Spacing.xs)
     }
 
     @ViewBuilder
