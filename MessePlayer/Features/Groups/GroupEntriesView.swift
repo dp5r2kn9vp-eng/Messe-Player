@@ -9,6 +9,7 @@ struct GroupEntriesView: View {
     @Environment(OutputController.self) private var output
     @State private var selection = Set<Entry.ID>()
     @State private var importErrors: [String] = []
+    @State private var editing: EntryReference?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,6 +34,9 @@ struct GroupEntriesView: View {
             }
         }
         .importErrorAlert($importErrors)
+        .sheet(item: $editing) { reference in
+            LayerEditorView(entry: binding(for: reference.id), document: document, packageURL: packageURL)
+        }
     }
 
     @ViewBuilder
@@ -59,6 +63,8 @@ struct GroupEntriesView: View {
                     .disabled(ids.count != 1)
                 Button("Einzeln auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
                     .disabled(ids.count != 1)
+                Button("Texte & Ebenen bearbeiten …", systemImage: "textformat") { editing = ids.first.map(EntryReference.init) }
+                    .disabled(ids.count != 1)
                 Button("Aus Gruppe entfernen", systemImage: "minus.circle", role: .destructive) { remove(ids) }
             },
             row: { entry in
@@ -67,7 +73,8 @@ struct GroupEntriesView: View {
                     entry: binding(for: entry.id),
                     medium: medium,
                     url: medium.flatMap { document.media.url(for: $0, in: packageURL) },
-                    isLive: output.isLive(entry: entry.id)
+                    isLive: output.isLive(entry: entry.id),
+                    onEditLayers: { editing = EntryReference(id: entry.id) }
                 )
             }
         )
@@ -121,4 +128,9 @@ struct GroupEntriesView: View {
         else { return }
         output.showSingle(item)
     }
+}
+
+/// Macht eine Eintrags-ID für `.sheet(item:)` nutzbar.
+private struct EntryReference: Identifiable {
+    let id: Entry.ID
 }

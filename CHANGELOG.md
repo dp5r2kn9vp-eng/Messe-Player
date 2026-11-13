@@ -13,6 +13,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Gruppen: anlegen, umbenennen, sortieren, löschen. Einträge aus der Bibliothek hinzufügen (auch mehrfach) oder Dateien direkt aus dem Finder in eine Gruppe ziehen, Reihenfolge per Drag & Drop, Standdauer pro Bild (1–3600 s, Standard 8 s).
 - Loop-Engine: Gruppe starten/stoppen, Doppelklick startet ab einem Eintrag. Bilder stehen ihre Dauer, Videos laufen komplett, danach 1 s Schwarz. Überblendung pro Gruppe einstellbar (0 = harter Schnitt), nächstes Bild wird vorgeladen, defekte Medien werden übersprungen. Änderungen an der laufenden Gruppe wirken sofort.
 - Ebenen: Text- und Bild-Ebenen pro Eintrag werden über Bild und Video gezeichnet – Position und Größe relativ zum Bildschirm, Schrift, Größe, Farbe, Ausrichtung, Schatten und hinterlegte Box. Textänderungen am laufenden Eintrag erscheinen sofort.
+- Ebenen-Editor: große 16:9-Vorschau, Ebenen mit der Maus verschieben, Text, Schrift, Größe, Fett, Farbe, Ausrichtung, Schatten, Box und Breite einstellen, Bilder aus der Bibliothek als Ebene (z. B. Logo). Vorschau-Videos laufen stumm.
+
+### Behoben
+- Ältere Projektdateien mit Gruppen ließen sich nach Einführung der Ebenen nicht mehr öffnen.
+- Steuerfenster füllte die Fensterbreite nicht vollständig.
 
 ### Hinzugefügt
 - Styleguide, Architektur-Dokumentation und Agent-Regeln.

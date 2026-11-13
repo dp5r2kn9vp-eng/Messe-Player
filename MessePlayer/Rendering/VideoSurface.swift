@@ -6,14 +6,16 @@ import SwiftUI
 struct VideoSurface: NSViewRepresentable {
     let url: URL
     var onFinish: (() -> Void)?
+    var isMuted = false
 
     func makeNSView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
-        view.play(url, onFinish: onFinish)
+        updateNSView(view, context: context)
         return view
     }
 
     func updateNSView(_ view: PlayerLayerView, context: Context) {
+        view.isMuted = isMuted
         view.play(url, onFinish: onFinish)
     }
 
@@ -29,6 +31,11 @@ final class PlayerLayerView: NSView {
     private var onFinish: (() -> Void)?
     private var endObservers: [NSObjectProtocol] = []
     private var statusObservation: NSKeyValueObservation?
+
+    var isMuted: Bool {
+        get { player.isMuted }
+        set { player.isMuted = newValue }
+    }
 
     override init(frame: NSRect) {
         super.init(frame: frame)

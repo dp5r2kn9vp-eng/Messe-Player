@@ -54,4 +54,15 @@ struct GroupTests {
         let legacy = Data(#"{"schemaVersion": 1, "media": []}"#.utf8)
         #expect(try ProjectCodec.decode(legacy).groups.isEmpty)
     }
+
+    @Test func groupsFromOlderFilesGetDefaults() throws {
+        let json = Data("""
+        {"schemaVersion": 1, "media": [], "groups": [{"id": "\(UUID())", "name": "Alt",
+          "entries": [{"id": "\(UUID())", "mediumID": "\(UUID())", "imageDuration": 4}]}]}
+        """.utf8)
+        let group = try #require(ProjectCodec.decode(json).groups.first)
+        #expect(group.crossfade == MediaGroup.defaultCrossfade)
+        #expect(group.entries.first?.layers == [])
+        #expect(group.entries.first?.imageDuration == 4)
+    }
 }

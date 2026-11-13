@@ -16,12 +16,14 @@ struct GroupsPanel: View {
             if let group = selectedGroup {
                 GroupEntriesView(document: $document, group: group, packageURL: packageURL)
                     .id(selectedGroupID)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ContentUnavailableView(
                     "Keine Gruppe gewählt",
                     systemImage: "rectangle.stack",
                     description: Text("Links eine Gruppe anlegen oder auswählen.")
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }
