@@ -1,12 +1,14 @@
 import AppKit
 
-/// Ein-Tasten-Kürzel ohne Modifier (z. B. „B“ für Black).
-/// Greift nicht, solange ein Textfeld aktiv ist, damit Tippen keine Aktionen auslöst.
+/// Ein-Tasten-Kürzel ohne Modifier (z. B. „B“ für Black, Esc für Stopp).
+/// Greift nicht, solange ein Textfeld aktiv ist. Liefert eine Aktion `false`, behält die Taste ihre normale Funktion.
 final class HotkeyService {
-    private var actions: [String: () -> Void] = [:]
+    static let escape = "\u{1b}"
+
+    private var actions: [String: () -> Bool] = [:]
     private var monitor: Any?
 
-    func register(_ key: String, action: @escaping () -> Void) {
+    func register(_ key: String, action: @escaping () -> Bool) {
         actions[key.lowercased()] = action
     }
 
@@ -28,7 +30,6 @@ final class HotkeyService {
               let key,
               let action = actions[key]
         else { return false }
-        action()
-        return true
+        return action()
     }
 }

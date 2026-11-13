@@ -15,6 +15,7 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Ebenen: Text- und Bild-Ebenen pro Eintrag werden über Bild und Video gezeichnet – Position und Größe relativ zum Bildschirm, Schrift, Größe, Farbe, Ausrichtung, Schatten und hinterlegte Box. Textänderungen am laufenden Eintrag erscheinen sofort.
 - Ebenen-Editor: große 16:9-Vorschau, Ebenen mit der Maus verschieben, Text, Schrift, Größe, Fett, Farbe, Ausrichtung, Schatten, Box und Breite einstellen, Bilder aus der Bibliothek als Ebene (z. B. Logo). Vorschau-Videos laufen stumm.
 - Restzeit-Balken: Am laufenden Eintrag zeigt ein oranger Balken mit „noch x s“, wie lange das Bild bzw. Video noch auf dem Ausgang steht.
+- Ausgang: Auswahl zeigt nur die angeschlossenen Bildschirme, der Ausgang läuft dort immer im Vollbild (Testfenster entfällt). Liegt er auf dem Bildschirm des Steuerfensters, erscheint er erst beim Start. Esc beendet Loop oder Einzelanzeige.
 
 ### Behoben
 - Ältere Projektdateien mit Gruppen ließen sich nach Einführung der Ebenen nicht mehr öffnen.

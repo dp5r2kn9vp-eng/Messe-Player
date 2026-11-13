@@ -5,13 +5,14 @@ import Observation
 struct Display: Identifiable, Hashable {
     let id: CGDirectDisplayID
     let name: String
+    /// Bildschirm mit der Menüleiste – dort liegt das Steuerfenster.
+    let isControlScreen: Bool
 }
 
 /// Kennt die angeschlossenen Bildschirme und meldet An- und Abstecken.
 @Observable
 final class DisplayService {
-    /// Alle Bildschirme außer dem mit der Menüleiste – dort liegt das Steuerfenster.
-    private(set) var externalDisplays: [Display] = []
+    private(set) var displays: [Display] = []
 
     @ObservationIgnored var onChange: (() -> Void)?
     @ObservationIgnored private var observation: Task<Void, Never>?
@@ -27,13 +28,22 @@ final class DisplayService {
         }
     }
 
+    /// Bevorzugter Ausgang: der erste externe Bildschirm, sonst der eigene.
+    var preferredOutput: Display? {
+        displays.first { !$0.isControlScreen } ?? displays.first
+    }
+
     func screen(for id: CGDirectDisplayID) -> NSScreen? {
         NSScreen.screens.first { $0.displayID == id }
     }
 
+    func isControlScreen(_ screen: NSScreen) -> Bool {
+        screen == NSScreen.screens.first
+    }
+
     private func refresh() {
-        externalDisplays = NSScreen.screens.dropFirst().compactMap { screen in
-            screen.displayID.map { Display(id: $0, name: screen.localizedName) }
+        displays = NSScreen.screens.enumerated().compactMap { index, screen in
+            screen.displayID.map { Display(id: $0, name: screen.localizedName, isControlScreen: index == 0) }
         }
     }
 }
