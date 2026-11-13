@@ -5,6 +5,8 @@ struct MediaLibraryView: View {
     @Binding var document: ProjectDocument
     let packageURL: URL?
 
+    @Environment(OutputController.self) private var output
+
     @State private var selection = Set<Medium.ID>()
     @State private var isPickingFiles = false
     @State private var importErrors: [String] = []
@@ -15,12 +17,24 @@ struct MediaLibraryView: View {
             if document.project.media.isEmpty {
                 emptyState
             } else {
-                ReorderableList(items: $document.project.media, selection: $selection, onInsert: importMedia) { medium in
-                    MediaRow(medium: medium, url: document.media.url(for: medium, in: packageURL))
-                        .contextMenu {
-                            Button("Entfernen", role: .destructive) { remove(medium) }
-                        }
-                }
+                ReorderableList(
+                    items: $document.project.media,
+                    selection: $selection,
+                    onInsert: importMedia,
+                    primaryAction: showOnOutput,
+                    menu: { ids in
+                        Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
+                            .disabled(ids.count != 1)
+                        Button("Entfernen", systemImage: "trash", role: .destructive) { remove(ids) }
+                    },
+                    row: { medium in
+                        MediaRow(
+                            medium: medium,
+                            url: document.media.url(for: medium, in: packageURL),
+                            isLive: output.isLive(medium)
+                        )
+                    }
+                )
             }
         }
         .fileImporter(isPresented: $isPickingFiles, allowedContentTypes: [.image, .movie], allowsMultipleSelection: true) { result in
@@ -53,7 +67,7 @@ struct MediaLibraryView: View {
         ContentUnavailableView(
             "Medien hierher ziehen",
             systemImage: "square.and.arrow.down",
-            description: Text("Bilder und Videos aus dem Finder ablegen oder mit + auswählen.")
+            description: Text("Bilder und Videos aus dem Finder ablegen oder mit + auswählen. Doppelklick zeigt ein Medium auf dem Ausgang.")
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
@@ -71,8 +85,17 @@ struct MediaLibraryView: View {
         importErrors = document.importMedia(from: urls, at: index).map(\.localizedDescription)
     }
 
-    private func remove(_ medium: Medium) {
-        document.project.media.removeAll { $0.id == medium.id }
-        selection.remove(medium.id)
+    private func remove(_ ids: Set<Medium.ID>) {
+        document.project.media.removeAll { ids.contains($0.id) }
+        selection.subtract(ids)
+    }
+
+    /// Zeigt genau ein ausgewähltes Medium dauerhaft auf dem Ausgang.
+    private func showOnOutput(_ ids: Set<Medium.ID>) {
+        guard ids.count == 1,
+              let medium = document.project.media.first(where: { ids.contains($0.id) }),
+              let url = document.media.url(for: medium, in: packageURL)
+        else { return }
+        output.showSingle(PlayableMedium(medium: medium, url: url))
     }
 }
