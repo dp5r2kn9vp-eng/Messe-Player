@@ -11,6 +11,10 @@ nonisolated struct ProjectDocument: FileDocument {
 
     var project: Project
     var media: MediaStore
+    /// Sicherung eines aus Format 1 umgestellten Projekts; wird bei jedem Speichern mitgeschrieben.
+    private(set) var v1Backup: Data?
+    /// `true`, wenn die Datei noch im Format 1 vorliegt und beim Speichern umgestellt wird.
+    private(set) var isConvertedFromFormat1 = false
 
     init(project: Project = Project(), media: MediaStore = MediaStore()) {
         self.project = project
@@ -19,10 +23,12 @@ nonisolated struct ProjectDocument: FileDocument {
 
     init(configuration: ReadConfiguration) throws {
         (project, media) = try ProjectPackage.read(configuration.file)
+        v1Backup = ProjectPackage.v1Backup(in: configuration.file)
+        isConvertedFromFormat1 = ProjectPackage.isFormat1(configuration.file)
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        try ProjectPackage.write(project, media: media)
+        try ProjectPackage.write(project, media: media, v1Backup: v1Backup)
     }
 }
 

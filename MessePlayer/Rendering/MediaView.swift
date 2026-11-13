@@ -18,6 +18,9 @@ struct MediaView: View {
                 StillImageView(url: item.url, onFailure: onFinish)
             case .video:
                 VideoSurface(url: item.url, onFinish: onFinish, isMuted: isMuted, isPaused: isPaused)
+            case .audio:
+                // Audio hat kein Bild; Wiedergabe übernimmt später der Audio-Player der Cue-Engine.
+                EmptyView()
             }
         }
     }

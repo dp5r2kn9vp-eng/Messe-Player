@@ -30,6 +30,7 @@ extension Medium.Kind {
         switch self {
         case .image: "Bild"
         case .video: "Video"
+        case .audio: "Audio"
         }
     }
 
@@ -37,6 +38,7 @@ extension Medium.Kind {
         switch self {
         case .image: "photo"
         case .video: "film"
+        case .audio: "waveform"
         }
     }
 }

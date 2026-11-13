@@ -1,0 +1,230 @@
+{
+  "groups" : [
+    {
+      "crossfade" : 1,
+      "entries" : [
+        {
+          "id" : "9BB33CCF-783B-4F71-A1AC-2E54EFBB4FCA",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "C715EA7E-063F-49E1-819A-0E792B4736F3"
+        },
+        {
+          "id" : "2CAB3182-A7B8-4C41-83BC-9DC2D3CEEC4B",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "0C6476BD-95D0-4D4C-8AC2-89BB8B9D7531"
+        },
+        {
+          "id" : "26AF8FEA-65C6-49C1-AD80-468E123D394E",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "7BBB7641-E15F-4167-94C6-D09D3E002FDC"
+        },
+        {
+          "id" : "1534827B-5065-42D1-B0A6-96037F378C7D",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "3CAAA45F-1DA8-4FF0-AEB5-0CF780F06A0C"
+        },
+        {
+          "id" : "80F2E3A9-3439-4183-A3D5-0D2CB095AA68",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "323E62B1-0A42-4F25-8A17-27C81D6D9673"
+        },
+        {
+          "id" : "0D78F7D3-E3CB-4FC7-9A95-D398C468CDED",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "5EE7AD6F-FACC-4D3E-AA23-11A53684B0A5"
+        },
+        {
+          "id" : "B8D3B679-1C4D-4238-A913-C786203945D0",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "4ADA5CEF-0116-481D-875A-4D0FA29DE06D"
+        },
+        {
+          "id" : "63656BB1-4A0E-4B0C-9777-7A5C04619C0C",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "EFC64544-BBB9-473B-B849-2A89BD26BE97"
+        },
+        {
+          "id" : "DA6D3208-7FFB-4B08-8855-66504F8B05A8",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "F2CC046D-546E-49AF-B5F5-F932A4F02090"
+        },
+        {
+          "id" : "ACE78B46-B5F1-4E35-98A5-E822D4F48741",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "80F89426-2C1E-4673-8FA0-80EE7DC1B96F"
+        },
+        {
+          "id" : "8377A084-4D85-4546-8634-8B7AB27A4ABD",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "F87EE247-D3CF-47A5-9E39-4500D3F2B7E9"
+        },
+        {
+          "id" : "BA293E26-F7A7-4371-A163-32CAE400350E",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "E076DAFF-AA01-4DBB-8516-7C5C2A0C680D"
+        },
+        {
+          "id" : "A9C2092F-607E-497E-859E-D321D200E24B",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "E165482D-CDA0-4F09-B0EA-E1722B400FE0"
+        },
+        {
+          "id" : "725E28F5-4520-4D9C-9474-5E9D8DD3FFA5",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "956CF953-7817-400E-AE4F-C6642C87983A"
+        },
+        {
+          "id" : "27A85937-E875-427E-822F-BDD9249D7C7B",
+          "imageDuration" : 2,
+          "layers" : [
+
+          ],
+          "mediumID" : "134015A6-8203-45E0-BC3B-71A1EC6E3ED9"
+        }
+      ],
+      "id" : "03F843C7-60C4-4AAE-B352-A3B77C44E1D2",
+      "name" : "Gruppe 1"
+    }
+  ],
+  "media" : [
+    {
+      "displayName" : "ChriXtina_10.png",
+      "fileName" : "80F89426-2C1E-4673-8FA0-80EE7DC1B96F.png",
+      "id" : "80F89426-2C1E-4673-8FA0-80EE7DC1B96F",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_01.png",
+      "fileName" : "C715EA7E-063F-49E1-819A-0E792B4736F3.png",
+      "id" : "C715EA7E-063F-49E1-819A-0E792B4736F3",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_08.png",
+      "fileName" : "EFC64544-BBB9-473B-B849-2A89BD26BE97.png",
+      "id" : "EFC64544-BBB9-473B-B849-2A89BD26BE97",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_03.png",
+      "fileName" : "7BBB7641-E15F-4167-94C6-D09D3E002FDC.png",
+      "id" : "7BBB7641-E15F-4167-94C6-D09D3E002FDC",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_06.png",
+      "fileName" : "5EE7AD6F-FACC-4D3E-AA23-11A53684B0A5.png",
+      "id" : "5EE7AD6F-FACC-4D3E-AA23-11A53684B0A5",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "KlangNIVEAU-Logo_Flyer_auf-Creme.png",
+      "fileName" : "2CE1E5A2-95CE-4A13-9ED8-4111D79AD57A.png",
+      "id" : "2CE1E5A2-95CE-4A13-9ED8-4111D79AD57A",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "slide-01.png",
+      "fileName" : "F87EE247-D3CF-47A5-9E39-4500D3F2B7E9.png",
+      "id" : "F87EE247-D3CF-47A5-9E39-4500D3F2B7E9",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "slide-04.png",
+      "fileName" : "956CF953-7817-400E-AE4F-C6642C87983A.png",
+      "id" : "956CF953-7817-400E-AE4F-C6642C87983A",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "slide-03.png",
+      "fileName" : "E165482D-CDA0-4F09-B0EA-E1722B400FE0.png",
+      "id" : "E165482D-CDA0-4F09-B0EA-E1722B400FE0",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_09.png",
+      "fileName" : "F2CC046D-546E-49AF-B5F5-F932A4F02090.png",
+      "id" : "F2CC046D-546E-49AF-B5F5-F932A4F02090",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_07.png",
+      "fileName" : "4ADA5CEF-0116-481D-875A-4D0FA29DE06D.png",
+      "id" : "4ADA5CEF-0116-481D-875A-4D0FA29DE06D",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_04.png",
+      "fileName" : "3CAAA45F-1DA8-4FF0-AEB5-0CF780F06A0C.png",
+      "id" : "3CAAA45F-1DA8-4FF0-AEB5-0CF780F06A0C",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "slide-02.png",
+      "fileName" : "E076DAFF-AA01-4DBB-8516-7C5C2A0C680D.png",
+      "id" : "E076DAFF-AA01-4DBB-8516-7C5C2A0C680D",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_05.png",
+      "fileName" : "323E62B1-0A42-4F25-8A17-27C81D6D9673.png",
+      "id" : "323E62B1-0A42-4F25-8A17-27C81D6D9673",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "slide-05.png",
+      "fileName" : "134015A6-8203-45E0-BC3B-71A1EC6E3ED9.png",
+      "id" : "134015A6-8203-45E0-BC3B-71A1EC6E3ED9",
+      "kind" : "image"
+    },
+    {
+      "displayName" : "ChriXtina_02.png",
+      "fileName" : "0C6476BD-95D0-4D4C-8AC2-89BB8B9D7531.png",
+      "id" : "0C6476BD-95D0-4D4C-8AC2-89BB8B9D7531",
+      "kind" : "image"
+    }
+  ],
+  "schemaVersion" : 1
+}

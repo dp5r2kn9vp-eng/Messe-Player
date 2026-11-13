@@ -182,7 +182,7 @@ final class OutputController {
         case .image:
             stepProgress = StepProgress(startedAt: now(), duration: current.imageDuration)
             schedule(after: .seconds(current.imageDuration))
-        case .video:
+        case .video, .audio:
             stepProgress = nil
             trackVideoDuration(of: current.item.url, step: step)
         }

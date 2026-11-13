@@ -8,7 +8,7 @@ struct GroupsPanel: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            GroupListView(groups: $document.project.groups, selection: $selectedGroupID) {
+            GroupListView(groups: $document.project.legacyGroups, selection: $selectedGroupID) {
                 selectedGroupID = document.project.addGroup()
             }
             .frame(width: 200)
@@ -31,13 +31,13 @@ struct GroupsPanel: View {
     /// Bindung über die ID statt über den Index, damit Löschen und Umsortieren sicher bleiben.
     private var selectedGroup: Binding<MediaGroup>? {
         guard let id = selectedGroupID,
-              let current = document.project.groups.first(where: { $0.id == id })
+              let current = document.project.legacyGroups.first(where: { $0.id == id })
         else { return nil }
         return Binding(
-            get: { document.project.groups.first { $0.id == id } ?? current },
+            get: { document.project.legacyGroups.first { $0.id == id } ?? current },
             set: { newValue in
-                guard let index = document.project.groups.firstIndex(where: { $0.id == id }) else { return }
-                document.project.groups[index] = newValue
+                guard let index = document.project.legacyGroups.firstIndex(where: { $0.id == id }) else { return }
+                document.project.legacyGroups[index] = newValue
             }
         )
     }

@@ -22,7 +22,7 @@ extension OutputController {
                 showSingle(item)
             }
         case .loop(let groupID, let entryID):
-            if let group = document.project.groups.first(where: { $0.id == groupID }) {
+            if let group = document.project.legacyGroups.first(where: { $0.id == groupID }) {
                 startLoop(document.playlist(for: group, in: packageURL), at: entryID)
             }
         }

@@ -22,9 +22,9 @@ struct HelpAndSampleTests {
         let (project, media) = try ProjectPackage.read(FileWrapper(url: url, options: []))
 
         #expect(project.media.count == 2)
-        #expect(project.groups.first?.entries.count == 2)
-        #expect(project.groups.first?.entries.allSatisfy { !$0.layers.isEmpty } == true)
-        #expect(project.groups.first?.entries.flatMap(\.layers).contains { !$0.animation.isStatic } == true)
+        #expect(project.legacyGroups.first?.entries.count == 2)
+        #expect(project.legacyGroups.first?.entries.allSatisfy { !$0.layers.isEmpty } == true)
+        #expect(project.legacyGroups.first?.entries.flatMap(\.layers).contains { !$0.animation.isStatic } == true)
         #expect(project.media.allSatisfy { media.url(for: $0, in: url).map { FileManager.default.fileExists(atPath: $0.path) } == true })
         // Zweiter Aufruf legt nichts neu an.
         #expect(try SampleProject.ensure(in: folder) == url)

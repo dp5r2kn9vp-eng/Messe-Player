@@ -16,7 +16,7 @@ struct LayerTests {
             style.background = RGBAColor(red: 0.9, green: 0.1, blue: 0.1, alpha: 0.8)
             text.content = .text(style)
         }
-        project.groups[0].entries[0].layers = [text, .image(logo.id)]
+        project.legacyGroups[0].entries[0].layers = [text, .image(logo.id)]
 
         #expect(try ProjectCodec.decode(ProjectCodec.encode(project)) == project)
     }
@@ -27,10 +27,10 @@ struct LayerTests {
         document.project.media = [logo]
         let groupID = document.project.addGroup()
         document.project.addEntries(for: [logo.id], toGroup: groupID)
-        document.project.groups[0].entries[0].layers = [.image(logo.id), .image(UUID()), .text("Hallo")]
+        document.project.legacyGroups[0].entries[0].layers = [.image(logo.id), .image(UUID()), .text("Hallo")]
 
         let package = URL(filePath: "/tmp/Show.klangshow")
-        let layers = try #require(document.playlist(for: document.project.groups[0], in: package).items.first).layers
+        let layers = try #require(document.playlist(for: document.project.legacyGroups[0], in: package).items.first).layers
         #expect(layers.map { $0.imageURL?.lastPathComponent } == ["l.png", nil, nil])
     }
 
@@ -62,10 +62,10 @@ struct BrandingTests {
         document.project.media = [photo]
         let groupID = document.project.addGroup()
         document.project.addEntries(for: [photo.id], toGroup: groupID)
-        document.project.groups[0].entries[0].layers = [.logo()]
+        document.project.legacyGroups[0].entries[0].layers = [.logo()]
 
         #expect(try ProjectCodec.decode(ProjectCodec.encode(document.project)) == document.project)
-        let layers = try #require(document.playlist(for: document.project.groups[0], in: URL(filePath: "/tmp/Show.klangshow")).items.first).layers
+        let layers = try #require(document.playlist(for: document.project.legacyGroups[0], in: URL(filePath: "/tmp/Show.klangshow")).items.first).layers
         #expect(layers.first?.layer.content == .logo)
         #expect(layers.first?.imageURL == nil)
     }

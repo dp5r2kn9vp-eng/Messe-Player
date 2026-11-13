@@ -10,6 +10,7 @@ struct ControlView: View {
     @Environment(HotkeyService.self) private var hotkeys
     @State private var librarySelection = Set<Medium.ID>()
     @State private var selectedGroupID: MediaGroup.ID?
+    @State private var showsFormatNotice = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,12 +32,18 @@ struct ControlView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 1000, minHeight: 520)
-        .onChange(of: document.project.groups) { refreshRunningLoop() }
+        .onChange(of: document.project.legacyGroups) { refreshRunningLoop() }
         .onChange(of: output.state) { saveSession() }
-        .task(id: document.project.groups.map(\.id)) { registerGroupHotkeys() }
+        .task(id: document.project.legacyGroups.map(\.id)) { registerGroupHotkeys() }
         .task {
             restoreSessionOnce()
             saveSession()
+            showsFormatNotice = document.isConvertedFromFormat1
+        }
+        .alert("Projekt wird ins neue Format umgestellt", isPresented: $showsFormatNotice) {
+            Button("OK") {}
+        } message: {
+            Text("Beim Speichern wird dieses Projekt ins Cue-Format von CueView 2 umgewandelt. Ältere CueView-Versionen können es danach nicht mehr öffnen. Eine Sicherung des alten Stands bleibt als „\(ProjectPackage.v1BackupFileName)“ im Projektpaket.")
         }
         .background(Color.brandDark)
         .preferredColorScheme(.dark)
@@ -63,7 +70,7 @@ extension ControlView {
     private func registerGroupHotkeys() {
         for number in 1...9 {
             hotkeys.register(String(number)) { [document = $document, packageURL, output] in
-                let groups = document.wrappedValue.project.groups
+                let groups = document.wrappedValue.project.legacyGroups
                 guard number <= groups.count else { return false }
                 output.startLoop(document.wrappedValue.playlist(for: groups[number - 1], in: packageURL))
                 return true
@@ -74,7 +81,7 @@ extension ControlView {
     /// Änderungen an der laufenden Gruppe (Reihenfolge, Dauer) wirken sofort.
     private func refreshRunningLoop() {
         guard let id = output.playingGroupID,
-              let group = document.project.groups.first(where: { $0.id == id })
+              let group = document.project.legacyGroups.first(where: { $0.id == id })
         else { return }
         output.updateLoop(document.playlist(for: group, in: packageURL))
     }

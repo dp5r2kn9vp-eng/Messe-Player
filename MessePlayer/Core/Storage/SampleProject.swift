@@ -20,14 +20,18 @@ nonisolated enum SampleProject {
             guard let url = bundle.url(forResource: name, withExtension: "jpg") else { throw CocoaError(.fileNoSuchFile) }
             return try media.add(url)
         }
-        let groupID = project.addGroup()
-        project.groups[0].name = String(localized: "Beispiel-Loop")
-        project.groups[0].crossfade = 1
-        project.addEntries(for: project.media.map(\.id), toGroup: groupID)
-        project.groups[0].entries[0].imageDuration = 6
-        project.groups[0].entries[0].layers = [logoLayer(), welcomeText()]
-        project.groups[0].entries[1].imageDuration = 6
-        project.groups[0].entries[1].layers = [nextShowText()]
+        let outputID = project.outputs.first?.id
+        project.cues = project.media.enumerated().map { index, medium in
+            var cue = Cue(number: String(index + 1), mediumID: medium.id, outputID: outputID)
+            cue.stillDuration = 6
+            cue.followAction = .followOnEnd
+            return cue
+        }
+        project.cues[0].layers = [logoLayer(), welcomeText()]
+        project.cues[1].layers = [nextShowText()]
+        var group = CueGroup(name: String(localized: "Beispiel-Loop"), firstCueID: project.cues[0].id, lastCueID: project.cues[1].id)
+        group.crossfade = 1
+        project.groups = [group]
         return (project, media)
     }
 

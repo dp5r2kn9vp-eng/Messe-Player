@@ -50,6 +50,8 @@ struct EntryRow: View {
             Label("Bild", systemImage: "photo").font(.caption).foregroundStyle(Color.mutedLight)
         case .video:
             Label("Video · läuft komplett", systemImage: "film").font(.caption).foregroundStyle(Color.mutedLight)
+        case .audio:
+            Label("Audio", systemImage: "waveform").font(.caption).foregroundStyle(Color.mutedLight)
         case nil:
             Label("Medium fehlt", systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(Color.brandRed)
         }
