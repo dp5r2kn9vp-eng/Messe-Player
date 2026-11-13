@@ -1,6 +1,6 @@
 # Medien
 
-Bilder und Videos werden ins Projekt kopiert.
+Bilder, Videos und Audiodateien (wav, aiff, mp3, m4a) werden ins Projekt kopiert. Audio-Cues haben keinen Ausgang und laufen über die Systemausgabe parallel zu den Bildern.
 
 Nicht unterstützte Dateien werden gemeldet.
 

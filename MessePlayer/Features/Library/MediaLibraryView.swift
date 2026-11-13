@@ -27,7 +27,7 @@ struct MediaLibraryView: View {
                 list
             }
         }
-        .fileImporter(isPresented: $isPickingFiles, allowedContentTypes: [.image, .movie], allowsMultipleSelection: true) { result in
+        .fileImporter(isPresented: $isPickingFiles, allowedContentTypes: [.image, .movie, .audio], allowsMultipleSelection: true) { result in
             if case .success(let urls) = result {
                 importMedia(urls, at: document.project.media.count)
             }

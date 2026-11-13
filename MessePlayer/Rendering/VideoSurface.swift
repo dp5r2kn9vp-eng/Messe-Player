@@ -111,26 +111,8 @@ final class PlayerLayerView: NSView {
         }
     }
 
-    /// Lautstärke und lineare Fade-Rampen je Tonspur über `AVAudioMix`.
     private func applyAudioMix() {
-        let level = playback.audio
-        let ramps = level.ramps(length: playback.playLength)
-        let parameters = audioTracks.map { track in
-            let input = AVMutableAudioMixInputParameters(track: track)
-            if level.fades(length: playback.playLength).in == 0 {
-                input.setVolume(Float(level.target), at: .zero)
-            }
-            for ramp in ramps {
-                input.setVolumeRamp(
-                    fromStartVolume: Float(ramp.from),
-                    toEndVolume: Float(ramp.to),
-                    timeRange: CMTimeRange(start: CMTime(seconds: ramp.start), duration: CMTime(seconds: ramp.duration))
-                )
-            }
-            return input
-        }
-        let mix = AVMutableAudioMix()
-        mix.inputParameters = parameters
+        let mix = AVAudioMix.cue(tracks: audioTracks, playback: playback)
         player.items().forEach { $0.audioMix = mix }
     }
 
@@ -145,11 +127,5 @@ final class PlayerLayerView: NSView {
             guard item.status == .failed, let self else { return }
             Task { @MainActor in self.onFinish?() }
         }
-    }
-}
-
-private extension CMTime {
-    init(seconds: TimeInterval) {
-        self.init(seconds: seconds, preferredTimescale: 600)
     }
 }

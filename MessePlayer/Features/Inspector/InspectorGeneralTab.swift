@@ -32,7 +32,7 @@ struct InspectorGeneralTab: View {
             mediumMenu
         }
         .importErrorAlert($importErrors)
-        .fileImporter(isPresented: $isPickingFile, allowedContentTypes: [.image, .movie]) { result in
+        .fileImporter(isPresented: $isPickingFile, allowedContentTypes: [.image, .movie, .audio]) { result in
             if case .success(let url) = result { relink(to: url) }
         }
     }
