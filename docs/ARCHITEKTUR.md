@@ -25,7 +25,7 @@ flowchart LR
 
 ## Datenmodell
 - **Project** – `schemaVersion`, `media: [Medium]`, `groups: [Group]`, Einstellungen (Überblendung s, Ausgabe-Bildschirm).
-- **Medium** – `id`, `type` (image|video), `fileName` (relativ in `Media/`), `duration?`.
+- **Medium** – `id`, `kind` (image|video), `fileName` (eindeutig, in `Media/`), `displayName` (Originalname).
 - **Group** – `id`, `name`, `entries: [Entry]` (geordnet).
 - **Entry** – `id`, `mediumID`, `imageDuration` (nur Bilder, s), `layers: [Layer]`.
 - **Layer** – `id`, `frame` (x, y, relativ 0–1), `content: text(TextStyle) | image(mediumID)`. TextStyle: Text, Schrift, Größe, Farbe, Ausrichtung, Schatten, Box.
@@ -55,6 +55,7 @@ Projekt.klangshow/
   project.json     # schemaVersion, Modell
   Media/           # alle verwendeten Dateien (beim Hinzufügen kopiert)
 ```
+Medien werden beim Hinzufügen lazy referenziert und erst beim Speichern ins Paket geschrieben (`MediaStore`); nicht mehr verwendete Dateien fallen beim Speichern weg.
 Export: `.zip` des Pakets; Import entpackt und validiert `schemaVersion` (Migration bei älterer Version).
 
 ## Ordnerstruktur
