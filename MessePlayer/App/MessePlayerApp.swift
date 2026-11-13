@@ -6,7 +6,7 @@ struct MessePlayerApp: App {
 
     var body: some Scene {
         DocumentGroup(newDocument: ProjectDocument()) { file in
-            ControlView(document: file.$document)
+            ControlView(document: file.$document, packageURL: file.fileURL)
                 .environment(appDelegate.output)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindow)

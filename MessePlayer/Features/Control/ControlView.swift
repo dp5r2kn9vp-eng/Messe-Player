@@ -3,18 +3,25 @@ import SwiftUI
 /// Steuerfenster eines Projekts auf dem MacBook.
 struct ControlView: View {
     @Binding var document: ProjectDocument
+    /// Speicherort des Pakets; `nil`, solange das Projekt noch nie gespeichert wurde.
+    let packageURL: URL?
 
     var body: some View {
         VStack(spacing: 0) {
             ControlHeaderView()
             Divider()
-            ContentUnavailableView(
-                "Noch keine Medien",
-                systemImage: "photo.on.rectangle",
-                description: Text("Die Medienbibliothek folgt in einem der nächsten Pakete.")
-            )
+            HStack(spacing: 0) {
+                MediaLibraryView(document: $document, packageURL: packageURL)
+                    .frame(width: 320)
+                Divider()
+                ContentUnavailableView(
+                    "Gruppen",
+                    systemImage: "rectangle.stack",
+                    description: Text("Gruppen und Loops folgen in einem der nächsten Pakete.")
+                )
+            }
         }
-        .frame(minWidth: 720, minHeight: 440)
+        .frame(minWidth: 800, minHeight: 480)
         .background(Color.brandDark)
         .preferredColorScheme(.dark)
     }
