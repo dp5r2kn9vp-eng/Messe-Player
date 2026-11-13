@@ -9,6 +9,7 @@ Versionierung nach SemVer: MAJOR bei inkompatiblen Änderungen (z. B. Projektfor
    ```sh
    xcodebuild -scheme MessePlayer -configuration Release -destination 'platform=macOS' -derivedDataPath build build
    ```
+   Der Build schreibt die Commit-ID in die App (`scripts/stamp-commit.sh`, Schlüssel `CueViewGitCommit`). Release-Builds nur aus dem gemergten, sauberen `main` erstellen (Reihenfolge: erst Schritt 6, dann Build, Zip, Tag), damit die ID dem getaggten Commit entspricht.
 5. Zip erstellen:
    ```sh
    ditto -c -k --keepParent build/Build/Products/Release/CueView.app CueView-X.Y.Z.zip
@@ -24,4 +25,9 @@ Versionierung nach SemVer: MAJOR bei inkompatiblen Änderungen (z. B. Projektfor
    R=~/KlangNIVEAU_Firma/Release
    mkdir -p "$R" && cp CueView-X.Y.Z.zip "$R/"
    rm -rf "$R/CueView.app" && ditto -x -k "$R/CueView-X.Y.Z.zip" "$R/"
+   ```
+10. Ausgelieferten Stand prüfen: In Zip (GitHub-Release) und `Release/CueView.app` müssen Version und Commit-ID zum Tag passen, ohne `-dirty`:
+   ```sh
+   plutil -extract CFBundleShortVersionString raw "$R/CueView.app/Contents/Info.plist"   # X.Y.Z
+   plutil -extract CueViewGitCommit raw "$R/CueView.app/Contents/Info.plist"             # = git rev-parse --short=7 vX.Y.Z
    ```
