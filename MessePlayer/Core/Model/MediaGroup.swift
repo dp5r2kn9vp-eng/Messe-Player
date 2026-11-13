@@ -21,6 +21,7 @@ nonisolated struct Entry: Codable, Equatable, Identifiable {
 
     let id: UUID
     let mediumID: Medium.ID
+    var layers: [Layer] = []
     var imageDuration: TimeInterval = Entry.defaultImageDuration {
         didSet { imageDuration = imageDuration.clamped(to: Self.durationRange) }
     }

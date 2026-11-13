@@ -54,13 +54,21 @@ extension ProjectDocument {
         media.url(for: medium, in: packageURL).map { PlayableMedium(medium: medium, url: $0) }
     }
 
+    func renderLayers(_ layers: [Layer], in packageURL: URL?) -> [RenderLayer] {
+        layers.map { layer in
+            guard case .image(let mediumID) = layer.content else { return RenderLayer(layer: layer, imageURL: nil) }
+            let url = project.medium(withID: mediumID).flatMap { media.url(for: $0, in: packageURL) }
+            return RenderLayer(layer: layer, imageURL: url)
+        }
+    }
+
     /// Löst eine Gruppe zum Abspielen auf; Einträge ohne Medium werden übersprungen.
     func playlist(for group: MediaGroup, in packageURL: URL?) -> LoopPlaylist {
         let items = group.entries.compactMap { entry -> LoopItem? in
             guard let medium = project.medium(withID: entry.mediumID),
                   let item = playable(medium, in: packageURL)
             else { return nil }
-            return LoopItem(entryID: entry.id, item: item, imageDuration: entry.imageDuration)
+            return LoopItem(entryID: entry.id, item: item, imageDuration: entry.imageDuration, layers: renderLayers(entry.layers, in: packageURL))
         }
         return LoopPlaylist(groupID: group.id, crossfade: group.crossfade, items: items)
     }

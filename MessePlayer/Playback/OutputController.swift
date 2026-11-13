@@ -70,6 +70,11 @@ final class OutputController {
         state.transition = newPlaylist.crossfade
         index = newPlaylist.items.firstIndex { $0.entryID == currentEntry } ?? min(index, newPlaylist.items.count - 1)
         upcoming = nextItem
+        // Geänderte Texte des laufenden Eintrags sofort zeigen, ohne neu zu überblenden.
+        if case .loop(var frame) = state.content, frame.entryID == newPlaylist.items[index].entryID {
+            frame.layers = newPlaylist.items[index].layers
+            state.content = .loop(frame)
+        }
     }
 
     /// Meldung des Renderers: Video zu Ende oder Medium defekt.
@@ -107,7 +112,13 @@ final class OutputController {
         index = newIndex % playlist.items.count
         step += 1
         let current = playlist.items[index]
-        state.content = .loop(LoopFrame(groupID: playlist.groupID, entryID: current.entryID, item: current.item, step: step))
+        state.content = .loop(LoopFrame(
+            groupID: playlist.groupID,
+            entryID: current.entryID,
+            item: current.item,
+            layers: current.layers,
+            step: step
+        ))
         upcoming = nextItem
         if current.item.medium.kind == .image {
             schedule(after: .seconds(current.imageDuration))
