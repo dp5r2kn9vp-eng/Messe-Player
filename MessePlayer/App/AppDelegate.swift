@@ -6,11 +6,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let displays = DisplayService()
     let hotkeys = HotkeyService()
     let mediaLengths = MediaLengths()
-    private(set) lazy var outputWindow = OutputWindowController(engine: engine, displays: displays)
+    let routing = OutputRouting()
+    private(set) lazy var outputWindows = OutputWindowManager(engine: engine, displays: displays, routing: routing)
     private let sleepGuard = SleepGuard()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        _ = outputWindow
+        _ = outputWindows
         sleepGuard.start()
         registerHotkeys()
         hotkeys.start()
@@ -32,6 +33,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             engine.toggleBlack()
             return true
         }
+        hotkeys.register("b", shift: true) { [engine] in
+            guard let output = engine.playheadOutputID else { return false }
+            engine.toggleBlack(output: output)
+            return true
+        }
         hotkeys.register(HotkeyService.space) { [engine] in
             guard engine.playheadID != nil else { return false }
             engine.go()
@@ -43,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Esc nur, wenn der Ausgang den Bildschirm des Steuerfensters blockiert.
         // Mit externem Bildschirm stoppt Esc nicht versehentlich – dafür gibt es den Notfall-Stopp ⌘.
         hotkeys.register(HotkeyService.escape) { [engine, unowned self] in
-            guard engine.state.content != .idle, outputWindow.sharesControlScreen else { return false }
+            guard outputWindows.blocksControlScreen else { return false }
             engine.stopAll()
             return true
         }

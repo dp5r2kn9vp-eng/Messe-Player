@@ -7,6 +7,8 @@ struct SessionSnapshot: Codable, Equatable {
     var visibleCueIDs: [Cue.ID] = []
     var playheadID: Cue.ID?
     var isBlack = false
+    /// Ausgänge mit eigenem Black (⇧B).
+    var blackOutputIDs: [OutputDefinition.ID] = []
 }
 
 extension SessionSnapshot {
@@ -17,6 +19,7 @@ extension SessionSnapshot {
         visibleCueIDs = try container.decodeIfPresent([Cue.ID].self, forKey: .visibleCueIDs) ?? []
         playheadID = try container.decodeIfPresent(Cue.ID.self, forKey: .playheadID)
         isBlack = try container.decodeIfPresent(Bool.self, forKey: .isBlack) ?? false
+        blackOutputIDs = try container.decodeIfPresent([OutputDefinition.ID].self, forKey: .blackOutputIDs) ?? []
     }
 }
 
@@ -39,9 +42,8 @@ enum SessionStore {
         return URL(filePath: path)
     }
 
-    /// Name statt ID, weil sich Bildschirm-IDs nach einem Neustart ändern können.
-    static var outputDisplayName: String? {
-        get { UserDefaults.standard.string(forKey: displayKey) }
-        set { UserDefaults.standard.set(newValue, forKey: displayKey) }
+    /// Bildschirm des einen Ausgangs aus CueView vor 2.0; Vorschlag für den ersten Ausgang ohne Zuordnung.
+    static func legacyOutputDisplayName(in defaults: UserDefaults = .standard) -> String? {
+        defaults.string(forKey: displayKey)
     }
 }

@@ -4,8 +4,10 @@ import Foundation
 struct CueShow: Equatable {
     var cues: [ShowCue] = []
     var groups: [ShowGroup] = []
-    /// Ausgang, den das Ausgabefenster zeigt (vorerst genau einer).
+    /// Standardausgang für Cues ohne eigene Wahl (der erste des Projekts).
     var primaryOutputID: OutputDefinition.ID?
+    /// Logische Ausgänge des Projekts; je Ausgang gibt es ein Ausgabefenster.
+    var outputs: [OutputDefinition] = []
 
     func index(of id: Cue.ID) -> Int? {
         cues.firstIndex { $0.id == id }
@@ -69,7 +71,7 @@ extension ProjectDocument {
         let groups = project.groups.compactMap { group in
             project.cueRange(of: group).map { ShowGroup(id: group.id, range: $0, mode: group.mode, crossfade: group.crossfade) }
         }
-        return CueShow(cues: cues, groups: groups, primaryOutputID: primary)
+        return CueShow(cues: cues, groups: groups, primaryOutputID: primary, outputs: project.outputs)
     }
 
     private func showCue(_ cue: Cue, in packageURL: URL?, primaryOutputID: OutputDefinition.ID?, mediaLength: (URL) -> TimeInterval?) -> ShowCue {
