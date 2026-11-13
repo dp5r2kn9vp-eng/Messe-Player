@@ -16,6 +16,7 @@ nonisolated struct Layer: Codable, Equatable, Identifiable {
     var position = RelativePoint.center
     /// Breite relativ zur Bildfläche: bei Bildern die Bildbreite, bei Text die maximale Zeilenbreite.
     var width = 0.6
+    var animation = LayerAnimation()
 
     static func text(_ text: String) -> Layer {
         Layer(id: UUID(), content: .text(TextStyle(text: text)))
@@ -28,6 +29,18 @@ nonisolated struct Layer: Codable, Equatable, Identifiable {
     /// Vorgefertigte Logo-Ebene: oben mittig, gut lesbar.
     static func logo() -> Layer {
         Layer(id: UUID(), content: .logo, position: RelativePoint(x: 0.5, y: 0.18), width: 0.35)
+    }
+}
+
+/// Ältere Projekte ohne Animation bleiben lesbar.
+nonisolated extension Layer {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        content = try container.decode(Content.self, forKey: .content)
+        position = try container.decodeIfPresent(RelativePoint.self, forKey: .position) ?? .center
+        width = try container.decodeIfPresent(Double.self, forKey: .width) ?? 0.6
+        animation = try container.decodeIfPresent(LayerAnimation.self, forKey: .animation) ?? LayerAnimation()
     }
 }
 

@@ -5,6 +5,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Ebenen-Animationen für Text, Bild und Logo: Erscheinen (Einblenden, von unten/oben/links/rechts, Zoom, Schreibmaschine), Verzögerung, Dauer, Dauereffekt Blinken oder Pulsieren, optional wieder ausblenden. Startet mit jedem Loop-Eintrag neu; im Editor per „Animation ansehen“ prüfbar.
+- Editor: „Bild aus Datei …“ legt ein Bild direkt als Ebene an (wird dabei in die Bibliothek übernommen).
+
 ## [1.0.1] – 2026-11-13
 
 ### Hinzugefügt

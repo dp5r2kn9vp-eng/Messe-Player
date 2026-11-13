@@ -5,6 +5,8 @@ struct LayerCanvas: View {
     let item: PlayableMedium?
     let layers: [RenderLayer]
     @Binding var selection: Layer.ID?
+    /// Startpunkt der Animationsvorschau; `nil` zeigt die Ebenen im Endzustand zum Bearbeiten.
+    var animationStart: Date?
     let onMove: (Layer.ID, RelativePoint) -> Void
 
     @State private var dragStart: RelativePoint?
@@ -17,8 +19,10 @@ struct LayerCanvas: View {
                 } else {
                     Color.black
                 }
-                ForEach(layers) { renderLayer in
-                    editableLayer(renderLayer, canvas: geometry.size)
+                AnimationClock(startedAt: animationStart, settlesAfter: LayerAnimation.settlesAfter(layers.map(\.layer.animation))) { time in
+                    ForEach(layers) { renderLayer in
+                        editableLayer(renderLayer, canvas: geometry.size, time: time)
+                    }
                 }
             }
             .contentShape(Rectangle())
@@ -28,10 +32,10 @@ struct LayerCanvas: View {
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 
-    private func editableLayer(_ renderLayer: RenderLayer, canvas: CGSize) -> some View {
+    private func editableLayer(_ renderLayer: RenderLayer, canvas: CGSize, time: TimeInterval?) -> some View {
         let layer = renderLayer.layer
         let isSelected = selection == layer.id
-        return LayerView(renderLayer: renderLayer, canvas: canvas)
+        return LayerView(renderLayer: renderLayer, canvas: canvas, time: time)
             .padding(Theme.Spacing.xs)
             .overlay {
                 Rectangle()
