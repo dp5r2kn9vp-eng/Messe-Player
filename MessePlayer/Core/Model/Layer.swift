@@ -6,6 +6,8 @@ nonisolated struct Layer: Codable, Equatable, Identifiable {
     enum Content: Codable, Equatable {
         case text(TextStyle)
         case image(Medium.ID)
+        /// KlangNIVEAU-Logo aus der App (helle Variante für dunkle Hintergründe).
+        case logo
     }
 
     let id: UUID
@@ -21,6 +23,11 @@ nonisolated struct Layer: Codable, Equatable, Identifiable {
 
     static func image(_ mediumID: Medium.ID) -> Layer {
         Layer(id: UUID(), content: .image(mediumID), width: 0.3)
+    }
+
+    /// Vorgefertigte Logo-Ebene: oben mittig, gut lesbar.
+    static func logo() -> Layer {
+        Layer(id: UUID(), content: .logo, position: RelativePoint(x: 0.5, y: 0.18), width: 0.35)
     }
 }
 

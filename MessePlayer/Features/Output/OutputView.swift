@@ -25,7 +25,7 @@ struct OutputView: View {
     private func content(_ content: OutputContent) -> some View {
         switch content {
         case .idle:
-            Color.brandDark
+            IdleView()
         case .single(let item):
             MediaView(item: item)
         case .loop(let frame) where frame.isGap:
@@ -38,5 +38,17 @@ struct OutputView: View {
     private func preloadUpcoming() {
         guard let next = output.upcoming, next.medium.kind == .image else { return }
         _ = ImageCache.shared.image(for: next.url)
+    }
+}
+
+/// Ruhebild des Ausgangs: Logo zentriert auf KlangNIVEAU-Dunkel.
+private struct IdleView: View {
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.brandDark
+                BrandLogo(width: geometry.size.width * 0.4)
+            }
+        }
     }
 }

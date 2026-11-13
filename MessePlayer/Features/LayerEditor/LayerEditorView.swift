@@ -49,6 +49,7 @@ struct LayerEditorView: View {
             PanelHeader(title: "Ebenen", count: entry.layers.count) {
                 Menu("Ebene hinzufügen", systemImage: "plus") {
                     Button("Text", systemImage: "textformat") { add(.text(String(localized: "Neuer Text"))) }
+                    Button("KlangNIVEAU-Logo", systemImage: "seal") { add(.logo()) }
                     Menu("Bild aus Bibliothek") {
                         ForEach(imageMedia) { medium in
                             Button(medium.displayName) { add(.image(medium.id)) }
@@ -112,6 +113,7 @@ extension Layer {
         switch content {
         case .text(let style): style.text.isEmpty ? String(localized: "Leerer Text") : style.text
         case .image: String(localized: "Bild")
+        case .logo: String(localized: "KlangNIVEAU-Logo")
         }
     }
 
@@ -119,6 +121,7 @@ extension Layer {
         switch content {
         case .text: "textformat"
         case .image: "photo"
+        case .logo: "seal"
         }
     }
 }

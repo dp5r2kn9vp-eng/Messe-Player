@@ -44,6 +44,8 @@ struct LayerView: View {
         case .text(let style):
             TextLayerView(style: style, scale: canvas.height / TextStyle.referenceHeight)
                 .frame(maxWidth: width)
+        case .logo:
+            BrandLogo(width: width)
         case .image:
             if let url = renderLayer.imageURL, let image = ImageCache.shared.image(for: url) {
                 Image(nsImage: image)
