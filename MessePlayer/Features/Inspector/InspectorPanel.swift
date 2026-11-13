@@ -57,9 +57,15 @@ struct InspectorPanel: View {
         case .timing: InspectorTimingTab(context: context)
         case .picture: InspectorPictureTab(context: context, group: groupBinding(of: context.model.cue))
         case .audio: InspectorAudioTab(context: context)
-        case .trim: InspectorTrimTab()
+        case .trim: trimTab(context)
         case .layers: InspectorLayersTab(cue: $document.cue(context.model.cue.id), document: $document, packageURL: packageURL)
         }
+    }
+
+    private func trimTab(_ context: InspectorContext) -> some View {
+        let url = context.model.medium.flatMap { document.media.url(for: $0, in: packageURL) }
+        return InspectorTrimTab(context: context, url: url, mediaLength: mediaLengths.length(of: url))
+            .id(context.cue.id)
     }
 
     private func groupBinding(of cue: Cue) -> Binding<CueGroup>? {

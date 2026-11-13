@@ -94,14 +94,6 @@ struct InspectorAudioTab: View {
     }
 }
 
-/// Platzhalter bis zum Trim-Editor.
-struct InspectorTrimTab: View {
-    var body: some View {
-        Text("Der Trim-Editor mit Filmstreifen und Wellenform folgt. Bis dahin lässt sich die Dauer in „Zeit & Ablauf“ kürzen.")
-            .foregroundStyle(Color.mutedLight)
-    }
-}
-
 /// Texte & Ebenen: öffnet den bestehenden Ebenen-Editor für den Cue.
 struct InspectorLayersTab: View {
     @Binding var cue: Cue

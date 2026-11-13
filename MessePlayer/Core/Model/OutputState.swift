@@ -63,4 +63,8 @@ struct PlaybackSettings: Equatable {
     var audio = AudioLevel()
     /// Spielzeit für den Fade aus; `nil`, solange die Länge unbekannt ist.
     var playLength: TimeInterval?
+    /// In-Punkt: Wiedergabe beginnt hier (Sekunden der Quelle).
+    var startTime: TimeInterval = 0
+    /// Out-Punkt; `nil` = bis Medienende.
+    var endTime: TimeInterval?
 }

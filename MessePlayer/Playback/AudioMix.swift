@@ -5,7 +5,7 @@ extension AVAudioMix {
     /// `release` ersetzt die Rampen, wenn ein Cue vorzeitig ausgeblendet wird („Stopp alle“).
     static func cue(tracks: [AVAssetTrack], playback: PlaybackSettings, release: VolumeRamp? = nil) -> AVAudioMix {
         let level = playback.audio
-        let ramps = release.map { [$0] } ?? level.ramps(length: playback.playLength)
+        let ramps = release.map { [$0] } ?? level.ramps(from: playback.startTime, length: playback.playLength)
         let startVolume = release?.from ?? (level.fades(length: playback.playLength).in == 0 ? level.target : nil)
         let mix = AVMutableAudioMix()
         mix.inputParameters = tracks.map { track in
