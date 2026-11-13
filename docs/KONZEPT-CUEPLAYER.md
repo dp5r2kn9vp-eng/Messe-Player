@@ -1,5 +1,7 @@
 # Konzept: CueView als Cue-Player
 
+Mockups (Design-Canvas, privat): https://claude.ai/artifact/DhbSdQ3nayvC1CVhbfYuhm – Hauptfenster/Cue-Liste, Inspektor Trim & Audio, Show-Zeitstrahl, Messe-Modus.
+
 Status: Entwurf zur Abstimmung · Zielversion: Schema 2 · Autor: Planungs-Agent
 
 ## 1 Ziel & Leitbild
@@ -353,7 +355,9 @@ Reihenfolge: P1 → P2/P3 (parallel möglich, getrennt in Dateien) → P4 → P5
 | ↑ / ↓ | – | Abspielkopf bewegen |
 | ⌘G / ⇧⌘G | – | Gruppe bilden / auflösen |
 
-## 12 Offene Fragen an den Nutzer
+## 12 Entscheidungen (ehemals offene Fragen)
+
+Stand 2026-11-13: Mit dem Auftrag „Tickets anlegen“ gelten alle acht Vorschläge als angenommen. Änderungen werden hier nachgetragen.
 
 1. **Zeitformat „0.00.00“.** Vorschlag: `m:ss.cc` (z. B. `0:42.30`, Hundertstel), Eingabe tolerant (`42`, `1:05`). Passt das, oder soll es `h:mm:ss` (Stunden:Minuten:Sekunden) sein?
 2. **Leertaste = GO.** Vorschlag: Leertaste startet den nächsten Cue (wie in Cue-Software), Pause wird `P`, Ziffern 1–9 wählen Ausgänge. Einverstanden, oder soll die Leertaste Pause bleiben und GO eine andere Taste (z. B. Return) bekommen?
