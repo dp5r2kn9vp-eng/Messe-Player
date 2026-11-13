@@ -57,13 +57,6 @@ nonisolated extension Entry {
         layers = try container.decodeIfPresent([Layer].self, forKey: .layers) ?? []
         imageDuration = try container.decodeIfPresent(TimeInterval.self, forKey: .imageDuration) ?? Self.defaultImageDuration
     }
-
-
-    /// Ändert eine Ebene, falls vorhanden.
-    mutating func updateLayer(_ id: Layer.ID, _ change: (inout Layer) -> Void) {
-        guard let index = layers.firstIndex(where: { $0.id == id }) else { return }
-        change(&layers[index])
-    }
 }
 
 extension Comparable {

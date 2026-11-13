@@ -35,3 +35,23 @@ nonisolated enum TimeFormat {
         return total
     }
 }
+
+/// Format für Textfelder: Anzeige `m:ss.cc`, Eingabe tolerant wie `TimeFormat.seconds(from:)`.
+nonisolated struct TimeFormatStyle: ParseableFormatStyle {
+    var parseStrategy: TimeParseStrategy { TimeParseStrategy() }
+
+    func format(_ value: TimeInterval) -> String {
+        TimeFormat.string(from: value)
+    }
+}
+
+nonisolated struct TimeParseStrategy: ParseStrategy {
+    func parse(_ value: String) throws -> TimeInterval {
+        guard let seconds = TimeFormat.seconds(from: value) else { throw CocoaError(.formatting) }
+        return seconds
+    }
+}
+
+nonisolated extension FormatStyle where Self == TimeFormatStyle {
+    static var cueTime: TimeFormatStyle { TimeFormatStyle() }
+}

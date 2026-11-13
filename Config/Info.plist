@@ -39,6 +39,16 @@
 				</array>
 			</dict>
 		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>de.klangniveau.cueview.medium-reference</string>
+			<key>UTTypeDescription</key>
+			<string>CueView-Medium</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

@@ -5,7 +5,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Hinzugefügt
+- Cue-Liste als Hauptansicht mit den Spalten Status, Nr., Name, Ausgang, Warten, Dauer, Danach und Restzeit; Spalten per Rechtsklick auf die Kopfzeile oder über das Spalten-Menü ein- und ausblendbar.
+- Bearbeiten direkt in der Zeile: Nummer (z. B. „1.5“), Name, Ausgang und Danach als Auswahl, Warten und Dauer im Format `m:ss.cc` (Eingabe `42`, `1:05` oder `0:42.3`). Bei Mehrfachauswahl gelten Ausgang, Warten, Dauer und Danach für alle markierten Cues.
+- Gruppenklammer: „Gruppe bilden“ (⌘G) aus zusammenhängenden Cues, „Gruppe auflösen“ (⇧⌘G); Kopfzeile mit Name, Loop ∞ oder n-mal, Überblendung, Ausgang, Σ Dauer und Zuklappen.
+- Medien per Drag & Drop (aus dem Medienbereich über das Vorschaubild oder aus dem Finder) in die Liste ziehen erzeugt Cues: Bilder 5 s, Videos in voller Länge. Zeilen sind per Drag sortierbar, Cue-Nummern bleiben dabei erhalten.
+
 ### Geändert
+- Die Gruppen-Ansicht entfällt; der Medienbereich links ist über die Kopfzeile ein- und ausklappbar.
 - Projektformat 2 (Cue-Liste): Gruppen und Einträge werden beim Öffnen verlustfrei in nummerierte Cues mit Loop-Gruppen auf Ausgang 1 umgewandelt. Beim Öffnen eines alten Projekts erscheint ein Hinweis; beim Speichern bleibt `project.v1.json` als Sicherung im Paket. Ältere CueView-Versionen können umgestellte Projekte nicht mehr öffnen.
 - Neue Bilder in Gruppen stehen standardmäßig 5 statt 8 Sekunden.
 

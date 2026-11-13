@@ -1,13 +1,13 @@
 import SwiftUI
 
 /// Medienbibliothek eines Projekts: Dateien aus dem Finder hineinziehen, sortieren, entfernen,
-/// auf dem Ausgang zeigen und Gruppen hinzufügen.
+/// auf dem Ausgang zeigen und als Cues in die Liste übernehmen.
 struct MediaLibraryView: View {
     @Binding var document: ProjectDocument
     let packageURL: URL?
     @Binding var selection: Set<Medium.ID>
-    /// `nil`, solange keine Gruppe gewählt ist.
-    let onAddToGroup: ((Set<Medium.ID>) -> Void)?
+    /// Legt für die Medien Cues in der Cue-Liste an.
+    let onAddCues: (Set<Medium.ID>) -> Void
 
     @Environment(OutputController.self) private var output
     @State private var isPickingFiles = false
@@ -16,9 +16,9 @@ struct MediaLibraryView: View {
     var body: some View {
         VStack(spacing: 0) {
             PanelHeader(title: "Medien", count: document.project.media.count) {
-                Button("Zur Gruppe hinzufügen", systemImage: "text.badge.plus") { onAddToGroup?(selection) }
-                    .disabled(onAddToGroup == nil || selection.isEmpty)
-                    .help("Ausgewählte Medien zur gewählten Gruppe hinzufügen")
+                Button("Als Cues hinzufügen", systemImage: "text.badge.plus") { onAddCues(selection) }
+                    .disabled(selection.isEmpty)
+                    .help("Für die ausgewählten Medien Cues am Ende der Cue-Liste anlegen")
                 Button("Medien hinzufügen", systemImage: "plus") { isPickingFiles = true }
             }
             if document.project.media.isEmpty {
@@ -45,8 +45,7 @@ struct MediaLibraryView: View {
             menu: { ids in
                 Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
                     .disabled(ids.count != 1)
-                Button("Zur Gruppe hinzufügen", systemImage: "text.badge.plus") { onAddToGroup?(ids) }
-                    .disabled(onAddToGroup == nil)
+                Button("Als Cues hinzufügen", systemImage: "text.badge.plus") { onAddCues(ids) }
                 Button("Entfernen", systemImage: "trash", role: .destructive) { remove(ids) }
             },
             row: { medium in

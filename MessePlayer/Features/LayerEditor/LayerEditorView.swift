@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Editor für die Ebenen eines Eintrags: große Vorschau, Ebenenliste, Eigenschaften.
+/// Editor für die Ebenen eines Cues: große Vorschau, Ebenenliste, Eigenschaften.
 struct LayerEditorView: View {
-    @Binding var entry: Entry
+    @Binding var cue: Cue
     @Binding var document: ProjectDocument
     let packageURL: URL?
 
@@ -12,8 +12,8 @@ struct LayerEditorView: View {
     @State private var isPickingImage = false
     @State private var importErrors: [String] = []
 
-    init(entry: Binding<Entry>, document: Binding<ProjectDocument>, packageURL: URL?, selection: Layer.ID? = nil) {
-        _entry = entry
+    init(cue: Binding<Cue>, document: Binding<ProjectDocument>, packageURL: URL?, selection: Layer.ID? = nil) {
+        _cue = cue
         _document = document
         self.packageURL = packageURL
         _selection = State(initialValue: selection)
@@ -24,11 +24,11 @@ struct LayerEditorView: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.m) {
                 LayerCanvas(
                     item: medium.flatMap { document.playable($0, in: packageURL) },
-                    layers: document.renderLayers(entry.layers, in: packageURL),
+                    layers: document.renderLayers(cue.layers, in: packageURL),
                     selection: $selection,
                     animationStart: animationStart
                 ) { id, position in
-                    entry.updateLayer(id) { $0.position = position }
+                    cue.updateLayer(id) { $0.position = position }
                 }
                 previewControls
             }
@@ -52,7 +52,7 @@ struct LayerEditorView: View {
 
     private var sidebar: some View {
         VStack(spacing: 0) {
-            PanelHeader(title: "Ebenen", count: entry.layers.count) {
+            PanelHeader(title: "Ebenen", count: cue.layers.count) {
                 Menu("Ebene hinzufügen", systemImage: "plus") {
                     Button("Text", systemImage: "textformat") { add(.text(String(localized: "Neuer Text"))) }
                     Button("KlangNIVEAU-Logo", systemImage: "seal") { add(.logo()) }
@@ -67,7 +67,7 @@ struct LayerEditorView: View {
                 .menuIndicator(.hidden)
             }
             List(selection: $selection) {
-                ForEach(entry.layers.reversed()) { layer in
+                ForEach(cue.layers.reversed()) { layer in
                     Label(layer.title, systemImage: layer.symbolName)
                         .lineLimit(1)
                         .tag(layer.id)
@@ -89,7 +89,7 @@ struct LayerEditorView: View {
     }
 
     private var medium: Medium? {
-        document.project.medium(withID: entry.mediumID)
+        cue.mediumID.flatMap(document.project.medium(withID:))
     }
 
     private var imageMedia: [Medium] {
@@ -97,10 +97,10 @@ struct LayerEditorView: View {
     }
 
     private var selectedLayer: Binding<Layer>? {
-        guard let id = selection, let current = entry.layers.first(where: { $0.id == id }) else { return nil }
+        guard let id = selection, let current = cue.layers.first(where: { $0.id == id }) else { return nil }
         return Binding(
-            get: { entry.layers.first { $0.id == id } ?? current },
-            set: { newValue in entry.updateLayer(id) { $0 = newValue } }
+            get: { cue.layers.first { $0.id == id } ?? current },
+            set: { newValue in cue.updateLayer(id) { $0 = newValue } }
         )
     }
 
@@ -129,12 +129,12 @@ struct LayerEditorView: View {
     }
 
     private func add(_ layer: Layer) {
-        entry.layers.append(layer)
+        cue.layers.append(layer)
         selection = layer.id
     }
 
     private func remove(_ id: Layer.ID) {
-        entry.layers.removeAll { $0.id == id }
+        cue.layers.removeAll { $0.id == id }
         if selection == id { selection = nil }
     }
 }

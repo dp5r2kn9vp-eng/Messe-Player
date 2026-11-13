@@ -5,6 +5,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let output = OutputController()
     let displays = DisplayService()
     let hotkeys = HotkeyService()
+    let mediaLengths = MediaLengths()
     private(set) lazy var outputWindow = OutputWindowController(output: output, displays: displays)
     private let sleepGuard = SleepGuard()
 
