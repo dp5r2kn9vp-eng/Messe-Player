@@ -25,6 +25,8 @@ extension Color {
     static let groupBracket = Color.brandOrange
     /// Abspielkopf („Als Nächstes“) in der Cue-Liste.
     static let playhead = Color.brandOrange
+    /// Tonspur im Show-Zeitstrahl (Audio-Cues haben keinen Ausgang).
+    static let audioLane = Color.mutedLight
 }
 
 extension Color {
