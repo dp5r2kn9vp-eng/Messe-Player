@@ -25,8 +25,8 @@ struct MediaImportTests {
         var document = ProjectDocument()
         let errors = document.importMedia(from: try makeFiles(["Clip.mp4", "Liste.pdf", "Foto.heic"]), at: 0)
         #expect(document.project.media.map(\.kind) == [.video, .image])
-        #expect(errors.count == 1)
-        #expect(errors.first as? MediaError == .unsupportedType(fileName: "Liste.pdf"))
+        #expect(errors.errors.count == 1)
+        #expect(errors.errors.first as? MediaError == .unsupportedType(fileName: "Liste.pdf"))
     }
 
     @Test func clampsOutOfRangePosition() throws {

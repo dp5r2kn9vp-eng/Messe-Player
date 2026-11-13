@@ -26,21 +26,31 @@ nonisolated struct ProjectDocument: FileDocument {
     }
 }
 
+/// Ergebnis eines Imports: übernommene Medien und übersprungene Dateien.
+nonisolated struct ImportResult {
+    var added: [Medium] = []
+    var errors: [any Error] = []
+}
+
 extension ProjectDocument {
     /// Nimmt Dateien an Position `index` der Bibliothek auf.
     /// Nicht unterstützte oder unlesbare Dateien werden übersprungen und als Fehler zurückgegeben.
-    mutating func importMedia(from urls: [URL], at index: Int) -> [any Error] {
-        var added: [Medium] = []
-        var errors: [any Error] = []
+    @discardableResult
+    mutating func importMedia(from urls: [URL], at index: Int) -> ImportResult {
+        var result = ImportResult()
         for url in urls {
             do {
-                added.append(try media.add(url))
+                result.added.append(try media.add(url))
             } catch {
-                errors.append(error)
+                result.errors.append(error)
             }
         }
         let position = min(max(index, 0), project.media.count)
-        project.media.insert(contentsOf: added, at: position)
-        return errors
+        project.media.insert(contentsOf: result.added, at: position)
+        return result
+    }
+
+    func playable(_ medium: Medium, in packageURL: URL?) -> PlayableMedium? {
+        media.url(for: medium, in: packageURL).map { PlayableMedium(medium: medium, url: $0) }
     }
 }

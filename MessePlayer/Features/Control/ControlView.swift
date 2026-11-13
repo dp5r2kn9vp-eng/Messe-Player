@@ -6,22 +6,28 @@ struct ControlView: View {
     /// Speicherort des Pakets; `nil`, solange das Projekt noch nie gespeichert wurde.
     let packageURL: URL?
 
+    @State private var librarySelection = Set<Medium.ID>()
+    @State private var selectedGroupID: MediaGroup.ID?
+
     var body: some View {
         VStack(spacing: 0) {
             ControlHeaderView()
             Divider()
             HStack(spacing: 0) {
-                MediaLibraryView(document: $document, packageURL: packageURL)
-                    .frame(width: 320)
-                Divider()
-                ContentUnavailableView(
-                    "Gruppen",
-                    systemImage: "rectangle.stack",
-                    description: Text("Gruppen und Loops folgen in einem der nächsten Pakete.")
+                MediaLibraryView(
+                    document: $document,
+                    packageURL: packageURL,
+                    selection: $librarySelection,
+                    onAddToGroup: selectedGroupID.map { groupID in
+                        { ids in document.project.addEntries(for: document.project.orderedMediumIDs(ids), toGroup: groupID) }
+                    }
                 )
+                .frame(width: 320)
+                Divider()
+                GroupsPanel(document: $document, packageURL: packageURL, selectedGroupID: $selectedGroupID)
             }
         }
-        .frame(minWidth: 800, minHeight: 480)
+        .frame(minWidth: 1000, minHeight: 520)
         .background(Color.brandDark)
         .preferredColorScheme(.dark)
     }
