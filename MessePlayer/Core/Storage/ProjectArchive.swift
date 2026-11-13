@@ -12,7 +12,7 @@ nonisolated enum ArchiveError: LocalizedError, Equatable {
         case .unreadableArchive:
             String(localized: "Die Zip-Datei ist beschädigt oder kein gültiges Archiv.")
         case .noProjectInArchive:
-            String(localized: "In der Zip-Datei wurde kein Messe-Player-Projekt (.klangshow) gefunden.")
+            String(localized: "In der Zip-Datei wurde kein CueView-Projekt (.klangshow) gefunden.")
         }
     }
 }

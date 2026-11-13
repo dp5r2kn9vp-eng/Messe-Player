@@ -5,6 +5,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Geändert
+- Die Software heißt jetzt **CueView**: eigenes App-Icon (Bildschirm mit Play und KlangNIVEAU-Schwung), Wortmarke in der Kopfzeile, App-Datei `CueView.app`. Einstellungen und zuletzt geöffnetes Projekt bleiben erhalten.
+
 ## [1.1.1] – 2026-11-13
 
 ### Hinzugefügt

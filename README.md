@@ -1,6 +1,9 @@
-# Messe-Player
+# CueView
 
-KlangNIVEAU Veranstaltungstechnik – macOS-Software zur Ausspielung von Videos, Bildern und Texten auf einem externen Bildschirm (Messe/Event).
+![CueView](Branding/CueView/cueview-wortmarke.png)
+
+
+CueView ist der Messe-Player von KlangNIVEAU Veranstaltungstechnik – macOS-Software zur Ausspielung von Videos, Bildern und Texten auf einem externen Bildschirm (Messe/Event).
 
 ## Entwicklung
 

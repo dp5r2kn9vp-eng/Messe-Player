@@ -32,6 +32,8 @@ Farben ausschließlich über `Theme` (Asset-Katalog), nie als Hex im Code.
 - Ausgabe-Textebenen: frei wählbare Schrift, Standard SF Pro Bold.
 
 ### Logo
+- Produktlogo **CueView**: Icon und Wortmarke unter `Branding/CueView/` (Generator `make_logo.py`). Wortmarke in der Kopfzeile, Icon als App-Icon.
+- Firmenlogo KlangNIVEAU (unten) bleibt Absender: Ruhebild des Ausgangs, Logo-Ebene, neben der Wortmarke.
 - `Branding/klangniveau-logo-hell.png` (helle Schrift) nur auf dunklem Grund, z. B. Header, Ausgang.
 - `Branding/klangniveau-logo-dunkel.png` nur auf hellem Grund.
 - Nie verzerren, einfärben oder beschneiden. Freiraum mindestens Logo-Höhe/4. Original 700x255.
