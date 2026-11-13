@@ -1,13 +1,16 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Sortierbare Liste mit Mehrfachauswahl, Entfernen (Löschtaste) und Einfügen per Drag & Drop.
+/// Sortierbare Liste mit Mehrfachauswahl, Entfernen (Löschtaste), Einfügen per Drag & Drop,
+/// Kontextmenü und Hauptaktion (Doppelklick oder Return).
 /// Gemeinsamer Baustein für Medienbibliothek und Gruppen.
-struct ReorderableList<Item: Identifiable, Payload: Transferable, Row: View>: View {
+struct ReorderableList<Item: Identifiable, Payload: Transferable, Row: View, Menu: View>: View {
     @Binding var items: [Item]
     @Binding var selection: Set<Item.ID>
     /// Eingefügte Objekte und die Zielposition in der Liste.
     let onInsert: ([Payload], Int) -> Void
+    let primaryAction: (Set<Item.ID>) -> Void
+    @ViewBuilder let menu: (Set<Item.ID>) -> Menu
     @ViewBuilder let row: (Item) -> Row
 
     var body: some View {
@@ -20,11 +23,12 @@ struct ReorderableList<Item: Identifiable, Payload: Transferable, Row: View>: Vi
                 onInsert(payloads, index)
             }
         }
-        .onDeleteCommand(perform: removeSelection)
+        .contextMenu(forSelectionType: Item.ID.self, menu: menu, primaryAction: primaryAction)
+        .onDeleteCommand { remove(selection) }
     }
 
-    private func removeSelection() {
-        items.removeAll { selection.contains($0.id) }
-        selection.removeAll()
+    private func remove(_ ids: Set<Item.ID>) {
+        items.removeAll { ids.contains($0.id) }
+        selection.subtract(ids)
     }
 }

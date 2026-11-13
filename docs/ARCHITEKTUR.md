@@ -5,7 +5,7 @@
 - **Core/Model/** – Datenmodell (`Project`, `Medium`, `Group`, `Entry`, `Layer`), `Codable`, Schema-Version.
 - **Core/Storage/** – `.klangshow`-Paket (FileWrapper), `MediaStore` (einziger Medienzugriff), Zip-Export/Import.
 - **Playback/** – `PlaybackEngine` (Zustandsautomat, Uhr injizierbar), Vorladen, Überblendung.
-- **Rendering/** – EIN `LayerRenderer`/`FrameView` für Ausgabe und Vorschau.
+- **Rendering/** – `MediaView` (Bild/Video, `VideoSurface` mit `AVPlayerLayer`) als gemeinsamer Renderer für Ausgabe und Vorschau; Ebenen folgen.
 - **Features/Library, Groups, LayerEditor, Output, Control** – Views + ViewModels je Feature.
 - **UI/** – `Theme` (Farb-Tokens), `ReorderableList`, gemeinsame Komponenten.
 - **System/** – Bildschirmverwaltung (Hotplug), `IOPMAssertion`, Tastenkürzel, Zustandswiederherstellung.

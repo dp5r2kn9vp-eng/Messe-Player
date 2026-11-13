@@ -6,11 +6,22 @@ struct OutputView: View {
 
     var body: some View {
         ZStack {
-            Color.brandDark
+            content
             if output.state.isBlack {
                 Color.black
             }
         }
         .ignoresSafeArea()
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch output.state.content {
+        case .idle:
+            Color.brandDark
+        case .single(let item):
+            MediaView(item: item)
+                .id(item.medium.id)
+        }
     }
 }
