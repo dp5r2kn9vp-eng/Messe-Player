@@ -8,7 +8,7 @@ final class SleepGuard {
         guard activity == nil else { return }
         activity = ProcessInfo.processInfo.beginActivity(
             options: [.idleDisplaySleepDisabled, .idleSystemSleepDisabled, .userInitiated],
-            reason: "Messe-Player gibt auf einem Bildschirm aus"
+            reason: "CueView gibt auf einem Bildschirm aus"
         )
     }
 }

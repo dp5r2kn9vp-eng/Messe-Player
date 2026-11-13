@@ -83,10 +83,13 @@ extension ControlView {
 private struct ControlHeaderView: View {
     var body: some View {
         HStack(spacing: Theme.Spacing.l) {
-            BrandLogo(width: 120)
-            Text("Messe-Player")
-                .font(.title3.bold())
-                .foregroundStyle(Color.brandPaper)
+            Image(.cueViewWordmark)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 40)
+                .accessibilityLabel("CueView")
+            Divider().frame(height: 28)
+            BrandLogo(width: 96)
             Spacer()
             DisplayPicker()
             BlackButton()

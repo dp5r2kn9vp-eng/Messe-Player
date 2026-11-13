@@ -10,7 +10,7 @@ nonisolated enum ProjectError: LocalizedError, Equatable {
         case .missingProjectFile:
             String(localized: "Die Projektdatei ist beschädigt: project.json fehlt.")
         case .newerSchema(let version):
-            String(localized: "Dieses Projekt stammt aus einer neueren Version des Messe-Players (Format \(version)). Bitte die App aktualisieren.")
+            String(localized: "Dieses Projekt stammt aus einer neueren Version von CueView (Format \(version)). Bitte die App aktualisieren.")
         case .unsupportedSchema(let version):
             String(localized: "Das Projektformat \(version) wird nicht unterstützt.")
         }

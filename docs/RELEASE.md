@@ -11,17 +11,17 @@ Versionierung nach SemVer: MAJOR bei inkompatiblen Änderungen (z. B. Projektfor
    ```
 5. Zip erstellen:
    ```sh
-   ditto -c -k --keepParent build/Build/Products/Release/MessePlayer.app Messe-Player-X.Y.Z.zip
+   ditto -c -k --keepParent build/Build/Products/Release/CueView.app CueView-X.Y.Z.zip
    ```
 6. Änderungen per PR auf `main` mergen.
 7. Tag setzen und pushen: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 8. GitHub-Release erstellen:
    ```sh
-   gh release create vX.Y.Z Messe-Player-X.Y.Z.zip --title "Messe-Player X.Y.Z" --notes-file docs/releases/vX.Y.Z.md
+   gh release create vX.Y.Z CueView-X.Y.Z.zip --title "CueView X.Y.Z" --notes-file docs/releases/vX.Y.Z.md
    ```
-9. Lokale Ablage für das Messe-Team: Zip nach `~/KlangNIVEAU_Firma/Release/` kopieren und dort zusätzlich die aktuelle `MessePlayer.app` entpacken (ersetzt die vorherige):
+9. Lokale Ablage für das Messe-Team: Zip nach `~/KlangNIVEAU_Firma/Release/` kopieren und dort zusätzlich die aktuelle `CueView.app` entpacken (ersetzt die vorherige):
    ```sh
    R=~/KlangNIVEAU_Firma/Release
-   mkdir -p "$R" && cp Messe-Player-X.Y.Z.zip "$R/"
-   rm -rf "$R/MessePlayer.app" && ditto -x -k "$R/Messe-Player-X.Y.Z.zip" "$R/"
+   mkdir -p "$R" && cp CueView-X.Y.Z.zip "$R/"
+   rm -rf "$R/CueView.app" && ditto -x -k "$R/CueView-X.Y.Z.zip" "$R/"
    ```
