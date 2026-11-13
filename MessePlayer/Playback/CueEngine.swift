@@ -41,7 +41,10 @@ final class CueEngine {
     /// Cue, den das nächste GO startet; `nil` = Ende der Liste.
     private(set) var playheadID: Cue.ID?
     private(set) var running: [Cue.ID: RunningCue] = [:]
+    /// Black alle (B): liegt über allen Ausgängen.
     private(set) var isBlack = false
+    /// Black je Ausgang (⇧B bzw. Schaltfläche am Ausgang).
+    private(set) var blackOutputIDs: Set<OutputDefinition.ID> = []
     private(set) var isPaused = false
     /// Zuletzt per GO gestarteter Cue ohne Medium (Fehlermeldung in der Transportleiste).
     private(set) var missingCueID: Cue.ID?
@@ -140,6 +143,13 @@ final class CueEngine {
         isBlack.toggle()
     }
 
+    /// Black nur für einen Ausgang; andere Ausgänge und alle Cues laufen unverändert weiter.
+    func toggleBlack(output id: OutputDefinition.ID) {
+        if blackOutputIDs.remove(id) == nil {
+            blackOutputIDs.insert(id)
+        }
+    }
+
     // MARK: Renderer
 
     /// Meldung des Renderers: Video zu Ende oder Medium defekt.
@@ -153,19 +163,30 @@ final class CueEngine {
     /// Zustand des Ausgangs `outputID` (Inhalt + Black + Pause).
     func state(for outputID: OutputDefinition.ID?) -> OutputState {
         let channel = outputID.flatMap { channels[$0] } ?? Channel()
-        return OutputState(content: channel.content, isBlack: isBlack, isPaused: isPaused, transition: channel.transition)
+        let black = isBlack || outputID.map(blackOutputIDs.contains) == true
+        return OutputState(content: channel.content, isBlack: black, isPaused: isPaused, transition: channel.transition)
     }
 
-    /// Zustand des Ausgangs, den das Ausgabefenster zeigt.
+    /// Zustand des ersten Ausgangs (Standardausgang).
     var state: OutputState {
         state(for: show.primaryOutputID)
     }
 
-    /// Medium, das voraussichtlich als Nächstes auf dem Hauptausgang erscheint (zum Vorladen).
-    var upcoming: PlayableMedium? {
-        guard let frame = state.content.frame, let index = show.index(of: frame.cueID) else { return nil }
+    /// Medium, das voraussichtlich als Nächstes auf dem Ausgang erscheint (zum Vorladen).
+    func upcoming(on outputID: OutputDefinition.ID?) -> PlayableMedium? {
+        guard let frame = state(for: outputID).content.frame, let index = show.index(of: frame.cueID) else { return nil }
         let next = show.group(at: index).flatMap { $0.range.upperBound == index ? $0.range.lowerBound : nil } ?? index + 1
         return show.cues.indices.contains(next) ? show.cues[next].item : nil
+    }
+
+    /// Ausgang des Cues am Abspielkopf (Ziel von ⇧B); ohne Bildinhalt der erste Ausgang.
+    var playheadOutputID: OutputDefinition.ID? {
+        playheadIndex.flatMap { show.cues[$0].isVisual ? outputKey(of: show.cues[$0]) : nil } ?? show.primaryOutputID
+    }
+
+    /// Anzahl der Ausgänge, die gerade ein Video zeigen (Warnung bei zu vielen parallelen Videos).
+    var parallelVideoCount: Int {
+        channels.values.count { $0.content.frame?.item.medium.kind == .video }
     }
 
     func isShowing(_ mediumID: Medium.ID) -> Bool {

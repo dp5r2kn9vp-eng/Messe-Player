@@ -8,6 +8,9 @@ struct ControlView: View {
 
     @Environment(CueEngine.self) private var engine
     @Environment(MediaLengths.self) private var mediaLengths
+    @Environment(OutputRouting.self) private var routing
+    @Environment(DisplayService.self) private var displays
+    @State private var showsOutputSetup = false
     @State private var librarySelection = Set<Medium.ID>()
     @State private var showsFormatNotice = false
     @AppStorage("showsMediaPanel") private var showsMedia = true
@@ -16,7 +19,7 @@ struct ControlView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ControlHeaderView(showsMedia: $showsMedia)
+            ControlHeaderView(showsMedia: $showsMedia, showsOutputSetup: $showsOutputSetup)
             Divider()
             HStack(spacing: 0) {
                 if showsMedia {
@@ -35,6 +38,8 @@ struct ControlView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             Divider()
+            OutputsBar()
+            Divider()
             TransportBar(claim: claimEngine)
         }
         .environment(\.cueNames, cueName)
@@ -46,6 +51,14 @@ struct ControlView: View {
             restoreSessionOnce()
             saveSession()
             showsFormatNotice = document.isConvertedFromFormat1
+            showsOutputSetup = routing.proposeMissing(
+                for: document.project.outputs,
+                displays: displays.displays,
+                legacyName: SessionStore.legacyOutputDisplayName()
+            )
+        }
+        .sheet(isPresented: $showsOutputSetup) {
+            OutputSetupSheet(project: $document.project)
         }
         .alert("Projekt wird ins neue Format umgestellt", isPresented: $showsFormatNotice) {
             Button("OK") {}
@@ -99,6 +112,7 @@ extension ControlView {
 
 private struct ControlHeaderView: View {
     @Binding var showsMedia: Bool
+    @Binding var showsOutputSetup: Bool
 
     var body: some View {
         HStack(spacing: Theme.Spacing.l) {
@@ -109,7 +123,8 @@ private struct ControlHeaderView: View {
             AppIconImage(size: 36)
             CueViewWordmark(height: 40)
             Spacer()
-            DisplayPicker()
+            Button("Ausgänge …", systemImage: "display.2") { showsOutputSetup = true }
+                .help("Ausgänge anlegen und auf diesem Rechner Bildschirmen zuordnen")
         }
         .padding(Theme.Spacing.l)
     }

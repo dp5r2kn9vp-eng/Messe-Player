@@ -13,13 +13,17 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 - Cue-Engine: GO startet den Cue am Abspielkopf (▷) samt Kette „Mit nächstem starten“; Warten (⏳), Dauer, Danach (Halten, Weiter nach Ende, Mit nächstem starten), Gruppen mit Loop ∞ oder n-mal, Überblendung der Gruppe. Ein Video mit „Halten“ geht am Ende auf Schwarz. Fehlt ein Medium, wird der Cue übersprungen bzw. in der Transportleiste gemeldet.
 - Transportleiste unten: GO, „Als Nächstes“, Pause/Fortsetzen, Stopp alle (Abspielkopf bleibt) und Black. Klick auf eine Zeile setzt den Abspielkopf, Doppelklick startet den Cue sofort.
+- Mehrere Ausgänge: Unter „Ausgänge …“ Ausgänge anlegen, umbenennen und entfernen und auf diesem Rechner Bildschirmen zuordnen (gespeichert je Rechner, nicht im Projekt). Je Ausgang ein eigenes Vollbildfenster; ein neuer Cue ersetzt nur den Inhalt seines Ausgangs.
+- Beim ersten Öffnen eines Projekts mit mehreren Ausgängen schlägt CueView eine Zuordnung vor und zeigt den Dialog zur Prüfung; „Bildschirme kennzeichnen“ blendet auf jedem Bildschirm den Ausgangsnamen ein.
+- Ausgangsleiste über dem Transport: Bildschirm je Ausgang, Black je Ausgang (⇧B für den Ausgang des Cues am Abspielkopf). Ausgänge ohne Bildschirm oder mit abgestecktem Bildschirm laufen als Vorschau im Steuerfenster weiter, mit Warnhinweis. Warnung, wenn mehr als drei Videos gleichzeitig laufen.
 
 ### Geändert
-- **Tastenbelegung:** Leertaste = GO, P = Pause/Fortsetzen (bisher Leertaste). B (Black), Esc und ⌘. (Notfall-Stopp) wie bisher. Die Tasten 1–9 zum Starten von Gruppen entfallen.
+- **Tastenbelegung:** Leertaste = GO, P = Pause/Fortsetzen (bisher Leertaste). B (jetzt „Black alle“), Esc und ⌘. (Notfall-Stopp) wie bisher. Die Tasten 1–9 zum Starten von Gruppen entfallen.
 - Doppelklick im Medienbereich legt einen Cue an (statt das Medium direkt auf dem Ausgang zu zeigen).
 - Die Gruppen-Ansicht entfällt; der Medienbereich links ist über die Kopfzeile ein- und ausklappbar.
 - Projektformat 2 (Cue-Liste): Gruppen und Einträge werden beim Öffnen verlustfrei in nummerierte Cues mit Loop-Gruppen auf Ausgang 1 umgewandelt. Beim Öffnen eines alten Projekts erscheint ein Hinweis; beim Speichern bleibt `project.v1.json` als Sicherung im Paket. Ältere CueView-Versionen können umgestellte Projekte nicht mehr öffnen.
 - Neue Bilder in Gruppen stehen standardmäßig 5 statt 8 Sekunden.
+- Die Bildschirmauswahl in der Kopfzeile wird durch „Ausgänge …“ ersetzt; der bisher gewählte Bildschirm wird für Ausgang 1 übernommen.
 
 ## [1.2.0] – 2026-11-13
 

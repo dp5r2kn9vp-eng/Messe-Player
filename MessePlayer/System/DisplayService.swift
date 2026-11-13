@@ -2,19 +2,24 @@ import AppKit
 import Observation
 
 /// Ein angeschlossener Bildschirm, stabil identifiziert über die CoreGraphics-ID.
-struct Display: Identifiable, Hashable {
+nonisolated struct Display: Identifiable, Hashable {
     let id: CGDirectDisplayID
     let name: String
+    /// Hardware-UUID; bleibt im Gegensatz zur ID über Neustarts gleich.
+    var uuid: String?
     /// Bildschirm mit der Menüleiste – dort liegt das Steuerfenster.
     let isControlScreen: Bool
+
+    var identity: ScreenIdentity {
+        ScreenIdentity(uuid: uuid, name: name)
+    }
 }
 
-/// Kennt die angeschlossenen Bildschirme und meldet An- und Abstecken.
+/// Kennt die angeschlossenen Bildschirme; An- und Abstecken ändert `displays` (beobachtbar).
 @Observable
 final class DisplayService {
     private(set) var displays: [Display] = []
 
-    @ObservationIgnored var onChange: (() -> Void)?
     @ObservationIgnored private var observation: Task<Void, Never>?
 
     init() {
@@ -23,14 +28,8 @@ final class DisplayService {
             let changes = NotificationCenter.default.notifications(named: NSApplication.didChangeScreenParametersNotification)
             for await _ in changes {
                 self?.refresh()
-                self?.onChange?()
             }
         }
-    }
-
-    /// Bevorzugter Ausgang: der erste externe Bildschirm, sonst der eigene.
-    var preferredOutput: Display? {
-        displays.first { !$0.isControlScreen } ?? displays.first
     }
 
     func screen(for id: CGDirectDisplayID) -> NSScreen? {
@@ -41,9 +40,16 @@ final class DisplayService {
         screen == NSScreen.screens.first
     }
 
+    private static func uuid(of id: CGDirectDisplayID) -> String? {
+        guard let uuid = CGDisplayCreateUUIDFromDisplayID(id)?.takeRetainedValue() else { return nil }
+        return CFUUIDCreateString(nil, uuid) as String?
+    }
+
     private func refresh() {
         displays = NSScreen.screens.enumerated().compactMap { index, screen in
-            screen.displayID.map { Display(id: $0, name: screen.localizedName, isControlScreen: index == 0) }
+            screen.displayID.map { id in
+                Display(id: id, name: screen.localizedName, uuid: Self.uuid(of: id), isControlScreen: index == 0)
+            }
         }
     }
 }

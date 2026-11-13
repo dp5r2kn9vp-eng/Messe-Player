@@ -31,7 +31,7 @@ struct TransportBar: View {
             .help("Alle laufenden Cues anhalten bzw. fortsetzen (P)")
             Button("Stopp alle", systemImage: "stop.fill", action: engine.stopAll)
                 .help("Alle Cues beenden, der Abspielkopf bleibt (⌘.)")
-            BlackButton()
+            BlackAllButton()
         }
         .padding(Theme.Spacing.m)
     }

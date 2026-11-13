@@ -1,7 +1,7 @@
 import AppKit
 import Observation
 
-/// Ein-Tasten-Kürzel ohne Modifier (z. B. „B“ für Black, Esc für Stopp).
+/// Ein-Tasten-Kürzel ohne Modifier oder nur mit Umschalt (z. B. „B“ Black alle, „⇧B“ Black je Ausgang).
 /// Greift nicht, solange ein Textfeld aktiv ist. Liefert eine Aktion `false`, behält die Taste ihre normale Funktion.
 @Observable
 final class HotkeyService {
@@ -11,8 +11,12 @@ final class HotkeyService {
     @ObservationIgnored private var actions: [String: () -> Bool] = [:]
     @ObservationIgnored private var monitor: Any?
 
-    func register(_ key: String, action: @escaping () -> Bool) {
-        actions[key.lowercased()] = action
+    func register(_ key: String, shift: Bool = false, action: @escaping () -> Bool) {
+        actions[Self.id(key, shift: shift)] = action
+    }
+
+    private static func id(_ key: String, shift: Bool) -> String {
+        (shift ? "⇧" : "") + key.lowercased()
     }
 
     func start() {
@@ -28,10 +32,10 @@ final class HotkeyService {
     private func handle(key: String?, modifiers: NSEvent.ModifierFlags) -> Bool {
         let relevantModifiers = modifiers.intersection(.deviceIndependentFlagsMask)
             .subtracting([.capsLock, .numericPad, .function])
-        guard relevantModifiers.isEmpty,
+        guard relevantModifiers.subtracting(.shift).isEmpty,
               !(NSApp.keyWindow?.firstResponder is NSText),
               let key,
-              let action = actions[key]
+              let action = actions[Self.id(key, shift: relevantModifiers.contains(.shift))]
         else { return false }
         return action()
     }

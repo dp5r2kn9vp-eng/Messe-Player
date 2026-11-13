@@ -26,3 +26,12 @@ extension Color {
     /// Abspielkopf („Als Nächstes“) in der Cue-Liste.
     static let playhead = Color.brandOrange
 }
+
+extension Color {
+    /// Kennfarben der Ausgänge in Projekt-Reihenfolge (Liste, Kennzeichnung, Ausgangsleiste).
+    private static let outputColors: [Color] = [.brandOrange, .outputBlue, .outputGreen, .outputViolet]
+
+    static func output(at index: Int) -> Color {
+        outputColors[max(index, 0) % outputColors.count]
+    }
+}
