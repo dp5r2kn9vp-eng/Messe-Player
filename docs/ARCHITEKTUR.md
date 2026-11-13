@@ -29,7 +29,7 @@ flowchart LR
 - **Group** – `id`, `name`, `entries: [Entry]` (geordnet).
 - **Entry** – `id`, `mediumID`, `imageDuration` (nur Bilder, s), `layers: [Layer]`.
 - **Layer** – `id`, `frame` (x, y, relativ 0–1), `content: text(TextStyle) | image(mediumID)`. TextStyle: Text, Schrift, Größe, Farbe, Ausrichtung, Schatten, Box.
-- **OutputState** – `black` | `single(entry/medium)` | `loop(groupID, index)`; plus Flag `paused`.
+- **OutputState** – `content: OutputContent` (`idle` | `single` | `loop(groupID, index)`) plus `isBlack`. Black liegt über dem Inhalt, Aufheben zeigt ihn unverändert weiter.
 
 ## Abspiel-Zustandsautomat
 ```mermaid
