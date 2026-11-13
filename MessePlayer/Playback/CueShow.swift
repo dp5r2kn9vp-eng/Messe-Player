@@ -39,7 +39,11 @@ struct ShowCue: Equatable {
     var endsWithMedia = false
     var followAction = FollowAction.hold
     /// Überblendung beim Erscheinen, wenn der Cue nicht in einer Gruppe läuft.
-    var fadeIn: TimeInterval = 0
+    var blendIn: TimeInterval = 0
+    /// Blende, wenn ein Video am Ende auf Schwarz geht.
+    var blendOut: TimeInterval = 0
+    var audio = AudioLevel()
+    var scaling = ContentScaling.fit
 
     var item: PlayableMedium? {
         if case .media(let item, _) = content { item } else { nil }
@@ -75,7 +79,11 @@ extension ProjectDocument {
     }
 
     private func showCue(_ cue: Cue, in packageURL: URL?, primaryOutputID: OutputDefinition.ID?, mediaLength: (URL) -> TimeInterval?) -> ShowCue {
-        var show = ShowCue(id: cue.id, content: .control, wait: cue.wait, duration: 0, followAction: cue.followAction, fadeIn: cue.fadeIn)
+        var show = ShowCue(id: cue.id, content: .control, wait: cue.wait, duration: 0, followAction: cue.followAction)
+        show.blendIn = cue.blendIn
+        show.blendOut = cue.blendOut
+        show.audio = cue.audioLevel
+        show.scaling = cue.scaling
         guard let mediumID = cue.mediumID else { return show }
         guard let medium = project.medium(withID: mediumID), let item = playable(medium, in: packageURL) else {
             show.content = .missing

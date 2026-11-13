@@ -48,6 +48,7 @@ struct OutputView: View {
             FrameView(
                 item: frame.item,
                 layers: frame.layers,
+                playback: frame.playback,
                 onFinish: { engine.mediaDidFinish(cueID: frame.cueID, step: frame.step) },
                 isPaused: state.isPaused
             )

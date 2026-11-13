@@ -16,6 +16,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Mehrere Ausgänge: Unter „Ausgänge …“ Ausgänge anlegen, umbenennen und entfernen und auf diesem Rechner Bildschirmen zuordnen (gespeichert je Rechner, nicht im Projekt). Je Ausgang ein eigenes Vollbildfenster; ein neuer Cue ersetzt nur den Inhalt seines Ausgangs.
 - Beim ersten Öffnen eines Projekts mit mehreren Ausgängen schlägt CueView eine Zuordnung vor und zeigt den Dialog zur Prüfung; „Bildschirme kennzeichnen“ blendet auf jedem Bildschirm den Ausgangsnamen ein.
 - Ausgangsleiste über dem Transport: Bildschirm je Ausgang, Black je Ausgang (⇧B für den Ausgang des Cues am Abspielkopf). Ausgänge ohne Bildschirm oder mit abgestecktem Bildschirm laufen als Vorschau im Steuerfenster weiter, mit Warnhinweis. Warnung, wenn mehr als drei Videos gleichzeitig laufen.
+- Inspektor rechts (ein-/ausklappbar über die Kopfzeile) mit sechs Reitern für die markierten Cues: Allgemein (Nummer, Name, Notiz, Farbe, Medium ersetzen oder neu verknüpfen), Zeit & Ablauf (Warten, Dauer, Danach, Blende ein/aus), Ausgang & Bild (Ausgang, Skalierung Einpassen/Füllen, Überblendung der Gruppe), Audio, Trim (Platzhalter) und Texte & Ebenen (bisheriger Ebenen-Editor). Nicht zutreffende Reiter sind ausgegraut; bei Mehrfachauswahl gelten Änderungen für alle markierten Cues.
+- Lautstärke je Cue 0–100 % (Standard 100 %), Fade ein/aus als lineare Rampe und Stumm; wirkt bei Videos mit Ton sofort, auch während sie laufen.
 
 ### Geändert
 - **Tastenbelegung:** Leertaste = GO, P = Pause/Fortsetzen (bisher Leertaste). B (jetzt „Black alle“), Esc und ⌘. (Notfall-Stopp) wie bisher. Die Tasten 1–9 zum Starten von Gruppen entfallen.

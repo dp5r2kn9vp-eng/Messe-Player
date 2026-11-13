@@ -276,8 +276,10 @@ final class CueEngine {
                 cancel(other.cueID)
             }
         }
-        let crossfade = groupRun.flatMap { run in show.groups.first { $0.id == run.groupID }?.crossfade } ?? cue.fadeIn
-        channels[outputID] = Channel(content: .cue(CueFrame(cueID: cue.id, item: item, layers: layers, step: step)), transition: crossfade)
+        let crossfade = groupRun.flatMap { run in show.groups.first { $0.id == run.groupID }?.crossfade } ?? cue.blendIn
+        var frame = CueFrame(cueID: cue.id, item: item, layers: layers, step: step)
+        frame.apply(cue)
+        channels[outputID] = Channel(content: .cue(frame), transition: crossfade)
     }
 
     /// Ende der Dauer: Folgeaktion; ein Video geht auf Schwarz, wenn nicht sofort ein Folgecue erscheint.
@@ -288,7 +290,7 @@ final class CueEngine {
         finish(at: index, groupRun: runningCue.groupRun)
         if cue.isVideo, let outputID = outputKey(of: cue), channels[outputID]?.content.frame?.step == runningCue.step {
             step += 1
-            channels[outputID] = Channel(content: .blank(step: step))
+            channels[outputID] = Channel(content: .blank(step: step), transition: cue.blendOut)
         }
     }
 
@@ -391,6 +393,7 @@ final class CueEngine {
                   case .media(let item, let layers) = cue.content, item == frame.item
             else { continue }
             frame.layers = layers
+            frame.apply(cue)
             channels[outputID]?.content = .cue(frame)
         }
     }
@@ -403,5 +406,12 @@ final class CueEngine {
             else { continue }
             running[id]?.progress = StepProgress(startedAt: appearedAt, duration: duration, pausedAt: pausedAt)
         }
+    }
+}
+
+private extension CueFrame {
+    /// Übernimmt Darstellung und Lautstärke aus der Liste (auch während der Cue läuft).
+    mutating func apply(_ cue: ShowCue) {
+        playback = PlaybackSettings(scaling: cue.scaling, audio: cue.audio, playLength: cue.duration)
     }
 }

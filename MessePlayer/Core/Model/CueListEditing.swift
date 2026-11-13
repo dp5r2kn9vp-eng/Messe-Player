@@ -8,12 +8,23 @@ nonisolated enum CueEdit: Equatable {
     case wait(TimeInterval)
     case duration(TimeInterval)
     case followAction(FollowAction)
+    case notes(String)
+    case color(RGBAColor?)
+    /// Medium ersetzen; In- und Out-Punkt beginnen neu.
+    case medium(Medium.ID)
+    case scaling(ContentScaling)
+    case blendIn(TimeInterval)
+    case blendOut(TimeInterval)
+    case volume(Double)
+    case fadeIn(TimeInterval)
+    case fadeOut(TimeInterval)
+    case muted(Bool)
 
-    /// Nummer und Name sind je Cue eindeutig und gelten nie für eine Mehrfachauswahl.
+    /// Nummer, Name und Medium sind je Cue eigen und gelten nie für eine Mehrfachauswahl.
     var appliesToSelection: Bool {
         switch self {
-        case .number, .name: false
-        case .output, .wait, .duration, .followAction: true
+        case .number, .name, .medium: false
+        default: true
         }
     }
 }
@@ -47,8 +58,41 @@ nonisolated extension Project {
                 setDuration(seconds, at: index, mediaLength: mediaLength(cue))
             case .followAction(let action):
                 cues[index].followAction = action
+            case .notes(let notes):
+                cues[index].notes = notes
+            case .color(let color):
+                cues[index].color = color
+            case .medium(let mediumID):
+                replaceMedium(at: index, with: mediumID)
+            default:
+                applyPlayback(edit, at: index)
             }
         }
+    }
+
+    /// Bild-, Blend- und Audio-Werte; Audio-Werte nur bei Video und Audio, Bild-Werte nicht bei Audio.
+    private mutating func applyPlayback(_ edit: CueEdit, at index: Int) {
+        let kind = cues[index].mediumID.flatMap(medium(withID:))?.kind
+        let hasSound = kind == .video || kind == .audio
+        switch edit {
+        case .scaling(let scaling) where kind != .audio: cues[index].scaling = scaling
+        case .blendIn(let seconds) where kind != .audio: cues[index].blendIn = seconds
+        case .blendOut(let seconds) where kind != .audio: cues[index].blendOut = seconds
+        case .volume(let volume) where hasSound: cues[index].volume = volume
+        case .fadeIn(let seconds) where hasSound: cues[index].fadeIn = seconds
+        case .fadeOut(let seconds) where hasSound: cues[index].fadeOut = seconds
+        case .muted(let isMuted) where hasSound: cues[index].isMuted = isMuted
+        default: break
+        }
+    }
+
+    /// Audio belegt keinen Ausgang; wird aus Audio ein Bild/Video, bekommt es den ersten Ausgang.
+    private mutating func replaceMedium(at index: Int, with mediumID: Medium.ID) {
+        guard let medium = medium(withID: mediumID) else { return }
+        cues[index].mediumID = mediumID
+        cues[index].inPoint = 0
+        cues[index].outPoint = nil
+        cues[index].outputID = medium.kind == .audio ? nil : cues[index].outputID ?? outputs.first?.id
     }
 
     /// Bild: Standdauer. Video/Audio: Kürzen setzt den Out-Punkt (höchstens bis Medienende).

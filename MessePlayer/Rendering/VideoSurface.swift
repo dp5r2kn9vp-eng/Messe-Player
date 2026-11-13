@@ -5,6 +5,7 @@ import SwiftUI
 /// Ohne `onFinish` läuft es nahtlos in Endlosschleife, sonst einmal und meldet dann Ende oder Fehler.
 struct VideoSurface: NSViewRepresentable {
     let url: URL
+    var playback = PlaybackSettings()
     var onFinish: (() -> Void)?
     var isMuted = false
     var isPaused = false
@@ -18,6 +19,7 @@ struct VideoSurface: NSViewRepresentable {
     func updateNSView(_ view: PlayerLayerView, context: Context) {
         view.isMuted = isMuted
         view.play(url, onFinish: onFinish)
+        view.apply(playback)
         view.isPaused = isPaused
     }
 
@@ -33,6 +35,9 @@ final class PlayerLayerView: NSView {
     private var onFinish: (() -> Void)?
     private var endObservers: [NSObjectProtocol] = []
     private var statusObservation: NSKeyValueObservation?
+    private var playback = PlaybackSettings()
+    private var audioTracks: [AVAssetTrack] = []
+    private var trackLoading: Task<Void, Never>?
 
     var isMuted: Bool {
         get { player.isMuted }
@@ -71,7 +76,17 @@ final class PlayerLayerView: NSView {
             player.insert(item, after: nil)
             observeEnd(of: item)
         }
+        loadAudioTracks(of: item, for: url)
         player.play()
+    }
+
+    /// Skalierung und Lautstärke; wirkt auch am laufenden Video.
+    func apply(_ settings: PlaybackSettings) {
+        guard settings != playback else { return }
+        let audioChanged = settings.audio != playback.audio || settings.playLength != playback.playLength
+        playback = settings
+        (layer as? AVPlayerLayer)?.videoGravity = settings.scaling == .fill ? .resizeAspectFill : .resizeAspect
+        if audioChanged { applyAudioMix() }
     }
 
     func stop() {
@@ -82,6 +97,41 @@ final class PlayerLayerView: NSView {
         endObservers = []
         statusObservation = nil
         currentURL = nil
+        trackLoading?.cancel()
+        audioTracks = []
+    }
+
+    private func loadAudioTracks(of item: AVPlayerItem, for url: URL) {
+        let asset = item.asset
+        trackLoading = Task { [weak self] in
+            let tracks = (try? await asset.loadTracks(withMediaType: .audio)) ?? []
+            guard let self, !Task.isCancelled, self.currentURL == url else { return }
+            self.audioTracks = tracks
+            self.applyAudioMix()
+        }
+    }
+
+    /// Lautstärke und lineare Fade-Rampen je Tonspur über `AVAudioMix`.
+    private func applyAudioMix() {
+        let level = playback.audio
+        let ramps = level.ramps(length: playback.playLength)
+        let parameters = audioTracks.map { track in
+            let input = AVMutableAudioMixInputParameters(track: track)
+            if level.fades(length: playback.playLength).in == 0 {
+                input.setVolume(Float(level.target), at: .zero)
+            }
+            for ramp in ramps {
+                input.setVolumeRamp(
+                    fromStartVolume: Float(ramp.from),
+                    toEndVolume: Float(ramp.to),
+                    timeRange: CMTimeRange(start: CMTime(seconds: ramp.start), duration: CMTime(seconds: ramp.duration))
+                )
+            }
+            return input
+        }
+        let mix = AVMutableAudioMix()
+        mix.inputParameters = parameters
+        player.items().forEach { $0.audioMix = mix }
     }
 
     private func observeEnd(of item: AVPlayerItem) {
@@ -95,5 +145,11 @@ final class PlayerLayerView: NSView {
             guard item.status == .failed, let self else { return }
             Task { @MainActor in self.onFinish?() }
         }
+    }
+}
+
+private extension CMTime {
+    init(seconds: TimeInterval) {
+        self.init(seconds: seconds, preferredTimescale: 600)
     }
 }
