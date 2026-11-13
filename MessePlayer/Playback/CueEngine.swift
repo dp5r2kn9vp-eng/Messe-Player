@@ -467,7 +467,7 @@ final class CueEngine {
 
 private extension ShowCue {
     var playbackSettings: PlaybackSettings {
-        PlaybackSettings(scaling: scaling, audio: audio, playLength: duration)
+        PlaybackSettings(scaling: scaling, audio: audio, playLength: duration, startTime: inPoint, endTime: outPoint)
     }
 }
 

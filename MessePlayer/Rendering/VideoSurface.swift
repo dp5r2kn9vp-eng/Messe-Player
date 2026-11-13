@@ -2,7 +2,7 @@ import AVFoundation
 import SwiftUI
 
 /// Video ohne Bedienelemente, hardwarebeschleunigt über `AVPlayerLayer`.
-/// Ohne `onFinish` läuft es nahtlos in Endlosschleife, sonst einmal und meldet dann Ende oder Fehler.
+/// Ohne `onFinish` läuft es nahtlos in Endlosschleife, sonst einmal im getrimmten Bereich und meldet dann Ende oder Fehler.
 struct VideoSurface: NSViewRepresentable {
     let url: URL
     var playback = PlaybackSettings()
@@ -18,8 +18,9 @@ struct VideoSurface: NSViewRepresentable {
 
     func updateNSView(_ view: PlayerLayerView, context: Context) {
         view.isMuted = isMuted
-        view.play(url, onFinish: onFinish)
+        // Zuerst die Einstellungen, damit ein neues Video am In-Punkt beginnt.
         view.apply(playback)
+        view.play(url, onFinish: onFinish)
         view.isPaused = isPaused
     }
 
@@ -73,8 +74,12 @@ final class PlayerLayerView: NSView {
         if onFinish == nil {
             looper = AVPlayerLooper(player: player, templateItem: item)
         } else {
+            item.forwardPlaybackEndTime = playback.endTime.map(CMTime.init(seconds:)) ?? .invalid
             player.insert(item, after: nil)
             observeEnd(of: item)
+            if playback.startTime > 0 {
+                player.seek(to: CMTime(seconds: playback.startTime), toleranceBefore: .zero, toleranceAfter: .zero)
+            }
         }
         loadAudioTracks(of: item, for: url)
         player.play()
@@ -84,6 +89,7 @@ final class PlayerLayerView: NSView {
     func apply(_ settings: PlaybackSettings) {
         guard settings != playback else { return }
         let audioChanged = settings.audio != playback.audio || settings.playLength != playback.playLength
+            || settings.startTime != playback.startTime
         playback = settings
         (layer as? AVPlayerLayer)?.videoGravity = settings.scaling == .fill ? .resizeAspectFill : .resizeAspect
         if audioChanged { applyAudioMix() }

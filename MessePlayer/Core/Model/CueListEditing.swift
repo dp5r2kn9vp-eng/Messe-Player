@@ -19,11 +19,15 @@ nonisolated enum CueEdit: Equatable {
     case fadeIn(TimeInterval)
     case fadeOut(TimeInterval)
     case muted(Bool)
+    /// Trim (nur Video/Audio): In-/Out-Punkt in Sekunden der Quelle; `resetTrim` = volle Länge.
+    case inPoint(TimeInterval)
+    case outPoint(TimeInterval)
+    case resetTrim
 
-    /// Nummer, Name und Medium sind je Cue eigen und gelten nie für eine Mehrfachauswahl.
+    /// Nummer, Name, Medium und In/Out sind je Cue eigen und gelten nie für eine Mehrfachauswahl.
     var appliesToSelection: Bool {
         switch self {
-        case .number, .name, .medium: false
+        case .number, .name, .medium, .inPoint, .outPoint: false
         default: true
         }
     }
@@ -56,6 +60,8 @@ nonisolated extension Project {
                 cues[index].wait = seconds.clamped(to: Cue.waitRange)
             case .duration(let seconds):
                 setDuration(seconds, at: index, mediaLength: mediaLength(cue))
+            case .inPoint, .outPoint, .resetTrim:
+                applyTrim(edit, at: index, mediaLength: mediaLength(cue))
             case .followAction(let action):
                 cues[index].followAction = action
             case .notes(let notes):
@@ -97,18 +103,27 @@ nonisolated extension Project {
 
     /// Bild: Standdauer. Video/Audio: Kürzen setzt den Out-Punkt (höchstens bis Medienende).
     private mutating func setDuration(_ seconds: TimeInterval, at index: Int, mediaLength: TimeInterval?) {
-        let cue = cues[index]
-        guard let mediumID = cue.mediumID, let medium = medium(withID: mediumID) else { return }
+        guard let medium = cues[index].mediumID.flatMap(medium(withID:)) else { return }
         guard medium.kind != .image else {
             cues[index].stillDuration = seconds
             return
         }
-        let end = cue.inPoint + max(seconds, 0)
-        if let mediaLength, end >= mediaLength {
-            cues[index].outPoint = nil
-        } else {
-            cues[index].outPoint = end
+        var trim = cues[index].trim(mediaLength: mediaLength)
+        trim.setDuration(seconds)
+        cues[index].applyTrim(trim)
+    }
+
+    /// In/Out und Zurücksetzen, nur bei Video und Audio.
+    private mutating func applyTrim(_ edit: CueEdit, at index: Int, mediaLength: TimeInterval?) {
+        guard let kind = cues[index].mediumID.flatMap(medium(withID:))?.kind, kind != .image else { return }
+        var trim = cues[index].trim(mediaLength: mediaLength)
+        switch edit {
+        case .inPoint(let seconds): trim.setIn(seconds)
+        case .outPoint(let seconds): trim.setOut(seconds)
+        case .resetTrim: trim.reset()
+        default: return
         }
+        cues[index].applyTrim(trim)
     }
 
     func isAudio(_ cue: Cue) -> Bool {

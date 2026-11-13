@@ -44,6 +44,9 @@ struct ShowCue: Equatable {
     var blendOut: TimeInterval = 0
     var audio = AudioLevel()
     var scaling = ContentScaling.fit
+    /// Getrimmter Bereich in Sekunden der Quelle (`outPoint == nil` = bis Medienende).
+    var inPoint: TimeInterval = 0
+    var outPoint: TimeInterval?
 
     var item: PlayableMedium? {
         if case .media(let item, _) = content { item } else { nil }
@@ -86,6 +89,8 @@ extension ProjectDocument {
         show.blendOut = cue.blendOut
         show.audio = cue.audioLevel
         show.scaling = cue.scaling
+        show.inPoint = cue.inPoint
+        show.outPoint = cue.outPoint
         guard let mediumID = cue.mediumID else { return show }
         guard let medium = project.medium(withID: mediumID), let item = playable(medium, in: packageURL) else {
             show.content = .missing
