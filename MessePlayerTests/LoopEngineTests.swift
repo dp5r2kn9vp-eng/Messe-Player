@@ -27,8 +27,10 @@ struct LoopEngineTests {
     let scheduler = ManualScheduler()
     let output: OutputController
 
+    static let start = Date(timeIntervalSince1970: 1_000)
+
     init() {
-        output = OutputController(scheduler: scheduler)
+        output = OutputController(scheduler: scheduler, videoDuration: { _ in 42 }, now: { Self.start })
     }
 
     private func item(_ kind: Medium.Kind, duration: TimeInterval = 5) -> LoopItem {
@@ -133,5 +135,25 @@ struct LoopEngineTests {
         #expect(frame?.entryID == b.entryID)
         #expect(output.upcoming == a.item)
         #expect(output.state.transition == 0)
+    }
+
+    @Test func imageStepReportsItsDuration() {
+        output.startLoop(playlist([item(.image, duration: 7)]))
+        #expect(output.stepProgress == StepProgress(startedAt: Self.start, duration: 7))
+    }
+
+    @Test func videoStepReportsFileDurationAndGapHasNone() async throws {
+        output.startLoop(playlist([item(.video), item(.image)]))
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(output.stepProgress?.duration == 42)
+
+        output.mediaDidFinish(step: try #require(frame).step)
+        #expect(output.stepProgress == nil)
+    }
+
+    @Test func stoppingClearsProgress() {
+        output.startLoop(playlist([item(.image)]))
+        output.stop()
+        #expect(output.stepProgress == nil)
     }
 }

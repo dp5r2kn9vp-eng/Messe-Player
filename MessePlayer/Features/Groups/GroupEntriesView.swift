@@ -74,6 +74,7 @@ struct GroupEntriesView: View {
                     medium: medium,
                     url: medium.flatMap { document.media.url(for: $0, in: packageURL) },
                     isLive: output.isLive(entry: entry.id),
+                    progress: output.isLive(entry: entry.id) && !output.state.isBlack ? output.stepProgress : nil,
                     onEditLayers: { editing = EntryReference(id: entry.id) }
                 )
             }
