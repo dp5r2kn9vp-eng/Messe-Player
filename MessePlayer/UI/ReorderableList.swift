@@ -9,6 +9,7 @@ struct ReorderableList<Item: Identifiable, Payload: Transferable, Row: View, Men
     @Binding var selection: Set<Item.ID>
     /// Eingefügte Objekte und die Zielposition in der Liste.
     let onInsert: ([Payload], Int) -> Void
+    let onRemove: (Set<Item.ID>) -> Void
     let primaryAction: (Set<Item.ID>) -> Void
     @ViewBuilder let menu: (Set<Item.ID>) -> Menu
     @ViewBuilder let row: (Item) -> Row
@@ -24,11 +25,6 @@ struct ReorderableList<Item: Identifiable, Payload: Transferable, Row: View, Men
             }
         }
         .contextMenu(forSelectionType: Item.ID.self, menu: menu, primaryAction: primaryAction)
-        .onDeleteCommand { remove(selection) }
-    }
-
-    private func remove(_ ids: Set<Item.ID>) {
-        items.removeAll { ids.contains($0.id) }
-        selection.subtract(ids)
+        .onDeleteCommand { onRemove(selection) }
     }
 }

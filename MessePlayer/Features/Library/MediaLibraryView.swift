@@ -1,40 +1,30 @@
 import SwiftUI
 
-/// Medienbibliothek eines Projekts: Dateien aus dem Finder hineinziehen, sortieren, entfernen.
+/// Medienbibliothek eines Projekts: Dateien aus dem Finder hineinziehen, sortieren, entfernen,
+/// auf dem Ausgang zeigen und Gruppen hinzufügen.
 struct MediaLibraryView: View {
     @Binding var document: ProjectDocument
     let packageURL: URL?
+    @Binding var selection: Set<Medium.ID>
+    /// `nil`, solange keine Gruppe gewählt ist.
+    let onAddToGroup: ((Set<Medium.ID>) -> Void)?
 
     @Environment(OutputController.self) private var output
-
-    @State private var selection = Set<Medium.ID>()
     @State private var isPickingFiles = false
     @State private var importErrors: [String] = []
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            PanelHeader(title: "Medien", count: document.project.media.count) {
+                Button("Zur Gruppe hinzufügen", systemImage: "text.badge.plus") { onAddToGroup?(selection) }
+                    .disabled(onAddToGroup == nil || selection.isEmpty)
+                    .help("Ausgewählte Medien zur gewählten Gruppe hinzufügen")
+                Button("Medien hinzufügen", systemImage: "plus") { isPickingFiles = true }
+            }
             if document.project.media.isEmpty {
                 emptyState
             } else {
-                ReorderableList(
-                    items: $document.project.media,
-                    selection: $selection,
-                    onInsert: importMedia,
-                    primaryAction: showOnOutput,
-                    menu: { ids in
-                        Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
-                            .disabled(ids.count != 1)
-                        Button("Entfernen", systemImage: "trash", role: .destructive) { remove(ids) }
-                    },
-                    row: { medium in
-                        MediaRow(
-                            medium: medium,
-                            url: document.media.url(for: medium, in: packageURL),
-                            isLive: output.isLive(medium)
-                        )
-                    }
-                )
+                list
             }
         }
         .fileImporter(isPresented: $isPickingFiles, allowedContentTypes: [.image, .movie], allowsMultipleSelection: true) { result in
@@ -42,25 +32,31 @@ struct MediaLibraryView: View {
                 importMedia(urls, at: document.project.media.count)
             }
         }
-        .alert("Nicht alle Dateien wurden übernommen", isPresented: hasImportErrors) {
-            Button("OK") {}
-        } message: {
-            Text(importErrors.joined(separator: "\n"))
-        }
+        .importErrorAlert($importErrors)
     }
 
-    private var header: some View {
-        HStack {
-            Text("Medien").font(.headline)
-            Text("\(document.project.media.count)")
-                .font(.caption)
-                .foregroundStyle(Color.mutedLight)
-            Spacer()
-            Button("Medien hinzufügen", systemImage: "plus") { isPickingFiles = true }
-                .labelStyle(.iconOnly)
-                .buttonStyle(.borderless)
-        }
-        .padding(Theme.Spacing.m)
+    private var list: some View {
+        ReorderableList(
+            items: $document.project.media,
+            selection: $selection,
+            onInsert: importMedia,
+            onRemove: remove,
+            primaryAction: showOnOutput,
+            menu: { ids in
+                Button("Auf Ausgang zeigen", systemImage: "play.tv") { showOnOutput(ids) }
+                    .disabled(ids.count != 1)
+                Button("Zur Gruppe hinzufügen", systemImage: "text.badge.plus") { onAddToGroup?(ids) }
+                    .disabled(onAddToGroup == nil)
+                Button("Entfernen", systemImage: "trash", role: .destructive) { remove(ids) }
+            },
+            row: { medium in
+                MediaRow(
+                    medium: medium,
+                    url: document.media.url(for: medium, in: packageURL),
+                    isLive: output.isLive(medium)
+                )
+            }
+        )
     }
 
     private var emptyState: some View {
@@ -77,25 +73,22 @@ struct MediaLibraryView: View {
         }
     }
 
-    private var hasImportErrors: Binding<Bool> {
-        Binding(get: { !importErrors.isEmpty }, set: { if !$0 { importErrors = [] } })
-    }
-
     private func importMedia(_ urls: [URL], at index: Int) {
-        importErrors = document.importMedia(from: urls, at: index).map(\.localizedDescription)
+        importErrors = document.importMedia(from: urls, at: index).errors.map(\.localizedDescription)
     }
 
     private func remove(_ ids: Set<Medium.ID>) {
-        document.project.media.removeAll { ids.contains($0.id) }
+        document.project.removeMedia(ids)
         selection.subtract(ids)
     }
 
     /// Zeigt genau ein ausgewähltes Medium dauerhaft auf dem Ausgang.
     private func showOnOutput(_ ids: Set<Medium.ID>) {
         guard ids.count == 1,
-              let medium = document.project.media.first(where: { ids.contains($0.id) }),
-              let url = document.media.url(for: medium, in: packageURL)
+              let id = ids.first,
+              let medium = document.project.medium(withID: id),
+              let item = document.playable(medium, in: packageURL)
         else { return }
-        output.showSingle(PlayableMedium(medium: medium, url: url))
+        output.showSingle(item)
     }
 }

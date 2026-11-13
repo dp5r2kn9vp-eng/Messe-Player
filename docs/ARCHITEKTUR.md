@@ -26,7 +26,7 @@ flowchart LR
 ## Datenmodell
 - **Project** – `schemaVersion`, `media: [Medium]`, `groups: [Group]`, Einstellungen (Überblendung s, Ausgabe-Bildschirm).
 - **Medium** – `id`, `kind` (image|video), `fileName` (eindeutig, in `Media/`), `displayName` (Originalname).
-- **Group** – `id`, `name`, `entries: [Entry]` (geordnet).
+- **MediaGroup** – `id`, `name`, `entries: [Entry]` (geordnet). Name `MediaGroup` statt `Group`, um Konflikt mit `SwiftUI.Group` zu vermeiden.
 - **Entry** – `id`, `mediumID`, `imageDuration` (nur Bilder, s), `layers: [Layer]`.
 - **Layer** – `id`, `frame` (x, y, relativ 0–1), `content: text(TextStyle) | image(mediumID)`. TextStyle: Text, Schrift, Größe, Farbe, Ausrichtung, Schatten, Box.
 - **OutputState** – `content: OutputContent` (`idle` | `single` | `loop(groupID, index)`) plus `isBlack`. Black liegt über dem Inhalt, Aufheben zeigt ihn unverändert weiter.

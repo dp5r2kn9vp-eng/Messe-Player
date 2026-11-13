@@ -1,13 +1,16 @@
 import SwiftUI
 
-/// Vorschaubild eines Mediums in 16:9, schwarz hinterlegt. Defekte Dateien werden markiert.
+/// Vorschaubild eines Mediums in 16:9, schwarz hinterlegt. Defekte Dateien werden markiert,
+/// was gerade auf dem Ausgang läuft, bekommt einen orangen Rahmen.
 struct MediaThumbnail: View {
     let url: URL?
+    var isLive = false
 
     @State private var image: NSImage?
     @State private var didFail = false
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.button)
         ZStack {
             Color.black
             if let image {
@@ -19,7 +22,8 @@ struct MediaThumbnail: View {
             }
         }
         .aspectRatio(16 / 9, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
+        .clipShape(shape)
+        .overlay { shape.stroke(isLive ? Color.brandOrange : .clear, lineWidth: 2) }
         .task(id: url) { await load() }
     }
 
