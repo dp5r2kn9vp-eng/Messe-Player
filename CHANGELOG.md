@@ -5,6 +5,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [1.1.1] – 2026-11-13
+
 ### Hinzugefügt
 - Notfall-Stopp: Menü „Wiedergabe → Wiedergabe beenden“ mit ⌘. (Cmd+Punkt) beendet die Wiedergabe jederzeit.
 
@@ -50,7 +52,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/releases/tag/v1.0.0
