@@ -5,6 +5,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [2.0.0] – 2026-11-13
+
 ### Hinzugefügt
 - Cue-Liste als Hauptansicht mit den Spalten Status, Nr., Name, Ausgang, Warten, Dauer, Danach und Restzeit; Spalten per Rechtsklick auf die Kopfzeile oder über das Spalten-Menü ein- und ausblendbar.
 - Bearbeiten direkt in der Zeile: Nummer (z. B. „1.5“), Name, Ausgang und Danach als Auswahl, Warten und Dauer im Format `m:ss.cc` (Eingabe `42`, `1:05` oder `0:42.3`). Bei Mehrfachauswahl gelten Ausgang, Warten, Dauer und Danach für alle markierten Cues.
@@ -94,7 +96,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.0.1...v1.1.0
