@@ -32,6 +32,7 @@ struct TimelineLoop: Equatable, Identifiable {
     /// `nil` = Loop läuft bis Stopp (offen).
     var end: TimeInterval?
     let mode: CueGroup.Mode
+    var isShuffled = false
     /// Nach dem letzten Durchlauf einer n-mal-Gruppe wartet die Show auf GO (→).
     var holds = false
 
@@ -57,6 +58,7 @@ struct ShowTimeline: Equatable {
 }
 
 /// Simuliert die Cue-Liste ohne Ausgabe: Die echte `CueEngine` läuft mit virtueller Uhr, Ton und Videoende werden nachgebildet.
+/// Zufallsgruppen erscheinen im ersten Durchlauf in Listenfolge, der ⟲-Abschnitt trägt den Hinweis „Zufall“.
 /// Ab dem Abspielkopf „Erster Cue“ wird jedes nötige GO sofort gedrückt, sobald nichts mehr von selbst weiterläuft.
 /// Gruppen erscheinen mit einem Durchlauf, weitere Durchläufe als ⟲-Abschnitt.
 @MainActor
@@ -77,7 +79,7 @@ struct ShowSimulation {
         let clock = VirtualClock()
         self.show = show
         self.clock = clock
-        engine = CueEngine(scheduler: clock, now: { clock.now }, audio: SimulatedAudioOutput(clock: clock))
+        engine = CueEngine(scheduler: clock, now: { clock.now }, audio: SimulatedAudioOutput(clock: clock), shuffle: { $0 })
         origin = clock.now
     }
 
@@ -210,7 +212,7 @@ private struct Recorder {
         guard openLoopByGroup[run.groupID] == nil, let group = show.groups.first(where: { $0.id == run.groupID }) else { return }
         guard let lane = show.cues[group.range].lazy.compactMap(lane(of:)).first else { return }
         let holds = group.mode != .loop && show.cues[group.range.upperBound].followAction == .hold
-        loops.append(TimelineLoop(groupID: group.id, lane: lane, start: time, mode: group.mode, holds: holds))
+        loops.append(TimelineLoop(groupID: group.id, lane: lane, start: time, mode: group.mode, isShuffled: group.isShuffled, holds: holds))
         openLoopByGroup[run.groupID] = loops.count - 1
     }
 

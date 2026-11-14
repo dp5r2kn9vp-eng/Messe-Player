@@ -20,11 +20,20 @@ struct RunningCue: Equatable {
     var appearedAt: Date?
 }
 
-/// Durchlauf einer Gruppe: Zähler für „n-mal“ und Schutz vor Endlosschleifen ohne Inhalt.
+/// Durchlauf einer Gruppe: Reihenfolge, Zähler für „n-mal“ und Schutz vor Endlosschleifen ohne Inhalt.
 struct GroupRun: Equatable {
     let groupID: CueGroup.ID
     var pass = 1
     var hasPlayed = false
+    /// Cues dieses Durchlaufs in Abspielfolge (Listenfolge oder zufällig).
+    var order: [Cue.ID] = []
+    /// Stelle des laufenden Cues in `order`.
+    var position = 0
+
+    /// Folgender Cue im Durchlauf; `nil` am Ende des Durchlaufs.
+    var nextCueID: Cue.ID? {
+        order.indices.contains(position + 1) ? order[position + 1] : nil
+    }
 }
 
 /// Cue-Engine: Abspielkopf, GO, Warten, Dauer, Folgeaktionen, Gruppen-Loop, Pause, Stopp, Black.
@@ -55,6 +64,7 @@ final class CueEngine {
     @ObservationIgnored private let scheduler: any StepScheduler
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let audio: any AudioCueOutput
+    @ObservationIgnored private let shuffle: GroupOrder.Shuffle
     /// Hörbare Audio-Cues mit der Kennung ihres Starts.
     @ObservationIgnored private var audibleSteps: [Cue.ID: Int] = [:]
     @ObservationIgnored private var handles: [Cue.ID: Cancellation] = [:]
@@ -67,11 +77,13 @@ final class CueEngine {
     init(
         scheduler: any StepScheduler = TaskStepScheduler(),
         now: @escaping () -> Date = Date.init,
-        audio: any AudioCueOutput = AudioCuePlayers()
+        audio: any AudioCueOutput = AudioCuePlayers(),
+        shuffle: @escaping GroupOrder.Shuffle = GroupOrder.random
     ) {
         self.scheduler = scheduler
         self.now = now
         self.audio = audio
+        self.shuffle = shuffle
     }
 
     // MARK: Cue-Liste
@@ -120,16 +132,16 @@ final class CueEngine {
 
     // MARK: Transport
 
-    /// Startet den Cue am Abspielkopf (in einer Gruppe deren ersten Cue) samt Kette „Mit nächstem starten“.
+    /// Startet den Cue am Abspielkopf (in einer Gruppe deren Durchlauf von vorn) samt Kette „Mit nächstem starten“.
     func go() {
         guard let index = playheadIndex else { return }
         startChain(at: show.group(at: index)?.range.lowerBound ?? index, manual: true)
     }
 
-    /// Startet einen Cue sofort (Doppelklick), unabhängig vom Abspielkopf.
+    /// Startet einen Cue sofort (Doppelklick), unabhängig vom Abspielkopf; in einer Gruppe beginnt der Durchlauf mit ihm.
     func start(_ id: Cue.ID) {
         guard let index = show.index(of: id) else { return }
-        startChain(at: index, manual: true)
+        startChain(at: index, manual: true, keepsFirstCue: true)
     }
 
     /// Hält alle laufenden Cues samt Restzeit an bzw. setzt sie fort. `false`, wenn nichts läuft.
@@ -201,7 +213,8 @@ final class CueEngine {
     /// Medium, das voraussichtlich als Nächstes auf dem Ausgang erscheint (zum Vorladen).
     func upcoming(on outputID: OutputDefinition.ID?) -> PlayableMedium? {
         guard let frame = state(for: outputID).content.frame, let index = show.index(of: frame.cueID) else { return nil }
-        let next = show.group(at: index).flatMap { $0.range.upperBound == index ? $0.range.lowerBound : nil } ?? index + 1
+        let inGroup = running[frame.cueID]?.groupRun?.nextCueID.flatMap(show.index(of:))
+        let next = inGroup ?? show.group(at: index).flatMap { $0.range.upperBound == index ? $0.range.lowerBound : nil } ?? index + 1
         return show.cues.indices.contains(next) ? show.cues[next].item : nil
     }
 
@@ -227,14 +240,20 @@ final class CueEngine {
     // MARK: Ablauf
 
     /// Startet den Cue an `index` und alle folgenden mit „Mit nächstem starten“; setzt danach den Abspielkopf.
-    private func startChain(at index: Int, manual: Bool) {
+    /// Eine Gruppe beginnt einen neuen Durchlauf; `keepsFirstCue` startet ihn mit dem Cue an `index`.
+    private func startChain(at index: Int, manual: Bool, keepsFirstCue: Bool = false) {
         if manual {
             missingCueID = nil
             if isPaused { resume() }
         }
         var current = index
         while true {
-            launch(at: current, groupRun: show.group(at: current).map { GroupRun(groupID: $0.id) }, manual: manual)
+            if let group = show.group(at: current) {
+                let run = makeRun(group, first: keepsFirstCue ? show.cues[current].id : nil)
+                launch(at: run.order.first.flatMap(show.index(of:)) ?? current, groupRun: run, manual: manual)
+            } else {
+                launch(at: current, groupRun: nil, manual: manual)
+            }
             guard effectiveFollowAction(at: current) == .continueWithNext, show.cues.indices.contains(current + 1) else { break }
             current += 1
         }
@@ -335,17 +354,35 @@ final class CueEngine {
         }
     }
 
-    /// Mitglieder laufen weiter; am Ende Rücksprung (Loop/n-mal), danach „Danach“ des letzten Cues.
+    /// Mitglieder laufen in der Folge des Durchlaufs weiter; am Ende Rücksprung (Loop/n-mal),
+    /// danach „Danach“ des letzten Cues der Gruppe in der Liste.
     private func finishInGroup(_ group: ShowGroup, at index: Int, run: GroupRun) {
-        guard index == group.range.upperBound else {
-            launch(at: index + 1, groupRun: run, manual: false)
+        if let (nextIndex, nextRun) = nextInRun(run, of: group) {
+            launch(at: nextIndex, groupRun: nextRun, manual: false)
             return
         }
         if run.hasPlayed, repeats(group, after: run.pass) {
-            launch(at: group.range.lowerBound, groupRun: GroupRun(groupID: group.id, pass: run.pass + 1), manual: false)
-        } else if show.cues[index].followAction != .hold {
-            startNext(after: index)
+            let nextRun = makeRun(group, pass: run.pass + 1, previousLast: run.order.last)
+            launch(at: nextRun.order.first.flatMap(show.index(of:)) ?? group.range.lowerBound, groupRun: nextRun, manual: false)
+        } else if show.cues[group.range.upperBound].followAction != .hold {
+            startNext(after: group.range.upperBound)
         }
+    }
+
+    /// Nächster noch vorhandener Cue des Durchlaufs (gelöschte Cues werden übersprungen).
+    private func nextInRun(_ run: GroupRun, of group: ShowGroup) -> (Int, GroupRun)? {
+        var next = run
+        while let id = next.nextCueID {
+            next.position += 1
+            if let index = show.index(of: id), group.range.contains(index) { return (index, next) }
+        }
+        return nil
+    }
+
+    private func makeRun(_ group: ShowGroup, pass: Int = 1, first: Cue.ID? = nil, previousLast: Cue.ID? = nil) -> GroupRun {
+        let ids = show.cues[group.range].map(\.id)
+        let order = GroupOrder.pass(of: ids, isShuffled: group.isShuffled, first: first, previousLast: previousLast, shuffle: shuffle)
+        return GroupRun(groupID: group.id, pass: pass, order: order)
     }
 
     private func repeats(_ group: ShowGroup, after pass: Int) -> Bool {

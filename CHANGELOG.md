@@ -5,6 +5,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Neu
+- Gruppen können ihre Cues in zufälliger Reihenfolge abspielen (Zufall-Symbol in der Gruppenzeile). Jeder Durchlauf wird neu gemischt, ohne dass ein Cue direkt zweimal hintereinander kommt (#79).
+
 ## [2.1.2] – 2026-11-14
 
 ### Behoben
