@@ -74,6 +74,8 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
     var color: RGBAColor?
     /// Fade- oder Stopp-Cue; dann ohne Medium.
     var action: CueAction?
+    /// Start zu fester Uhrzeit.
+    var schedule: CueSchedule?
 
     init(id: UUID = UUID(), number: String, mediumID: Medium.ID? = nil, outputID: OutputDefinition.ID? = nil) {
         self.id = id
@@ -107,6 +109,7 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         color = try container.decodeIfPresent(RGBAColor.self, forKey: .color)
         action = try container.decodeIfPresent(CueAction.self, forKey: .action)
+        schedule = try container.decodeIfPresent(CueSchedule.self, forKey: .schedule)
     }
 }
 

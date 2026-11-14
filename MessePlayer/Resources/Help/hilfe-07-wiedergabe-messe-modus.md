@@ -11,7 +11,7 @@ Unten steuerst du die Show: GO, „Als Nächstes“ (der Cue am Abspielkopf), Pa
 
 ## Menü Wiedergabe
 
-Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Loop beenden, Stopp alle, Black alle, Notfall-Stopp (⌘.) und Messe-Modus.
+Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Loop beenden, Stopp alle, Black alle, Notfall-Stopp (⌘.), Messe-Modus und Zeitplan aktiv.
 
 ## Tasten
 
@@ -33,6 +33,16 @@ Schalte den Messe-Modus über das Menü Wiedergabe mit „Messe-Modus“ (⇧⌘
 - Die Cue-Liste ist gesperrt. Ein Klick setzt nur den Abspielkopf, ein Doppelklick startet den Cue.
 - Bearbeiten, Sortieren, Löschen und Drag & Drop sind aus.
 - Medienbereich, Inspektor, Zeitstrahl und die Pause-Schaltfläche sind ausgeblendet.
+
+## Start nach Uhrzeit
+
+Ein Cue kann zu einer festen Uhrzeit starten, zum Beispiel täglich um 14:00 die Präsentation. Stelle das im Inspektor unter „Zeit & Ablauf“ ein: „Startet um Uhrzeit“, die Uhrzeit und optional die Wochentage. Ohne Auswahl gilt die Zeit täglich. In der Cue-Liste zeigt ein Uhr-Symbol solche Cues.
+
+- Der Start wirkt wie GO auf diesen Cue. Er ersetzt den Inhalt seines Ausgangs, zum Beispiel einen Standloop. Andere Ausgänge und Ton laufen weiter.
+- Der Zeitplan gilt im Messe-Modus oder mit „Zeitplan aktiv“ im Menü Wiedergabe.
+- Die Transportleiste zeigt den nächsten geplanten Start.
+- Eine verpasste Zeit wird nicht nachgeholt, zum Beispiel wenn CueView erst danach gestartet wurde.
+- Während einer Pause entfällt der Start. Die Transportleiste meldet das. Nach „Stopp alle“ bleibt der Zeitplan aktiv.
 
 ## Hinweis beim ersten Start
 

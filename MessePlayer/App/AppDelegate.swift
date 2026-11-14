@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let hotkeys = HotkeyService()
     let mediaLengths = MediaLengths()
     let routing = OutputRouting()
+    private(set) lazy var timetable = CueTimetable(engine: engine)
     private(set) lazy var outputWindows = OutputWindowManager(engine: engine, displays: displays, routing: routing)
     private let sleepGuard = SleepGuard()
 
@@ -22,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         registerHotkeys()
         hotkeys.start()
         // Ohne diese Ausnahme sähe jeder Testlauf beim nächsten echten Start wie ein Absturz aus.
+        if !AppInfo.isTestHost { timetable.start() }
         if !AppInfo.isTestHost, SessionStore.beginRun() { reopenLastProject() }
     }
 

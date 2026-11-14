@@ -8,6 +8,7 @@ struct MessePlayerApp: App {
         DocumentGroup(newDocument: ProjectDocument()) { file in
             ControlView(document: file.$document, packageURL: file.fileURL)
                 .environment(appDelegate.engine)
+                .environment(appDelegate.timetable)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindows)
                 .environment(appDelegate.routing)

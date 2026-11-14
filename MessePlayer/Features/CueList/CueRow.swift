@@ -131,6 +131,11 @@ struct CueRow: View {
             if let symbol = model.cue.action?.symbolName ?? model.medium?.kind.symbolName {
                 Image(systemName: symbol).foregroundStyle(Color.mutedLight)
             }
+            if let schedule = model.cue.schedule {
+                Image(systemName: "clock")
+                    .foregroundStyle(Color.brandOrange)
+                    .help("Startet um \(schedule.summary)")
+            }
             if model.hasMissingTarget {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(Color.brandRed)
