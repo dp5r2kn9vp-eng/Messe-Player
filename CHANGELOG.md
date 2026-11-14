@@ -5,6 +5,11 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [2.1.1] – 2026-11-14
+
+### Behoben
+- Die Commit-ID (`CueViewGitCommit`) fehlte im Release-Build, wenn sich die Info.plist geändert hatte (betraf 2.1.0). Das Build-Skript läuft jetzt nach dem Erzeugen der Info.plist.
+
 ## [2.1.0] – 2026-11-14
 
 ### Geändert
@@ -111,7 +116,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v1.2.0...v2.0.0
