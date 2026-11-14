@@ -52,3 +52,18 @@ struct SessionTests {
         #expect(snapshot.isBlack)
     }
 }
+
+struct LaunchTests {
+    @Test func cleanExitStartsWithWelcome() throws {
+        let defaults = try #require(UserDefaults(suiteName: UUID().uuidString))
+        #expect(!SessionStore.beginRun(in: defaults))
+        SessionStore.endRun(in: defaults)
+        #expect(!SessionStore.beginRun(in: defaults))
+    }
+
+    @Test func crashRestoresLastProject() throws {
+        let defaults = try #require(UserDefaults(suiteName: UUID().uuidString))
+        _ = SessionStore.beginRun(in: defaults)
+        #expect(SessionStore.beginRun(in: defaults))
+    }
+}

@@ -15,14 +15,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         sleepGuard.start()
         registerHotkeys()
         hotkeys.start()
-        reopenLastProject()
+        if SessionStore.beginRun() { reopenLastProject() }
     }
 
-    /// Kein leeres Projekt und kein Öffnen-Dialog – stattdessen öffnet sich das letzte Projekt oder das Willkommensfenster.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        QuitConfirmation.confirm(isOutputActive: !engine.visibleCueIDs.isEmpty) ? .terminateNow : .terminateCancel
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        SessionStore.endRun()
+    }
+
+    /// Kein leeres Projekt und kein Öffnen-Dialog – stattdessen erscheint das Willkommensfenster.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
         false
     }
 
+    /// Nur nach Absturz oder Stromausfall: Das letzte Projekt samt Ausgabezustand kommt automatisch zurück.
     private func reopenLastProject() {
         guard let url = SessionStore.lastProjectURL, NSDocumentController.shared.documents.isEmpty else { return }
         NSDocumentController.shared.openDocument(withContentsOf: url, display: true) { _, _, _ in }
