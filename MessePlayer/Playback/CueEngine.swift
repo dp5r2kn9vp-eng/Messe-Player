@@ -70,6 +70,9 @@ final class CueEngine {
     @ObservationIgnored private var handles: [Cue.ID: Cancellation] = [:]
     @ObservationIgnored private var step = 0
     @ObservationIgnored private var pausedAt: Date?
+    /// Verzögerte Starts durch Nachwarten, je auslösendem Cue (Restzeit + Zeitgeber).
+    @ObservationIgnored private var pendingStarts: [Cue.ID: StepProgress] = [:]
+    @ObservationIgnored private var pendingHandles: [Cue.ID: Cancellation] = [:]
 
     /// Kurzes Ausblenden der Audio-Cues bei „Stopp alle“; der Notfall-Stopp schneidet hart.
     static let audioStopFade: TimeInterval = 0.2
@@ -103,6 +106,9 @@ final class CueEngine {
         for id in running.keys where newShow.index(of: id) == nil {
             stopAudio(id, fadeOut: Self.audioStopFade)
             cancel(id)
+        }
+        for id in pendingStarts.keys where newShow.index(of: id) == nil {
+            cancelPendingStart(id)
         }
         refreshVisibleFrames()
         refreshAudio()
@@ -147,7 +153,7 @@ final class CueEngine {
     /// Hält alle laufenden Cues samt Restzeit an bzw. setzt sie fort. `false`, wenn nichts läuft.
     @discardableResult
     func togglePause() -> Bool {
-        guard !running.isEmpty else { return false }
+        guard !running.isEmpty || hasPendingStarts else { return false }
         isPaused ? resume() : pause()
         return true
     }
@@ -169,6 +175,9 @@ final class CueEngine {
         if isPaused { audio.setPaused(false) }
         handles.values.forEach { $0.cancel() }
         handles = [:]
+        pendingHandles.values.forEach { $0.cancel() }
+        pendingHandles = [:]
+        pendingStarts = [:]
         running = [:]
         channels = [:]
         isPaused = false
@@ -228,6 +237,11 @@ final class CueEngine {
         channels.values.count { $0.content.frame?.item.medium.kind == .video }
     }
 
+    /// Ein Folge-Cue wartet noch auf sein Nachwarten.
+    var hasPendingStarts: Bool {
+        !pendingStarts.isEmpty
+    }
+
     func isShowing(_ mediumID: Medium.ID) -> Bool {
         channels.values.contains { $0.content.frame?.item.medium.id == mediumID }
     }
@@ -255,6 +269,11 @@ final class CueEngine {
                 launch(at: current, groupRun: nil, manual: manual)
             }
             guard effectiveFollowAction(at: current) == .continueWithNext, show.cues.indices.contains(current + 1) else { break }
+            let postWait = show.cues[current].postWait
+            if postWait > 0 {
+                schedulePendingStart(after: show.cues[current].id, delay: postWait)
+                break
+            }
             current += 1
         }
         advancePlayhead(from: index, to: current, manual: manual)
@@ -278,6 +297,7 @@ final class CueEngine {
         let cue = show.cues[index]
         stopAudio(cue.id, fadeOut: Self.audioStopFade)
         cancel(cue.id)
+        cancelPendingStart(cue.id)
         if case .missing = cue.content {
             if manual { missingCueID = cue.id }
             finish(at: index, groupRun: groupRun)
@@ -398,6 +418,30 @@ final class CueEngine {
         startChain(at: index + 1, manual: false)
     }
 
+    // MARK: Nachwarten
+
+    /// Der Folge-Cue von `id` startet nach `delay` (ab Start von `id`), auch wenn `id` vorher endet.
+    private func schedulePendingStart(after id: Cue.ID, delay: TimeInterval) {
+        pendingStarts[id] = StepProgress(startedAt: now(), duration: delay)
+        schedulePending(id, after: delay)
+    }
+
+    private func schedulePending(_ id: Cue.ID, after seconds: TimeInterval) {
+        pendingHandles[id]?.cancel()
+        pendingHandles[id] = scheduler.schedule(after: .seconds(seconds)) { [weak self] in self?.firePendingStart(id) }
+    }
+
+    private func firePendingStart(_ id: Cue.ID) {
+        cancelPendingStart(id)
+        guard let index = show.index(of: id) else { return }
+        startNext(after: index)
+    }
+
+    private func cancelPendingStart(_ id: Cue.ID) {
+        pendingHandles.removeValue(forKey: id)?.cancel()
+        pendingStarts[id] = nil
+    }
+
     // MARK: Pause
 
     private func pause() {
@@ -407,8 +451,13 @@ final class CueEngine {
         audio.setPaused(true)
         handles.values.forEach { $0.cancel() }
         handles = [:]
+        pendingHandles.values.forEach { $0.cancel() }
+        pendingHandles = [:]
         for id in running.keys {
             running[id]?.progress?.pausedAt = time
+        }
+        for id in pendingStarts.keys {
+            pendingStarts[id]?.pausedAt = time
         }
     }
 
@@ -424,6 +473,11 @@ final class CueEngine {
             resumed.appearedAt = runningCue.appearedAt.map { $0 + pausedFor }
             running[id] = resumed
             reschedule(resumed)
+        }
+        for (id, progress) in pendingStarts {
+            let resumed = progress.resumed(at: time)
+            pendingStarts[id] = resumed
+            schedulePending(id, after: resumed.remaining(at: time))
         }
     }
 

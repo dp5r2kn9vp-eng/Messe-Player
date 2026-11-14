@@ -17,6 +17,7 @@ Die Spalten sind Status, Nr., Name, Ausgang, Warten, Dauer, Danach und Restzeit.
 - Halten: Der Cue bleibt am Ende stehen. Ein Video geht am Ende auf Schwarz.
 - Weiter nach Ende: Der nächste Cue startet, wenn dieser fertig ist.
 - Mit nächstem starten: Der nächste Cue startet zusammen mit diesem.
+- Nachwarten: Bei „Mit nächstem starten“ startet der nächste Cue erst so viele Sekunden nach diesem. Die Spalte „Nachw.“ blendest du über das Spalten-Menü ein, im Inspektor steht sie unter „Zeit & Ablauf“.
 
 ## Gruppen & Loop
 

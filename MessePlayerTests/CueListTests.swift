@@ -221,12 +221,32 @@ struct CueListTests {
 
     @Test func columnVisibilityRoundTrips() {
         var visibility = CueColumnVisibility()
-        #expect(visibility.visible == CueColumn.allCases)
+        #expect(visibility.visible == CueColumn.allCases.filter { $0 != .postWait })
         visibility.toggle(.wait)
         visibility.toggle(.remaining)
         let restored = CueColumnVisibility(rawValue: visibility.rawValue)
         #expect(restored.visible == [.status, .number, .name, .output, .duration, .followAction])
-        #expect(CueColumnVisibility(rawValue: "unbekannt,wait").hidden == [.wait])
+        #expect(CueColumnVisibility(rawValue: "unbekannt,wait").hidden == [.wait, .postWait])
+    }
+
+    @Test func postWaitColumnIsHiddenUntilShown() {
+        #expect(CueColumnVisibility(rawValue: "").hidden == [.postWait])
+        var visibility = CueColumnVisibility(rawValue: "remaining")
+        visibility.toggle(.postWait)
+        #expect(visibility.rawValue == "+postWait,remaining")
+        #expect(CueColumnVisibility(rawValue: visibility.rawValue).hidden == [.remaining])
+    }
+
+    @Test func postWaitAppliesOnlyToContinueWithNextOutsideGroups() throws {
+        var project = Project()
+        project.cues = (1...3).map { Cue(number: "\($0)") }
+        project.apply(.followAction(.continueWithNext), to: [project.cues[0].id, project.cues[1].id])
+        project.apply(.postWait(-3), to: [project.cues[0].id])
+        #expect(project.cues[0].postWait == 0)
+        project.groups = [CueGroup(name: "G", firstCueID: project.cues[1].id, lastCueID: project.cues[2].id)]
+        #expect(project.postWaitApplies(to: project.cues[0]))
+        #expect(!project.postWaitApplies(to: project.cues[1]))
+        #expect(!project.postWaitApplies(to: project.cues[2]))
     }
 
     @Test(arguments: [("42", "0:42.00"), ("1:05", "1:05.00"), ("0:42.3", "0:42.30")])

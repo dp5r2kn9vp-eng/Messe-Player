@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Spalten der Cue-Liste in fester Reihenfolge. Name ist flexibel, die übrigen haben feste Breiten.
 enum CueColumn: String, CaseIterable, Identifiable {
-    case status, number, name, output, wait, duration, followAction, remaining
+    case status, number, name, output, wait, duration, followAction, postWait, remaining
 
     var id: String { rawValue }
 
@@ -15,13 +15,18 @@ enum CueColumn: String, CaseIterable, Identifiable {
         case .wait: "Warten"
         case .duration: "Dauer"
         case .followAction: "Danach"
+        case .postWait: "Nachw."
         case .remaining: "Restzeit"
         }
     }
 
     /// Langer Name für das Spalten-Menü.
     var menuTitle: LocalizedStringKey {
-        self == .status ? "Status" : title
+        switch self {
+        case .status: "Status"
+        case .postWait: "Nachwarten"
+        default: title
+        }
     }
 
     /// `nil` = nimmt den restlichen Platz.
@@ -31,27 +36,41 @@ enum CueColumn: String, CaseIterable, Identifiable {
         case .number: 44
         case .name: nil
         case .output: 104
-        case .wait, .duration: 72
+        case .wait, .duration, .postWait: 72
         case .followAction: 152
         case .remaining: 132
         }
     }
 }
 
-/// Ausgeblendete Spalten, als Text speicherbar (`@AppStorage`). Standard: alle sichtbar.
+/// Ausgeblendete Spalten, als Text speicherbar (`@AppStorage`).
+/// Standard: alle sichtbar außer `hiddenByDefault`; eingeblendete davon stehen mit „+“ im Text.
 struct CueColumnVisibility: RawRepresentable, Equatable {
+    static let hiddenByDefault: Set<CueColumn> = [.postWait]
+    private static let shownMarker = "+"
+
     private(set) var hidden: Set<CueColumn>
 
-    init(hidden: Set<CueColumn> = []) {
+    init(hidden: Set<CueColumn> = CueColumnVisibility.hiddenByDefault) {
         self.hidden = hidden
     }
 
     init(rawValue: String) {
-        hidden = Set(rawValue.split(separator: ",").compactMap { CueColumn(rawValue: String($0)) })
+        let names = rawValue.split(separator: ",").map(String.init)
+        let listed = Set(names.compactMap(CueColumn.init(rawValue:)))
+        let shown = Set(names.filter { $0.hasPrefix(Self.shownMarker) }.compactMap { CueColumn(rawValue: String($0.dropFirst())) })
+        hidden = listed.union(Self.hiddenByDefault.subtracting(shown))
     }
 
     var rawValue: String {
-        CueColumn.allCases.filter(hidden.contains).map(\.rawValue).joined(separator: ",")
+        CueColumn.allCases.compactMap { column in
+            switch (hidden.contains(column), Self.hiddenByDefault.contains(column)) {
+            case (true, false): column.rawValue
+            case (false, true): Self.shownMarker + column.rawValue
+            default: nil
+            }
+        }
+        .joined(separator: ",")
     }
 
     var visible: [CueColumn] {
@@ -111,7 +130,7 @@ extension View {
         frame(
             minWidth: column.width ?? 120,
             maxWidth: column.width ?? .infinity,
-            alignment: column == .wait || column == .duration ? .trailing : .leading
+            alignment: [.wait, .duration, .postWait].contains(column) ? .trailing : .leading
         )
     }
 }

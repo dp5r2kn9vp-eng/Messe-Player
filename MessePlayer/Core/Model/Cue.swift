@@ -46,6 +46,8 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
         didSet { stillDuration = stillDuration.clamped(to: Self.stillDurationRange) }
     }
     var followAction = FollowAction.hold
+    /// Nachwarten: Bei „Mit nächstem starten“ startet der nächste Cue erst so viele Sekunden nach diesem.
+    var postWait: TimeInterval = 0
     var volume = 1.0 {
         didSet { volume = volume.clamped(to: Self.volumeRange) }
     }
@@ -91,6 +93,7 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
         outPoint = try container.decodeIfPresent(TimeInterval.self, forKey: .outPoint)
         stillDuration = try container.decodeIfPresent(TimeInterval.self, forKey: .stillDuration) ?? Self.defaultStillDuration
         followAction = try container.decodeIfPresent(FollowAction.self, forKey: .followAction) ?? .hold
+        postWait = try container.decodeIfPresent(TimeInterval.self, forKey: .postWait) ?? 0
         volume = try container.decodeIfPresent(Double.self, forKey: .volume) ?? 1
         fadeIn = try container.decodeIfPresent(TimeInterval.self, forKey: .fadeIn) ?? 0
         fadeOut = try container.decodeIfPresent(TimeInterval.self, forKey: .fadeOut) ?? 0

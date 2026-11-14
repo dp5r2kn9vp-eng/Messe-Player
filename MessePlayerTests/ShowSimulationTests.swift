@@ -23,6 +23,15 @@ struct ShowSimulationTests {
         #expect(timeline.bars.allSatisfy { !$0.holds })
     }
 
+    @Test func postWaitShiftsNextCueWithoutExtraGo() {
+        var first = ShowFixture.cue(.image, duration: 1, follow: .continueWithNext)
+        first.postWait = 2
+        let cues = [first, ShowFixture.cue(.image, output: ShowFixture.outputA2)]
+        let timeline = ShowSimulation.run(ShowFixture.show(cues))
+        #expect(timeline.goTimes == [0])
+        #expect(timeline.bars.map(\.start) == [0, 2])
+    }
+
     @Test func continueWithNextStartsBothOutputsTogether() {
         let cues = [
             ShowFixture.cue(.image, follow: .continueWithNext),

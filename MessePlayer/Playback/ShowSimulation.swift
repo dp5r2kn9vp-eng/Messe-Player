@@ -108,7 +108,8 @@ struct ShowSimulation {
 
     /// Nichts läuft mehr von selbst weiter: nur noch endlose Loops oder Cues mit unbekannter Länge.
     private func isSettled(_ recorder: Recorder) -> Bool {
-        engine.running.values.allSatisfy { running in
+        guard !engine.hasPendingStarts else { return false }
+        return engine.running.values.allSatisfy { running in
             if let run = running.groupRun, recorder.isEndless(run) { return true }
             let cue = show.index(of: running.cueID).map { show.cues[$0] }
             return running.phase == .running && cue?.duration == nil
