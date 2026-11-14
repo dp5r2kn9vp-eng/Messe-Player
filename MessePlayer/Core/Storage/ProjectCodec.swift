@@ -15,13 +15,18 @@ nonisolated enum ProjectCodec {
     static func encode(_ project: Project) throws -> Data {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(project)
+        var stored = project
+        stored.schemaVersion = project.requiredSchemaVersion
+        return try encoder.encode(stored)
     }
 
+    /// Im Speicher trägt ein Projekt immer die aktuelle Version.
     static func decode(_ data: Data) throws -> Project {
         let version = try schemaVersion(of: data)
         guard version <= Project.currentSchemaVersion else { throw ProjectError.newerSchema(version) }
-        return try JSONDecoder().decode(Project.self, from: migrate(data, from: version))
+        var project = try JSONDecoder().decode(Project.self, from: migrate(data, from: version))
+        project.schemaVersion = Project.currentSchemaVersion
+        return project
     }
 
     static func schemaVersion(of data: Data) throws -> Int {
@@ -32,6 +37,8 @@ nonisolated enum ProjectCodec {
     private static func migrate(_ data: Data, from version: Int) throws -> Data {
         switch version {
         case Project.currentSchemaVersion: data
+        // v2 → v3: nur neue, optionale Felder (Fade-/Stopp-Cues).
+        case 2: data
         case 1: try migrate(migrateV1toV2(data), from: 2)
         default: throw ProjectError.unsupportedSchema(version)
         }

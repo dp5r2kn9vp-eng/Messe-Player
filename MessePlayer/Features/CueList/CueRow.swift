@@ -66,12 +66,16 @@ struct CueRowModel {
     let outputs: [OutputDefinition]
     /// Nachwarten wirkt nur bei „Mit nächstem starten“ außerhalb von Gruppen.
     var postWaitApplies = false
+    /// Fade-/Stopp-Cue: Beschreibung wie „Fade: 3 Musik → 30 %“.
+    var actionTitle: String?
+    var hasMissingTarget = false
 
-    var isMissing: Bool { cue.mediumID != nil && medium == nil }
+    var isMissing: Bool { (cue.mediumID != nil && medium == nil) || hasMissingTarget }
     var isAudio: Bool { medium?.kind == .audio }
 
     var displayName: String {
         if !cue.name.isEmpty { return cue.name }
+        if let actionTitle { return actionTitle }
         if let medium { return medium.displayName }
         return cue.mediumID == nil ? String(localized: "Steuer-Cue") : String(localized: "Medium fehlt")
     }
@@ -124,8 +128,13 @@ struct CueRow: View {
 
     private var nameCell: some View {
         HStack(spacing: Theme.Spacing.xs) {
-            if let medium = model.medium {
-                Image(systemName: medium.kind.symbolName).foregroundStyle(Color.mutedLight)
+            if let symbol = model.cue.action?.symbolName ?? model.medium?.kind.symbolName {
+                Image(systemName: symbol).foregroundStyle(Color.mutedLight)
+            }
+            if model.hasMissingTarget {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(Color.brandRed)
+                    .help("Ziel fehlt – im Inspektor ein neues Ziel wählen")
             }
             TextField(model.displayName, text: Binding(get: { model.cue.name }, set: { onEdit(.name($0)) }))
                 .textFieldStyle(.plain)

@@ -9,6 +9,8 @@ nonisolated enum CueEdit: Equatable {
     case duration(TimeInterval)
     case followAction(FollowAction)
     case postWait(TimeInterval)
+    /// Einstellungen eines Fade-/Stopp-Cues.
+    case action(CueAction)
     case notes(String)
     case color(RGBAColor?)
     /// Medium ersetzen; In- und Out-Punkt beginnen neu.
@@ -28,7 +30,7 @@ nonisolated enum CueEdit: Equatable {
     /// Nummer, Name, Medium und In/Out sind je Cue eigen und gelten nie für eine Mehrfachauswahl.
     var appliesToSelection: Bool {
         switch self {
-        case .number, .name, .medium, .inPoint, .outPoint: false
+        case .number, .name, .medium, .inPoint, .outPoint, .action: false
         default: true
         }
     }
@@ -65,6 +67,8 @@ nonisolated extension Project {
                 applyTrim(edit, at: index, mediaLength: mediaLength(cue))
             case .followAction(let action):
                 cues[index].followAction = action
+            case .action(let action):
+                if cue.action != nil { cues[index].action = action }
             case .postWait(let seconds):
                 cues[index].postWait = seconds.clamped(to: Cue.waitRange)
             case .notes(let notes):
@@ -148,6 +152,17 @@ nonisolated extension Project {
         cues.insert(contentsOf: newCues, at: min(max(offset, 0), cues.count))
         rebuildGroups(from: membership)
         return newCues.map(\.id)
+    }
+
+    /// Legt einen Fade-/Stopp-Cue an der Stelle `offset` an.
+    mutating func insertActionCue(_ action: CueAction, at offset: Int, joining groupID: CueGroup.ID? = nil) -> Cue.ID {
+        var cue = Cue(number: String(highestCueNumber + 1))
+        cue.action = action
+        var membership = groupMembership
+        if let groupID { membership[cue.id] = groupID }
+        cues.insert(cue, at: min(max(offset, 0), cues.count))
+        rebuildGroups(from: membership)
+        return cue.id
     }
 
     /// Verschiebt Cues vor die Position `offset` (Zählung wie `Array.move(fromOffsets:toOffset:)`).

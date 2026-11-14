@@ -7,7 +7,8 @@ final class AudioCuePlayer {
     private let player: AVPlayer
     private var playback: PlaybackSettings
     private var tracks: [AVAssetTrack] = []
-    private var release: VolumeRamp?
+    /// Laufende Änderung der Lautstärke (Fade-Cue oder Ausblenden beim Stopp).
+    private var adjustment: VolumeRamp?
     private var onFinish: (() -> Void)?
     private var endObservers: [NSObjectProtocol] = []
     private var statusObservation: NSKeyValueObservation?
@@ -48,6 +49,7 @@ final class AudioCuePlayer {
     /// Lautstärke und Fades; wirkt auch während der Wiedergabe.
     func apply(_ settings: PlaybackSettings) {
         guard settings != playback else { return }
+        adjustment = playback.adjustment(changingTo: settings, at: currentTime, current: adjustment)
         playback = settings
         applyAudioMix()
     }
@@ -61,8 +63,8 @@ final class AudioCuePlayer {
             return
         }
         let position = currentTime
-        let volume = playback.audio.volume(at: position - playback.startTime, length: playback.playLength)
-        release = VolumeRamp(start: position, duration: fadeOut, from: volume, to: 0)
+        let volume = playback.volume(at: position, adjustment: adjustment)
+        adjustment = VolumeRamp(start: position, duration: fadeOut, from: volume, to: 0)
         applyAudioMix()
         releaseTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(fadeOut))
@@ -90,7 +92,7 @@ final class AudioCuePlayer {
     }
 
     private func applyAudioMix() {
-        player.currentItem?.audioMix = AVAudioMix.cue(tracks: tracks, playback: playback, release: release)
+        player.currentItem?.audioMix = AVAudioMix.cue(tracks: tracks, playback: playback, release: adjustment)
     }
 
     private func observeEnd(of item: AVPlayerItem) {

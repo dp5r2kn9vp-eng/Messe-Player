@@ -67,4 +67,31 @@ struct PlaybackSettings: Equatable {
     var startTime: TimeInterval = 0
     /// Out-Punkt; `nil` = bis Medienende.
     var endTime: TimeInterval?
+    /// Von einem Fade-Cue gesetzte Lautstärke/Deckkraft.
+    var levelFade: LevelFade?
+}
+
+/// Werte, auf die ein Fade-Cue einen laufenden Cue blendet. `id` macht jede neue Blende eindeutig.
+struct LevelFade: Equatable {
+    let id: Int
+    /// Ziel-Lautstärke 0…1; `nil` = unverändert.
+    var volume: Double?
+    /// Ziel-Deckkraft 0…1; `nil` = unverändert.
+    var opacity: Double?
+    let duration: TimeInterval
+}
+
+extension PlaybackSettings {
+    /// Lautstärke an der Medienposition `position`, mit einer laufenden Anpassung (Fade-Cue, Ausblenden).
+    func volume(at position: TimeInterval, adjustment: VolumeRamp?) -> Double {
+        if let adjustment, position >= adjustment.start { return adjustment.value(at: position) }
+        return audio.volume(at: position - startTime, length: playLength)
+    }
+
+    /// Rampe von der jetzigen Lautstärke (mit den bisherigen Einstellungen) auf das Ziel der neuen Blende.
+    /// `nil`, wenn `newSettings` keine neue Lautstärke-Blende bringt.
+    func adjustment(changingTo newSettings: PlaybackSettings, at position: TimeInterval, current: VolumeRamp?) -> VolumeRamp? {
+        guard let fade = newSettings.levelFade, fade != levelFade, let target = fade.volume else { return current }
+        return VolumeRamp(start: position, duration: fade.duration, from: volume(at: position, adjustment: current), to: target)
+    }
 }

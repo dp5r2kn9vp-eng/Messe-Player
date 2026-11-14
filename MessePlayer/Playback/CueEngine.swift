@@ -67,6 +67,10 @@ final class CueEngine {
     private(set) var isPaused = false
     /// Zuletzt per GO gestarteter Cue ohne Medium (Fehlermeldung in der Transportleiste).
     private(set) var missingCueID: Cue.ID?
+    /// Zuletzt übersprungener Fade-/Stopp-Cue, dessen Ziel nicht lief (Hinweis in der Transportleiste).
+    private(set) var inactiveTargetCueID: Cue.ID?
+    /// Von Fade-Cues gesetzte Lautstärke/Deckkraft je Ziel-Cue.
+    private(set) var levels: [Cue.ID: LevelFade] = [:]
     /// Steuerfenster, dessen Cue-Liste geladen ist.
     private(set) var ownerID: UUID?
     private var channels: [OutputDefinition.ID: Channel] = [:]
@@ -190,9 +194,11 @@ final class CueEngine {
         pendingStarts = [:]
         running = [:]
         channels = [:]
+        levels = [:]
         isPaused = false
         pausedAt = nil
         missingCueID = nil
+        inactiveTargetCueID = nil
     }
 
     /// Black wirkt sofort auf alle Ausgänge; die Cues laufen darunter weiter.
@@ -295,6 +301,7 @@ final class CueEngine {
     private func startChain(at index: Int, manual: Bool, keepsFirstCue: Bool = false) {
         if manual {
             missingCueID = nil
+            inactiveTargetCueID = nil
             if isPaused { resume() }
         }
         var current = index
@@ -335,6 +342,7 @@ final class CueEngine {
         stopAudio(cue.id, fadeOut: Self.audioStopFade)
         cancel(cue.id)
         cancelPendingStart(cue.id)
+        levels[cue.id] = nil
         if case .missing = cue.content {
             if manual { missingCueID = cue.id }
             finish(at: index, groupRun: groupRun)
@@ -354,6 +362,12 @@ final class CueEngine {
     private func appear(_ id: Cue.ID) {
         guard var runningCue = running[id], let index = show.index(of: id) else { return }
         let cue = show.cues[index]
+        if let action = cue.action, !perform(action) {
+            inactiveTargetCueID = cue.id
+            cancel(id)
+            finish(at: index, groupRun: runningCue.groupRun)
+            return
+        }
         runningCue.phase = .running
         runningCue.appearedAt = now()
         runningCue.progress = cue.duration.map { StepProgress(startedAt: now(), duration: $0) }
@@ -385,7 +399,7 @@ final class CueEngine {
         }
         let crossfade = groupRun.flatMap { run in show.groups.first { $0.id == run.groupID }?.crossfade } ?? cue.blendIn
         var frame = CueFrame(cueID: cue.id, item: item, layers: layers, step: step)
-        frame.apply(cue)
+        frame.playback = playback(of: cue)
         channels[outputID] = Channel(content: .cue(frame), transition: crossfade)
     }
 
@@ -395,6 +409,9 @@ final class CueEngine {
         stopAudio(id, fadeOut: 0)
         cancel(id)
         let cue = show.cues[index]
+        if case .fade(let fade) = cue.action, fade.stopsTarget, let target = fade.targetCueID {
+            stopCue(target, fadeOut: 0)
+        }
         finish(at: index, groupRun: runningCue.groupRun)
         if cue.isVideo, let outputID = outputKey(of: cue), channels[outputID]?.content.frame?.step == runningCue.step {
             step += 1
@@ -453,6 +470,74 @@ final class CueEngine {
     private func startNext(after index: Int) {
         guard show.cues.indices.contains(index + 1) else { return }
         startChain(at: index + 1, manual: false)
+    }
+
+    // MARK: Fade- und Stopp-Cues
+
+    /// Führt die Aktion aus; `false`, wenn der Ziel-Cue nicht läuft (der Steuer-Cue wird dann übersprungen).
+    private func perform(_ action: CueAction) -> Bool {
+        switch action {
+        case .fade(let fade):
+            guard let target = fade.targetCueID, isActive(target) else { return false }
+            step += 1
+            let previous = levels[target]
+            levels[target] = LevelFade(
+                id: step,
+                volume: fade.volume ?? previous?.volume,
+                opacity: fade.opacity ?? previous?.opacity,
+                duration: fade.duration
+            )
+            refreshVisibleFrames()
+            refreshAudio()
+        case .stop(let stop):
+            switch stop.target {
+            case .cue(let target):
+                guard isActive(target) else { return false }
+                stopCue(target, fadeOut: stop.fadeOut)
+            case .output(let outputID):
+                stopOutput(outputID, fadeOut: stop.fadeOut)
+            case nil:
+                return false
+            }
+        }
+        return true
+    }
+
+    /// Cue läuft, ist zu hören oder steht noch sichtbar auf einem Ausgang (z. B. gehaltenes Bild).
+    private func isActive(_ id: Cue.ID) -> Bool {
+        running[id] != nil || audibleSteps[id] != nil || channels.values.contains { $0.content.frame?.cueID == id }
+    }
+
+    /// Beendet einen Cue ohne Folgeaktion; sein Ausgang blendet auf Schwarz, Ton blendet aus.
+    private func stopCue(_ id: Cue.ID, fadeOut: TimeInterval) {
+        stopAudio(id, fadeOut: fadeOut)
+        cancel(id)
+        levels[id] = nil
+        for (outputID, channel) in channels where channel.content.frame?.cueID == id {
+            blank(outputID, transition: fadeOut)
+        }
+    }
+
+    /// Beendet alle Bild-/Video-Cues eines Ausgangs und blendet ihn auf Schwarz.
+    private func stopOutput(_ outputID: OutputDefinition.ID, fadeOut: TimeInterval) {
+        for id in running.keys {
+            guard let cue = show.index(of: id).map({ show.cues[$0] }), cue.isVisual, outputKey(of: cue) == outputID else { continue }
+            cancel(id)
+            levels[id] = nil
+        }
+        blank(outputID, transition: fadeOut)
+    }
+
+    private func blank(_ outputID: OutputDefinition.ID, transition: TimeInterval) {
+        step += 1
+        channels[outputID] = Channel(content: .blank(step: step), transition: transition)
+    }
+
+    /// Einstellungen aus der Liste plus die Werte eines Fade-Cues.
+    private func playback(of cue: ShowCue) -> PlaybackSettings {
+        var settings = cue.playbackSettings
+        settings.levelFade = levels[cue.id]
+        return settings
     }
 
     // MARK: Nachwarten
@@ -540,7 +625,7 @@ final class CueEngine {
     private func startAudio(_ cue: ShowCue, step: Int) {
         guard let item = cue.item else { return }
         audibleSteps[cue.id] = step
-        let playback = AudioCuePlayback(cueID: cue.id, item: item, step: step, playback: cue.playbackSettings)
+        let playback = AudioCuePlayback(cueID: cue.id, item: item, step: step, playback: playback(of: cue))
         audio.play(playback) { [weak self] in
             self?.mediaDidFinish(cueID: cue.id, step: step)
         }
@@ -569,7 +654,7 @@ final class CueEngine {
                   case .media(let item, let layers) = cue.content, item == frame.item
             else { continue }
             frame.layers = layers
-            frame.apply(cue)
+            frame.playback = playback(of: cue)
             channels[outputID]?.content = .cue(frame)
         }
     }
@@ -578,7 +663,7 @@ final class CueEngine {
     private func refreshAudio() {
         for id in audibleSteps.keys {
             guard let cue = show.index(of: id).map({ show.cues[$0] }) else { continue }
-            audio.update(id, playback: cue.playbackSettings)
+            audio.update(id, playback: playback(of: cue))
         }
     }
 
@@ -599,9 +684,3 @@ private extension ShowCue {
     }
 }
 
-private extension CueFrame {
-    /// Übernimmt Darstellung und Lautstärke aus der Liste (auch während der Cue läuft).
-    mutating func apply(_ cue: ShowCue) {
-        playback = cue.playbackSettings
-    }
-}

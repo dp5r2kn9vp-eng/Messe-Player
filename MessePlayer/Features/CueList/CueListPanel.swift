@@ -52,6 +52,13 @@ struct CueListPanel: View {
         Button("Cue aus Medien", systemImage: "plus") { addCues(for: project.orderedMediumIDs(librarySelection)) }
             .disabled(librarySelection.isEmpty)
             .help("Für die im Medienbereich ausgewählten Medien Cues anlegen")
+        Menu("Steuer-Cue", systemImage: "slider.horizontal.below.square.filled.and.square") {
+            Button("Fade-Cue", systemImage: CueAction.fadeSymbol) { addActionCue(.fade(FadeAction(targetCueID: firstSelectedCueID))) }
+            Button("Stopp-Cue", systemImage: CueAction.stopSymbol) {
+                addActionCue(.stop(StopAction(target: firstSelectedCueID.map(StopAction.Target.cue))))
+            }
+        }
+        .help("Cue anlegen, der einen laufenden Cue ausblendet, leiser macht oder stoppt; Ziel ist der markierte Cue")
         Button("Gruppe bilden", systemImage: "square.stack.3d.down.right") { formGroup() }
             .keyboardShortcut("g", modifiers: .command)
             .disabled(!project.canFormGroup(from: selectedCueIDs))
@@ -155,6 +162,7 @@ struct CueListPanel: View {
 
     private func status(of cue: Cue) -> CueStatus? {
         if let mediumID = cue.mediumID, project.medium(withID: mediumID) == nil { return .missing }
+        if project.hasMissingTarget(cue) { return .missing }
         guard isEngineShowingThisList else { return nil }
         if let running = engine.running[cue.id] {
             if engine.isPaused { return .paused }
@@ -179,6 +187,12 @@ struct CueListPanel: View {
 
     private var selectedCueIDs: Set<Cue.ID> {
         project.cueIDs(inSelection: selection)
+    }
+
+    /// Erster markierter Cue in Listenfolge (Vorschlag für das Ziel eines Steuer-Cues).
+    private var firstSelectedCueID: Cue.ID? {
+        let ids = selectedCueIDs
+        return project.cues.first { ids.contains($0.id) && $0.action == nil }?.id
     }
 
     private var canDissolve: Bool { canDissolve(selection) }
@@ -230,6 +244,14 @@ struct CueListPanel: View {
         let rows = project.listRows
         let after = rows.lastIndex { selection.contains($0.id) }.map { $0 + 1 } ?? rows.count
         insert(mediumIDs.map(CueListDrop.medium), at: project.dropTarget(in: rows, before: after))
+    }
+
+    /// Fade-/Stopp-Cue hinter die Auswahl, sonst ans Ende.
+    private func addActionCue(_ action: CueAction) {
+        let rows = project.listRows
+        let after = rows.lastIndex { selection.contains($0.id) }.map { $0 + 1 } ?? rows.count
+        let target = project.dropTarget(in: rows, before: after)
+        selection = [document.project.insertActionCue(action, at: target.offset, joining: target.groupID)]
     }
 
     /// Entfernt markierte Cues; ein markierter Gruppenkopf löst nur die Gruppe auf.

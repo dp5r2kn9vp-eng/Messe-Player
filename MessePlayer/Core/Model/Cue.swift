@@ -72,6 +72,8 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
     var layers: [Layer] = []
     var notes = ""
     var color: RGBAColor?
+    /// Fade- oder Stopp-Cue; dann ohne Medium.
+    var action: CueAction?
 
     init(id: UUID = UUID(), number: String, mediumID: Medium.ID? = nil, outputID: OutputDefinition.ID? = nil) {
         self.id = id
@@ -104,6 +106,7 @@ nonisolated struct Cue: Codable, Equatable, Identifiable {
         layers = try container.decodeIfPresent([Layer].self, forKey: .layers) ?? []
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         color = try container.decodeIfPresent(RGBAColor.self, forKey: .color)
+        action = try container.decodeIfPresent(CueAction.self, forKey: .action)
     }
 }
 

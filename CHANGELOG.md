@@ -9,8 +9,10 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 - Gruppen können ihre Cues in zufälliger Reihenfolge abspielen (Zufall-Symbol in der Gruppenzeile). Jeder Durchlauf wird neu gemischt, ohne dass ein Cue direkt zweimal hintereinander kommt (#79).
 - Nachwarten: Bei „Mit nächstem starten“ startet der nächste Cue erst nach einer einstellbaren Zeit ab Start dieses Cues. Spalte „Nachw.“ (standardmäßig ausgeblendet) und Feld im Inspektor (#76).
 - „Loop beenden“ (L, ⇧L, Transportleiste und Menü Wiedergabe): Eine laufende Gruppe spielt den Durchlauf bzw. den laufenden Cue zu Ende, danach gilt „Danach“ des letzten Cues. Funktioniert auch im Messe-Modus (#78).
+- Fade- und Stopp-Cues: Ein Steuer-Cue blendet Lautstärke oder Deckkraft eines laufenden Cues (z. B. Musik auf 30 %) oder stoppt einen Cue bzw. Ausgang mit Ausblendung. Läuft das Ziel nicht, wird er mit Hinweis übersprungen; fehlt das Ziel, zeigt die Zeile ein Warnsymbol (#77).
 
 ### Geändert
+- Projekte mit Fade-/Stopp-Cues werden im Format 3 gespeichert; ältere Versionen melden „Bitte die App aktualisieren“. Projekte ohne Steuer-Cues bleiben im Format 2 (#77).
 - „Danach“ des letzten Cues einer Loop-Gruppe ist jetzt einstellbar und gilt nach „Loop beenden“ (#78).
 
 ## [2.1.2] – 2026-11-14

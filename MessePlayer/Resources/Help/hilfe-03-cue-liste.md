@@ -31,3 +31,13 @@ Die Spalten sind Status, Nr., Name, Ausgang, Warten, Dauer, Danach und Restzeit.
 - Der Abspielkopf (▷) zeigt den Cue, den GO als Nächstes startet.
 - Mit ↑ und ↓ bewegst du den Abspielkopf, ohne zu starten.
 - Ein Doppelklick oder Return startet einen Cue sofort.
+
+## Fade- und Stopp-Cues
+
+Ein Steuer-Cue ändert einen anderen Cue, der gerade läuft. Markiere den Ziel-Cue und wähle in der Kopfzeile „Steuer-Cue“ → „Fade-Cue“ oder „Stopp-Cue“. Ziel und Werte stellst du im Inspektor ein.
+
+- Fade-Cue: blendet Lautstärke und/oder Deckkraft des Ziels in der eingestellten Dauer auf neue Werte, zum Beispiel Musik auf 30 %. Mit „Danach Ziel stoppen“ endet das Ziel nach der Blende.
+- Stopp-Cue: beendet einen Cue oder alles auf einem Ausgang. Das Bild blendet in der Ausblendzeit auf Schwarz, der Ton blendet aus. „Danach“ des gestoppten Cues greift nicht.
+- Läuft das Ziel nicht, wird der Steuer-Cue übersprungen. Die Transportleiste zeigt einen Hinweis.
+- Fehlt das Ziel, weil der Cue gelöscht wurde, zeigt die Zeile ein Warnsymbol.
+- Projekte mit Steuer-Cues lassen sich in älteren CueView-Versionen nicht öffnen.

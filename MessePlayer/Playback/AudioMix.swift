@@ -14,6 +14,10 @@ extension AVAudioMix {
                 input.setVolume(Float(startVolume), at: .zero)
             }
             for ramp in ramps {
+                guard ramp.duration > 0 else {
+                    input.setVolume(Float(ramp.to), at: CMTime(seconds: ramp.start))
+                    continue
+                }
                 input.setVolumeRamp(
                     fromStartVolume: Float(ramp.from),
                     toEndVolume: Float(ramp.to),

@@ -6,6 +6,12 @@ nonisolated struct VolumeRamp: Equatable {
     let duration: TimeInterval
     let from: Double
     let to: Double
+
+    func value(at position: TimeInterval) -> Double {
+        guard duration > 0 else { return position >= start ? to : from }
+        let fraction = ((position - start) / duration).clamped(to: 0...1)
+        return from + (to - from) * fraction
+    }
 }
 
 /// Lautstärke eines Cues mit Fade ein/aus. Rein rechnerisch, damit Grenzen und Rampen testbar sind.
