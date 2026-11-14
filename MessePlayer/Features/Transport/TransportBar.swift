@@ -9,6 +9,8 @@ struct TransportBar: View {
     var isTradeShowMode = false
 
     @Environment(CueEngine.self) private var engine
+    @Environment(CueTimetable.self) private var timetable
+    @AppStorage(TransportSettings.scheduleActiveKey) private var isScheduleActive = false
     @Environment(\.cueNames) private var cueNames
     @AppStorage(TransportSettings.keyChangeNoticeKey) private var didAcknowledgeKeyChange = false
 
@@ -73,6 +75,22 @@ struct TransportBar: View {
         .background(Color.brandOrange.opacity(0.2))
     }
 
+    /// Nächster Start nach Uhrzeit bzw. Hinweis auf einen wegen Pause ausgelassenen Start.
+    @ViewBuilder
+    private var scheduleInfo: some View {
+        if isTradeShowMode || isScheduleActive, let next = timetable.nextStart {
+            Label("\(next.date.formatted(date: .omitted, time: .shortened)) Cue \(cueNames(next.cueID))", systemImage: "clock")
+                .font(.caption)
+                .foregroundStyle(Color.mutedLight)
+                .help("Nächster Start nach Zeitplan")
+        }
+        if let skipped = timetable.skippedCueID {
+            Label("Cue \(cueNames(skipped)): Start nach Uhrzeit wegen Pause ausgelassen", systemImage: "clock.badge.exclamationmark")
+                .font(.caption)
+                .foregroundStyle(Color.brandOrange)
+        }
+    }
+
     private var nextCueLabel: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             Text("Als Nächstes").font(.caption).foregroundStyle(Color.mutedLight)
@@ -84,6 +102,7 @@ struct TransportBar: View {
                     .font(.caption)
                     .foregroundStyle(Color.brandRed)
             }
+            scheduleInfo
             if let skipped = engine.inactiveTargetCueID {
                 Label("Cue \(cueNames(skipped)): Ziel läuft nicht, übersprungen", systemImage: "exclamationmark.circle")
                     .font(.caption)

@@ -42,6 +42,7 @@ struct ShowCue: Equatable {
     var postWait: TimeInterval = 0
     /// Fade- oder Stopp-Cue.
     var action: CueAction?
+    var schedule: CueSchedule?
     /// Überblendung beim Erscheinen, wenn der Cue nicht in einer Gruppe läuft.
     var blendIn: TimeInterval = 0
     /// Blende, wenn ein Video am Ende auf Schwarz geht.
@@ -92,6 +93,7 @@ extension ProjectDocument {
         var show = ShowCue(id: cue.id, content: .control, wait: cue.wait, duration: 0, followAction: cue.followAction)
         show.postWait = cue.postWait
         show.action = cue.action
+        show.schedule = cue.schedule
         show.blendIn = cue.blendIn
         show.blendOut = cue.blendOut
         show.audio = cue.audioLevel

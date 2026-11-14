@@ -26,6 +26,7 @@ struct CueModelTests {
         cue.stillDuration = 7
         cue.followAction = .continueWithNext
         cue.postWait = 2.5
+        cue.schedule = CueSchedule(minuteOfDay: 840, weekdays: [2, 3])
         cue.volume = 0.4
         cue.fadeIn = 0.5
         cue.fadeOut = 1

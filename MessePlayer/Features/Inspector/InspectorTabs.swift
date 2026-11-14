@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Zeit & Ablauf: Warten, Dauer, Danach, Nachwarten, Bild-Blenden.
+/// Zeit & Ablauf: Warten, Dauer, Danach, Nachwarten, Uhrzeit, Bild-Blenden.
 struct InspectorTimingTab: View {
     let context: InspectorContext
 
@@ -17,6 +17,9 @@ struct InspectorTimingTab: View {
         }
         LabeledContent("Nachwarten") {
             CuePostWaitField(model: context.model, onEdit: context.onEdit, step: 0.5)
+        }
+        if !context.isMultiple {
+            ScheduleEditor(schedule: cue.schedule) { context.onEdit(.schedule($0)) }
         }
         if !context.model.isAudio {
             LabeledContent("Blende ein") {

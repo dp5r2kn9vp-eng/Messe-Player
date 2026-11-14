@@ -11,6 +11,8 @@ nonisolated enum CueEdit: Equatable {
     case postWait(TimeInterval)
     /// Einstellungen eines Fade-/Stopp-Cues.
     case action(CueAction)
+    /// Start zur Uhrzeit; `nil` = aus.
+    case schedule(CueSchedule?)
     case notes(String)
     case color(RGBAColor?)
     /// Medium ersetzen; In- und Out-Punkt beginnen neu.
@@ -30,7 +32,7 @@ nonisolated enum CueEdit: Equatable {
     /// Nummer, Name, Medium und In/Out sind je Cue eigen und gelten nie für eine Mehrfachauswahl.
     var appliesToSelection: Bool {
         switch self {
-        case .number, .name, .medium, .inPoint, .outPoint, .action: false
+        case .number, .name, .medium, .inPoint, .outPoint, .action, .schedule: false
         default: true
         }
     }
@@ -67,6 +69,8 @@ nonisolated extension Project {
                 applyTrim(edit, at: index, mediaLength: mediaLength(cue))
             case .followAction(let action):
                 cues[index].followAction = action
+            case .schedule(let schedule):
+                cues[index].schedule = schedule
             case .action(let action):
                 if cue.action != nil { cues[index].action = action }
             case .postWait(let seconds):

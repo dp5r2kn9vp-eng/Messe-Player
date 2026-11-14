@@ -5,6 +5,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Neu
+- Start nach Uhrzeit: Ein Cue startet täglich oder an gewählten Wochentagen zu einer festen Uhrzeit, wie GO auf diesen Cue. Das gilt im Messe-Modus oder mit „Zeitplan aktiv“ (Menü Wiedergabe). Die Transportleiste zeigt den nächsten Start. Verpasste Zeiten werden nicht nachgeholt, während einer Pause entfällt der Start mit Hinweis (#86).
+
 ## [2.2.0] – 2026-11-14
 
 ### Neu

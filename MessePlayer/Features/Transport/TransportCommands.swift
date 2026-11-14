@@ -6,6 +6,14 @@ enum TransportSettings {
     static let tradeShowModeKey = "isTradeShowMode"
     /// Der einmalige Hinweis auf die geänderten Tasten (Leertaste/P) wurde bestätigt.
     static let keyChangeNoticeKey = "didAcknowledgeKeyChange"
+    /// Zeitplan auch außerhalb des Messe-Modus aktiv.
+    static let scheduleActiveKey = "isScheduleActive"
+
+    /// Uhrzeit-Starts gelten im Messe-Modus oder mit „Zeitplan aktiv“.
+    static func isScheduleEnabled() -> Bool {
+        let defaults = UserDefaults.standard
+        return defaults.bool(forKey: tradeShowModeKey) || defaults.bool(forKey: scheduleActiveKey)
+    }
 }
 
 /// Menü „Wiedergabe“: Transport, Notfall-Stopp und Messe-Modus.
@@ -15,6 +23,7 @@ struct TransportCommands: Commands {
     let engine: CueEngine
 
     @AppStorage(TransportSettings.tradeShowModeKey) private var isTradeShowMode = false
+    @AppStorage(TransportSettings.scheduleActiveKey) private var isScheduleActive = false
 
     var body: some Commands {
         CommandMenu("Wiedergabe") {
@@ -34,6 +43,8 @@ struct TransportCommands: Commands {
             Divider()
             Toggle("Messe-Modus", isOn: $isTradeShowMode)
                 .keyboardShortcut("m", modifiers: [.command, .shift])
+            Toggle("Zeitplan aktiv", isOn: $isScheduleActive)
+                .help("Cues mit Uhrzeit starten auch außerhalb des Messe-Modus")
         }
     }
 }
