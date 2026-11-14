@@ -5,6 +5,15 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [2.1.2] – 2026-11-14
+
+### Behoben
+- Der Startbildschirm erschien nicht, wenn vorher die Unit-Tests gelaufen waren: Der Testlauf sah beim nächsten Start wie ein Absturz aus und öffnete das letzte Projekt. Außerdem stellt macOS für CueView keine Fenster mehr wieder her.
+- Die Restzeit in der Cue-Liste steht kompakt als `m:ss` in einer Zeile; die Zeile springt beim Ablauf nicht mehr.
+
+### Geändert
+- Black je Ausgang gibt es nur noch für Ausgänge auf einem externen Bildschirm. Auf dem eigenen Bildschirm und in der Vorschau fällt die Schaltfläche weg.
+
 ## [2.1.1] – 2026-11-14
 
 ### Behoben
@@ -116,7 +125,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.0...v2.0.1

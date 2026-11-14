@@ -9,6 +9,12 @@ enum AppInfo {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–"
     }
 
+    /// Läuft als Gastgeber der Unit-Tests: dann keinen Start merken und nichts wiederherstellen.
+    static var isTestHost: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["XCTestConfigurationFilePath"] != nil || environment["XCTestBundlePath"] != nil
+    }
+
     static var build: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "–"
     }
