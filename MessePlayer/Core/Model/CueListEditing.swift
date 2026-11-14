@@ -8,6 +8,7 @@ nonisolated enum CueEdit: Equatable {
     case wait(TimeInterval)
     case duration(TimeInterval)
     case followAction(FollowAction)
+    case postWait(TimeInterval)
     case notes(String)
     case color(RGBAColor?)
     /// Medium ersetzen; In- und Out-Punkt beginnen neu.
@@ -64,6 +65,8 @@ nonisolated extension Project {
                 applyTrim(edit, at: index, mediaLength: mediaLength(cue))
             case .followAction(let action):
                 cues[index].followAction = action
+            case .postWait(let seconds):
+                cues[index].postWait = seconds.clamped(to: Cue.waitRange)
             case .notes(let notes):
                 cues[index].notes = notes
             case .color(let color):
@@ -216,6 +219,11 @@ nonisolated extension Project {
     func followActionIsSetByGroup(_ cue: Cue) -> Bool {
         guard let group = group(containing: cue.id) else { return false }
         return group.mode == .loop || group.lastCueID != cue.id
+    }
+
+    /// Nachwarten wirkt nur bei „Mit nächstem starten“ außerhalb von Gruppen.
+    func postWaitApplies(to cue: Cue) -> Bool {
+        cue.followAction == .continueWithNext && group(containing: cue.id) == nil
     }
 
     /// Zuordnung Cue → Gruppe für alle Cues in Gruppen.

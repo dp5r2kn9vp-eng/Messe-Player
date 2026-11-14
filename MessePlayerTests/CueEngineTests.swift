@@ -218,6 +218,67 @@ struct CueEngineTests {
 
     // MARK: Transport
 
+    // MARK: Nachwarten
+
+    private func postWaitShow(_ postWait: TimeInterval, follow: FollowAction = .continueWithNext) -> [ShowCue] {
+        var first = ShowFixture.cue(.image, duration: 1, follow: follow)
+        first.postWait = postWait
+        let cues = [first, ShowFixture.cue(.image, output: ShowFixture.outputA2), ShowFixture.cue(.image)]
+        engine.load(ShowFixture.show(cues))
+        return cues
+    }
+
+    @Test func postWaitDelaysNextCueFromStartOfThisCue() {
+        let cues = postWaitShow(2)
+        engine.go()
+        #expect(visible(on: ShowFixture.outputA2) == nil)
+        #expect(engine.playheadID == cues[1].id)
+        clock.advance(by: 1.9)
+        #expect(visible(on: ShowFixture.outputA2) == nil)
+        clock.advance(by: 0.1)
+        #expect(visible(on: ShowFixture.outputA2) == cues[1].id)
+        #expect(engine.playheadID == cues[2].id)
+    }
+
+    @Test(arguments: [FollowAction.hold, .followOnEnd])
+    func postWaitIsIgnoredWithoutContinueWithNext(follow: FollowAction) {
+        let cues = postWaitShow(2, follow: follow)
+        engine.go()
+        clock.advance(by: 2)
+        #expect(visible(on: ShowFixture.outputA2) == (follow == .followOnEnd ? cues[1].id : nil))
+        #expect(!engine.hasPendingStarts)
+    }
+
+    @Test func pauseHoldsPostWait() {
+        let cues = postWaitShow(3)
+        engine.go()
+        clock.advance(by: 1)
+        #expect(engine.togglePause())
+        clock.advance(by: 50)
+        #expect(visible(on: ShowFixture.outputA2) == nil)
+        engine.togglePause()
+        clock.advance(by: 1.9)
+        #expect(visible(on: ShowFixture.outputA2) == nil)
+        clock.advance(by: 0.1)
+        #expect(visible(on: ShowFixture.outputA2) == cues[1].id)
+    }
+
+    @Test func pauseWorksWhileOnlyPostWaitRuns() {
+        _ = postWaitShow(5)
+        engine.go()
+        clock.advance(by: 2)
+        #expect(engine.running.isEmpty)
+        #expect(engine.togglePause())
+    }
+
+    @Test func stopCancelsPostWait() {
+        _ = postWaitShow(2)
+        engine.go()
+        engine.stopAll()
+        #expect(!engine.hasPendingStarts)
+        #expect(clock.pendingCount == 0)
+    }
+
     @Test func pauseKeepsRemainingTime() {
         let cues = [ShowFixture.cue(.image, duration: 10, follow: .followOnEnd), ShowFixture.cue(.image)]
         engine.load(ShowFixture.show(cues))

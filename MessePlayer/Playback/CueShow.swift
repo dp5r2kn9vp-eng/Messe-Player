@@ -38,6 +38,8 @@ struct ShowCue: Equatable {
     /// Video oder Audio ohne Out-Punkt: Das Ende meldet der Player, die Dauer dient nur der Restzeit-Anzeige.
     var endsWithMedia = false
     var followAction = FollowAction.hold
+    /// Nachwarten bei „Mit nächstem starten“, ab Start dieses Cues.
+    var postWait: TimeInterval = 0
     /// Überblendung beim Erscheinen, wenn der Cue nicht in einer Gruppe läuft.
     var blendIn: TimeInterval = 0
     /// Blende, wenn ein Video am Ende auf Schwarz geht.
@@ -86,6 +88,7 @@ extension ProjectDocument {
 
     private func showCue(_ cue: Cue, in packageURL: URL?, primaryOutputID: OutputDefinition.ID?, mediaLength: (URL) -> TimeInterval?) -> ShowCue {
         var show = ShowCue(id: cue.id, content: .control, wait: cue.wait, duration: 0, followAction: cue.followAction)
+        show.postWait = cue.postWait
         show.blendIn = cue.blendIn
         show.blendOut = cue.blendOut
         show.audio = cue.audioLevel

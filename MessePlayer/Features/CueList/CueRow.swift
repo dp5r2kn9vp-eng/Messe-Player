@@ -64,6 +64,8 @@ struct CueRowModel {
     /// „Danach“ wird von der Gruppe vorgegeben (Loop) und ist gesperrt.
     let followIsSetByGroup: Bool
     let outputs: [OutputDefinition]
+    /// Nachwarten wirkt nur bei „Mit nächstem starten“ außerhalb von Gruppen.
+    var postWaitApplies = false
 
     var isMissing: Bool { cue.mediumID != nil && medium == nil }
     var isAudio: Bool { medium?.kind == .audio }
@@ -111,6 +113,8 @@ struct CueRow: View {
             CueDurationField(model: model, onEdit: onEdit)
         case .followAction:
             CueFollowPicker(model: model, onEdit: onEdit)
+        case .postWait:
+            CuePostWaitField(model: model, onEdit: onEdit)
         case .remaining:
             if let progress = model.progress {
                 StepProgressBar(progress: progress)

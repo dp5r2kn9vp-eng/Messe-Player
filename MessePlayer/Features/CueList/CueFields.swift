@@ -41,6 +41,25 @@ struct CueDurationField: View {
     }
 }
 
+/// Nachwarten eines Cues; nur bei „Mit nächstem starten“ außerhalb von Gruppen bearbeitbar.
+struct CuePostWaitField: View {
+    let model: CueRowModel
+    let onEdit: (CueEdit) -> Void
+    var step: TimeInterval?
+
+    var body: some View {
+        DurationField(
+            seconds: Binding(get: { model.cue.postWait }, set: { onEdit(.postWait($0)) }),
+            range: Cue.waitRange,
+            step: step
+        )
+        .disabled(!model.postWaitApplies)
+        .help(model.postWaitApplies
+            ? "Der nächste Cue startet so viele Sekunden nach diesem"
+            : "Wirkt nur bei „Mit nächstem starten“ außerhalb von Gruppen")
+    }
+}
+
 /// „Danach“ eines Cues; in Loop-Gruppen gesperrt auf „Weiter nach Ende“.
 struct CueFollowPicker: View {
     let model: CueRowModel
@@ -102,7 +121,8 @@ extension ProjectDocument {
             progress: progress,
             duration: project.duration(of: cue, mediaLength: mediaLength),
             followIsSetByGroup: project.followActionIsSetByGroup(cue),
-            outputs: project.outputs
+            outputs: project.outputs,
+            postWaitApplies: project.postWaitApplies(to: cue)
         )
     }
 }

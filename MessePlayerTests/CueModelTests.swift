@@ -25,6 +25,7 @@ struct CueModelTests {
         cue.outPoint = 9.25
         cue.stillDuration = 7
         cue.followAction = .continueWithNext
+        cue.postWait = 2.5
         cue.volume = 0.4
         cue.fadeIn = 0.5
         cue.fadeOut = 1
