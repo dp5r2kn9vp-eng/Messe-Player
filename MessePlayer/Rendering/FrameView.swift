@@ -17,6 +17,8 @@ struct FrameView: View {
             MediaView(item: item, playback: playback, onFinish: onFinish, isPaused: isPaused)
             LayerOverlay(layers: layers, startedAt: startedAt)
         }
+        .opacity(playback.levelFade?.opacity ?? 1)
+        .animation(.linear(duration: playback.levelFade?.duration ?? 0), value: playback.levelFade)
     }
 }
 

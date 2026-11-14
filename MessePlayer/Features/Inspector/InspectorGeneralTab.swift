@@ -28,8 +28,14 @@ struct InspectorGeneralTab: View {
                     .help("Farbe entfernen")
             }
         }
-        LabeledContent("Medium") {
-            mediumMenu
+        Group {
+            if let action = cue.action {
+                ActionCueEditor(action: action, cue: cue, project: document.project) { context.onEdit(.action($0)) }
+            } else {
+                LabeledContent("Medium") {
+                    mediumMenu
+                }
+            }
         }
         .importErrorAlert($importErrors)
         .fileImporter(isPresented: $isPickingFile, allowedContentTypes: [.image, .movie, .audio]) { result in

@@ -1,8 +1,9 @@
 import Foundation
 
-/// Wurzel des gespeicherten Projekts (Schema 2: eine Cue-Liste). Ältere Formate hebt `ProjectCodec` an.
+/// Wurzel des gespeicherten Projekts (Schema 2: eine Cue-Liste; Schema 3: zusätzlich Fade-/Stopp-Cues).
+/// Ältere Formate hebt `ProjectCodec` an; gespeichert wird die niedrigste passende Version.
 nonisolated struct Project: Codable, Equatable {
-    static let currentSchemaVersion = 2
+    static let currentSchemaVersion = 3
 
     var schemaVersion = Project.currentSchemaVersion
     var media: [Medium] = []
@@ -32,6 +33,26 @@ nonisolated enum ProjectIssue: Equatable {
 }
 
 nonisolated extension Project {
+    /// Niedrigste Schema-Version, die alles im Projekt kennt (ältere App-Versionen öffnen es dann weiter).
+    var requiredSchemaVersion: Int {
+        cues.contains { $0.action != nil } ? 3 : 2
+    }
+
+    /// Steuer-Cue, dessen Ziel-Cue nicht mehr in der Liste steht.
+    func hasMissingTarget(_ cue: Cue) -> Bool {
+        guard let action = cue.action else { return false }
+        switch action {
+        case .fade(let fade):
+            return fade.targetCueID.map { self.cue(withID: $0) == nil } ?? true
+        case .stop(let stop):
+            switch stop.target {
+            case .cue(let id): return self.cue(withID: id) == nil
+            case .output(let id): return !outputs.contains { $0.id == id }
+            case nil: return true
+            }
+        }
+    }
+
     func medium(withID id: Medium.ID) -> Medium? {
         media.first { $0.id == id }
     }
@@ -93,6 +114,7 @@ nonisolated extension Project {
     /// Abgeleitete Dauer: Bild = Standdauer, Video/Audio = getrimmte Länge, Steuer-Cue = 0.
     /// `nil`, solange die Medienlänge unbekannt ist und kein Out-Punkt gesetzt wurde.
     func duration(of cue: Cue, mediaLength: TimeInterval?) -> TimeInterval? {
+        if let action = cue.action { return action.duration }
         guard let mediumID = cue.mediumID else { return 0 }
         if medium(withID: mediumID)?.kind == .image { return cue.stillDuration }
         guard let end = cue.outPoint ?? mediaLength else { return nil }

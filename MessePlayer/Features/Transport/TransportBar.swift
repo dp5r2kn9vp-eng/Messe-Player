@@ -84,6 +84,11 @@ struct TransportBar: View {
                     .font(.caption)
                     .foregroundStyle(Color.brandRed)
             }
+            if let skipped = engine.inactiveTargetCueID {
+                Label("Cue \(cueNames(skipped)): Ziel läuft nicht, übersprungen", systemImage: "exclamationmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(Color.brandOrange)
+            }
         }
     }
 }

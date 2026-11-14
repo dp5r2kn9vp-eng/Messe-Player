@@ -38,6 +38,8 @@ final class PlayerLayerView: NSView {
     private var statusObservation: NSKeyValueObservation?
     private var playback = PlaybackSettings()
     private var audioTracks: [AVAssetTrack] = []
+    /// Laufende Änderung der Lautstärke durch einen Fade-Cue.
+    private var adjustment: VolumeRamp?
     private var trackLoading: Task<Void, Never>?
 
     var isMuted: Bool {
@@ -89,7 +91,9 @@ final class PlayerLayerView: NSView {
     func apply(_ settings: PlaybackSettings) {
         guard settings != playback else { return }
         let audioChanged = settings.audio != playback.audio || settings.playLength != playback.playLength
-            || settings.startTime != playback.startTime
+            || settings.startTime != playback.startTime || settings.levelFade != playback.levelFade
+        let position = player.currentTime().isNumeric ? player.currentTime().seconds : settings.startTime
+        adjustment = playback.adjustment(changingTo: settings, at: position, current: adjustment)
         playback = settings
         (layer as? AVPlayerLayer)?.videoGravity = settings.scaling == .fill ? .resizeAspectFill : .resizeAspect
         if audioChanged { applyAudioMix() }
@@ -105,6 +109,7 @@ final class PlayerLayerView: NSView {
         currentURL = nil
         trackLoading?.cancel()
         audioTracks = []
+        adjustment = nil
     }
 
     private func loadAudioTracks(of item: AVPlayerItem, for url: URL) {
@@ -118,7 +123,7 @@ final class PlayerLayerView: NSView {
     }
 
     private func applyAudioMix() {
-        let mix = AVAudioMix.cue(tracks: audioTracks, playback: playback)
+        let mix = AVAudioMix.cue(tracks: audioTracks, playback: playback, release: adjustment)
         player.items().forEach { $0.audioMix = mix }
     }
 

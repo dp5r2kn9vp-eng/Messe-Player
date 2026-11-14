@@ -37,7 +37,7 @@ struct MigrationTests {
         let entries = file.groups.flatMap(\.entries)
         let outputID = try #require(project.outputs.first?.id)
 
-        #expect(project.schemaVersion == 2)
+        #expect(project.schemaVersion == Project.currentSchemaVersion)
         #expect(project.media == file.media)
         #expect(project.outputs.count == 1)
         #expect(project.cues.map(\.id) == entries.map(\.id))

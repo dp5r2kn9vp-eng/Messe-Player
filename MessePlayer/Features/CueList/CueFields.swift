@@ -124,7 +124,9 @@ extension ProjectDocument {
             duration: project.duration(of: cue, mediaLength: mediaLength),
             followIsSetByGroup: project.followActionIsSetByGroup(cue),
             outputs: project.outputs,
-            postWaitApplies: project.postWaitApplies(to: cue)
+            postWaitApplies: project.postWaitApplies(to: cue),
+            actionTitle: cue.action.map { project.title(of: $0) },
+            hasMissingTarget: project.hasMissingTarget(cue)
         )
     }
 }
