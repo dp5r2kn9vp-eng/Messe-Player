@@ -5,6 +5,14 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+### Geändert
+- CueView startet immer mit dem Willkommensfenster statt automatisch mit dem letzten Projekt. Das letzte Projekt lässt sich dort mit „… fortsetzen“ (Eingabetaste) öffnen.
+- Nur nach Absturz oder Stromausfall öffnet sich das letzte Projekt samt Ausgabezustand automatisch wie bisher.
+
+### Hinzugefügt
+- Willkommensfenster: Änderungsdatum in „Zuletzt geöffnet“, fehlende Projekte als „nicht gefunden“ markiert, angeschlossene Bildschirme und die wichtigsten Tasten.
+- Nachfrage beim Beenden (⌘Q); läuft etwas auf einem Ausgang, weist der Dialog deutlich darauf hin. Beim Abmelden oder Ausschalten des Macs keine Nachfrage.
+
 ## [2.0.1] – 2026-11-13
 
 ### Hinzugefügt

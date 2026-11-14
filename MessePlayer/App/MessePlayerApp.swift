@@ -22,6 +22,7 @@ struct MessePlayerApp: App {
         }
         Window("Willkommen bei CueView", id: WindowID.welcome) {
             WelcomeView()
+                .environment(appDelegate.displays)
         }
         .windowResizability(.contentSize)
         .defaultLaunchBehavior(.presented)

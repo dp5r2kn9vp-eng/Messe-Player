@@ -27,6 +27,7 @@ extension SessionSnapshot {
 enum SessionStore {
     private static let key = "session"
     private static let displayKey = "outputDisplayName"
+    private static let runningKey = "isRunning"
 
     static func load(from defaults: UserDefaults = .standard) -> SessionSnapshot? {
         defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(SessionSnapshot.self, from: $0) }
@@ -40,6 +41,18 @@ enum SessionStore {
     static var lastProjectURL: URL? {
         guard let path = load()?.projectPath, FileManager.default.fileExists(atPath: path) else { return nil }
         return URL(filePath: path)
+    }
+
+    /// Merkt sich den Start. `true`, wenn der letzte Lauf nicht sauber beendet wurde (Absturz, Stromausfall).
+    static func beginRun(in defaults: UserDefaults = .standard) -> Bool {
+        let endedUncleanly = defaults.bool(forKey: runningKey)
+        defaults.set(true, forKey: runningKey)
+        return endedUncleanly
+    }
+
+    /// Sauberes Beenden: Beim nächsten Start erscheint das Willkommensfenster.
+    static func endRun(in defaults: UserDefaults = .standard) {
+        defaults.set(false, forKey: runningKey)
     }
 
     /// Bildschirm des einen Ausgangs aus CueView vor 2.0; Vorschlag für den ersten Ausgang ohne Zuordnung.
