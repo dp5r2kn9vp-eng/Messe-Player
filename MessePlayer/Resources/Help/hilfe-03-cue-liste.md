@@ -23,6 +23,7 @@ Die Spalten sind Status, Nr., Name, Ausgang, Warten, Dauer, Danach und Restzeit.
 
 - Markiere zusammenhängende Cues und drücke **⌘G**, um eine Gruppe zu bilden. **⇧⌘G** löst sie wieder auf.
 - Die Gruppenzeile zeigt Name, Loop (∞ oder n-mal), Zufall, Überblendung, Ausgang und die Summe der Dauer.
+- In einer Gruppe geht es immer weiter nach Ende. Nur „Danach“ des letzten Cues bestimmt, was nach der Gruppe passiert, also nach n Durchläufen oder nach „Loop beenden“.
 - Mit dem Zufall-Symbol laufen die Cues der Gruppe in zufälliger Reihenfolge. Jeder Durchlauf zeigt jeden Cue einmal, und kein Cue kommt direkt zweimal hintereinander.
 
 ## Abspielkopf

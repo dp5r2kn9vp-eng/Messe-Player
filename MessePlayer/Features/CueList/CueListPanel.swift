@@ -94,6 +94,7 @@ struct CueListPanel: View {
                 outputID: commonOutput(of: group),
                 outputs: project.outputs,
                 totalDuration: project.duration(of: group, mediaLength: mediaLength),
+                ending: isEngineShowingThisList ? engine.loopEnding(of: group.id) : nil,
                 onSetOutput: { document.project.setOutput($0, forGroup: group.id) }
             )
             .moveDisabled(!group.isCollapsed)

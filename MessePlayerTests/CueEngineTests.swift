@@ -189,6 +189,52 @@ struct CueEngineTests {
         #expect(sequence(steps: 3) == cues.map(\.id))
     }
 
+    // MARK: Loop beenden
+
+    private func loopShow(lastFollow: FollowAction) -> [ShowCue] {
+        let cues = [ShowFixture.cue(.image), ShowFixture.cue(.image), ShowFixture.cue(.image, follow: lastFollow), ShowFixture.cue(.image)]
+        engine.load(ShowFixture.show(cues, groups: [(0...2, .loop)]))
+        return cues
+    }
+
+    @Test func endLoopFinishesPassThenFollowsOn() {
+        let cues = loopShow(lastFollow: .followOnEnd)
+        engine.go()
+        clock.advance(by: 5)
+        #expect(engine.endLoop())
+        #expect(engine.loopEnding(of: engine.show.groups[0].id) == .afterPass)
+        #expect(sequence(steps: 4) == [cues[1].id, cues[2].id, cues[3].id, cues[3].id])
+        #expect(engine.loopTargets.isEmpty)
+    }
+
+    @Test func endLoopAfterCueLeavesGroupImmediately() {
+        let cues = loopShow(lastFollow: .followOnEnd)
+        engine.go()
+        engine.endLoop(.afterCue)
+        #expect(sequence(steps: 2) == [cues[0].id, cues[3].id])
+    }
+
+    @Test func endLoopWithHoldKeepsLastImage() {
+        let cues = loopShow(lastFollow: .hold)
+        engine.go()
+        engine.endLoop()
+        #expect(sequence(steps: 5) == [cues[0].id, cues[1].id, cues[2].id, cues[2].id, cues[2].id])
+        #expect(engine.running.isEmpty)
+    }
+
+    @Test func endLoopWithoutRunningGroupDoesNothing() {
+        _ = loopShow(lastFollow: .hold)
+        #expect(!engine.endLoop())
+    }
+
+    @Test func endLoopEndsRepeatCountEarly() {
+        let cues = [ShowFixture.cue(.image), ShowFixture.cue(.image, follow: .followOnEnd), ShowFixture.cue(.image)]
+        engine.load(ShowFixture.show(cues, groups: [(0...1, .repeatCount(5))]))
+        engine.go()
+        engine.endLoop()
+        #expect(sequence(steps: 3) == cues.map(\.id))
+    }
+
     @Test func goOnGroupMemberStartsAtFirstMember() {
         let cues = (0..<3).map { _ in ShowFixture.cue(.image) }
         engine.load(ShowFixture.show(cues, groups: [(0...2, .loop)]))

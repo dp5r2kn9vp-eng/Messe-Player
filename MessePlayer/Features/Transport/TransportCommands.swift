@@ -9,7 +9,7 @@ enum TransportSettings {
 }
 
 /// Menü „Wiedergabe“: Transport, Notfall-Stopp und Messe-Modus.
-/// Die Ein-Tasten-Kürzel (Leertaste, P, B, ⇧B, Esc) laufen über `HotkeyService`, damit sie in Textfeldern nicht greifen.
+/// Die Ein-Tasten-Kürzel (Leertaste, P, B, ⇧B, L, ⇧L, Esc) laufen über `HotkeyService`, damit sie in Textfeldern nicht greifen.
 /// ⌘. funktioniert immer, auch mit externem Bildschirm.
 struct TransportCommands: Commands {
     let engine: CueEngine
@@ -22,6 +22,10 @@ struct TransportCommands: Commands {
                 .disabled(engine.playheadID == nil)
             Button(engine.isPaused ? "Fortsetzen (P)" : "Pause (P)") { engine.togglePause() }
                 .disabled(engine.running.isEmpty)
+            Button("Loop beenden (L)") { engine.endLoop(.afterPass) }
+                .disabled(engine.loopTargets.isEmpty)
+            Button("Loop nach aktuellem Cue beenden (⇧L)") { engine.endLoop(.afterCue) }
+                .disabled(engine.loopTargets.isEmpty)
             Button("Stopp alle", action: engine.stopAll)
             Button("Black alle (B)", action: engine.toggleBlack)
             Divider()

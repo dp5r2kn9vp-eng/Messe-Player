@@ -1,7 +1,8 @@
+import AppKit
 import SwiftUI
 
-/// Transportleiste unten im Steuerfenster: GO, Als Nächstes, Pause, Stopp alle, Black.
-/// Im Messe-Modus nur GO, Stopp und Black.
+/// Transportleiste unten im Steuerfenster: GO, Als Nächstes, Loop beenden, Pause, Stopp alle, Black.
+/// Im Messe-Modus ohne Pause.
 struct TransportBar: View {
     /// Lädt die Cue-Liste dieses Fensters in die Engine, bevor gestartet wird.
     let claim: () -> Void
@@ -34,12 +35,21 @@ struct TransportBar: View {
             .help("Cue am Abspielkopf starten (Leertaste)")
             nextCueLabel
             Spacer()
+            if !engine.loopTargets.isEmpty { endLoopButton }
             if !isTradeShowMode { pauseButton }
             Button("Stopp alle", systemImage: "stop.fill", action: engine.stopAll)
                 .help("Alle Cues beenden, der Abspielkopf bleibt (⌘. Notfall-Stopp)")
             BlackAllButton()
         }
         .padding(Theme.Spacing.m)
+    }
+
+    /// Klick: Durchlauf zu Ende spielen; ⌥-Klick: nur den laufenden Cue.
+    private var endLoopButton: some View {
+        Button("Loop beenden", systemImage: "arrow.turn.down.right") {
+            engine.endLoop(NSEvent.modifierFlags.contains(.option) ? .afterCue : .afterPass)
+        }
+        .help("Loop nach diesem Durchlauf beenden, danach gilt „Danach“ des letzten Cues (L; ⌥-Klick oder ⇧L: nach dem laufenden Cue)")
     }
 
     private var pauseButton: some View {

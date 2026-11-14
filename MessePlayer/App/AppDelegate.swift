@@ -63,6 +63,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotkeys.register("p") { [engine] in
             engine.togglePause()
         }
+        hotkeys.register("l") { [engine] in
+            engine.endLoop(.afterPass)
+        }
+        hotkeys.register("l", shift: true) { [engine] in
+            engine.endLoop(.afterCue)
+        }
         // Esc nur, wenn der Ausgang den Bildschirm des Steuerfensters blockiert.
         // Mit externem Bildschirm stoppt Esc nicht versehentlich – dafür gibt es den Notfall-Stopp ⌘.
         hotkeys.register(HotkeyService.escape) { [engine, unowned self] in

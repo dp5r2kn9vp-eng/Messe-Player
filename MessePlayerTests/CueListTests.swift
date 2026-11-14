@@ -150,7 +150,7 @@ struct CueListTests {
         var project = project(3)
         try formGroup(&project, ids(project, 0, 1))
         #expect(project.followActionIsSetByGroup(project.cues[0]))
-        #expect(project.followActionIsSetByGroup(project.cues[1]))
+        #expect(!project.followActionIsSetByGroup(project.cues[1]))
         #expect(!project.followActionIsSetByGroup(project.cues[2]))
         project.groups[0].mode = .repeatCount(3)
         #expect(project.followActionIsSetByGroup(project.cues[0]))
