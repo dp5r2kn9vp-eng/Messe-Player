@@ -6,6 +6,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 ## [Unreleased]
 
 ### Neu
+- Fernsteuerung im lokalen Netz (Wiedergabe → „Fernsteuerung …“): Geräte koppeln sich per PIN und senden GO, Stopp, Black, Notfall-Stopp, Pause, Loop beenden und Abspielkopf. Den Zustand bekommen sie live. Standardmäßig aus, die Transportleiste zeigt verbundene Geräte. Schnittstelle in `docs/REMOTE-API.md`, Grundlage für die iPad-App (#87).
+- Tastenkürzel-Übersicht enthält L / ⇧L (Loop beenden).
 - Start nach Uhrzeit: Ein Cue startet täglich oder an gewählten Wochentagen zu einer festen Uhrzeit, wie GO auf diesen Cue. Das gilt im Messe-Modus oder mit „Zeitplan aktiv“ (Menü Wiedergabe). Die Transportleiste zeigt den nächsten Start. Verpasste Zeiten werden nicht nachgeholt, während einer Pause entfällt der Start mit Hinweis (#86).
 
 ## [2.2.0] – 2026-11-14

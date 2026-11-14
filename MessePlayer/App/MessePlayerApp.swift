@@ -9,6 +9,7 @@ struct MessePlayerApp: App {
             ControlView(document: file.$document, packageURL: file.fileURL)
                 .environment(appDelegate.engine)
                 .environment(appDelegate.timetable)
+                .environment(appDelegate.remoteServer)
                 .environment(appDelegate.displays)
                 .environment(appDelegate.outputWindows)
                 .environment(appDelegate.routing)
@@ -35,6 +36,13 @@ struct MessePlayerApp: App {
         Window("CueView-Hilfe", id: WindowID.help) {
             HelpView()
         }
+        .defaultLaunchBehavior(.suppressed)
+        Window("Fernsteuerung", id: WindowID.remote) {
+            RemoteControlView()
+                .environment(appDelegate.remoteServer)
+                .environment(appDelegate.remotePairing)
+        }
+        .windowResizability(.contentSize)
         .defaultLaunchBehavior(.suppressed)
         Window("Tastenkürzel", id: WindowID.shortcuts) {
             ShortcutsView()

@@ -61,6 +61,7 @@ struct ShortcutInfo: Identifiable {
         ShortcutInfo(keys: "P", action: String(localized: "Pause / Weiter für alle laufenden Cues")),
         ShortcutInfo(keys: "B", action: String(localized: "Black alle: alle Ausgänge sofort schwarz, nochmal drücken zeigt wieder das Bild")),
         ShortcutInfo(keys: "⇧B", action: String(localized: "Black je Ausgang: nur der Ausgang des Cues am Abspielkopf")),
+        ShortcutInfo(keys: "L / ⇧L", action: String(localized: "Loop beenden: nach dem Durchlauf / nach dem laufenden Cue")),
         ShortcutInfo(keys: "⌘.", action: String(localized: "Notfall-Stopp: beendet die Wiedergabe immer")),
         ShortcutInfo(keys: "Esc", action: String(localized: "Wiedergabe beenden – nur wenn ein Ausgang auf dem Steuerbildschirm liegt")),
         ShortcutInfo(keys: "↑ / ↓", action: String(localized: "Abspielkopf in der Liste bewegen, ohne zu starten")),

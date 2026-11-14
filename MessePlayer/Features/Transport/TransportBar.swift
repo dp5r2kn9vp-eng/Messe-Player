@@ -37,6 +37,7 @@ struct TransportBar: View {
             .help("Cue am Abspielkopf starten (Leertaste)")
             nextCueLabel
             Spacer()
+            RemoteStatusBadge()
             if !engine.loopTargets.isEmpty { endLoopButton }
             if !isTradeShowMode { pauseButton }
             Button("Stopp alle", systemImage: "stop.fill", action: engine.stopAll)

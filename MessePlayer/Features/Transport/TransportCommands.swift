@@ -26,6 +26,7 @@ struct TransportCommands: Commands {
 
     @AppStorage(TransportSettings.tradeShowModeKey) private var isTradeShowMode = false
     @AppStorage(TransportSettings.scheduleActiveKey) private var isScheduleActive = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some Commands {
         CommandMenu("Wiedergabe") {
@@ -47,6 +48,8 @@ struct TransportCommands: Commands {
                 .keyboardShortcut("m", modifiers: [.command, .shift])
             Toggle("Zeitplan aktiv", isOn: $isScheduleActive)
                 .help("Cues mit Uhrzeit starten auch außerhalb des Messe-Modus")
+            Divider()
+            Button("Fernsteuerung …") { openWindow(id: WindowID.remote) }
         }
     }
 }
