@@ -5,6 +5,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ## [Unreleased]
 
+## [2.2.0] – 2026-11-14
+
 ### Neu
 - Gruppen können ihre Cues in zufälliger Reihenfolge abspielen (Zufall-Symbol in der Gruppenzeile). Jeder Durchlauf wird neu gemischt, ohne dass ein Cue direkt zweimal hintereinander kommt (#79).
 - Nachwarten: Bei „Mit nächstem starten“ startet der nächste Cue erst nach einer einstellbaren Zeit ab Start dieses Cues. Spalte „Nachw.“ (standardmäßig ausgeblendet) und Feld im Inspektor (#76).
@@ -135,7 +137,8 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionier
 
 ### Behoben
 
-[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/dp5r2kn9vp-eng/Messe-Player/compare/v2.0.1...v2.1.0
