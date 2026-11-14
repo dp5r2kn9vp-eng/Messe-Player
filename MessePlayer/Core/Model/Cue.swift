@@ -127,6 +127,8 @@ nonisolated struct CueGroup: Codable, Equatable, Identifiable {
         didSet { crossfade = crossfade.clamped(to: Self.crossfadeRange) }
     }
     var isCollapsed = false
+    /// Zufällige Reihenfolge je Durchlauf, ohne denselben Cue direkt zweimal hintereinander.
+    var isShuffled = false
 
     init(id: UUID = UUID(), name: String, firstCueID: Cue.ID, lastCueID: Cue.ID) {
         self.id = id
@@ -144,6 +146,7 @@ nonisolated struct CueGroup: Codable, Equatable, Identifiable {
         mode = try container.decodeIfPresent(Mode.self, forKey: .mode) ?? .loop
         crossfade = try container.decodeIfPresent(TimeInterval.self, forKey: .crossfade) ?? Self.defaultCrossfade
         isCollapsed = try container.decodeIfPresent(Bool.self, forKey: .isCollapsed) ?? false
+        isShuffled = try container.decodeIfPresent(Bool.self, forKey: .isShuffled) ?? false
     }
 }
 

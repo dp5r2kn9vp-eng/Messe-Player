@@ -63,7 +63,7 @@ struct TimelineItemView: View {
                 .fill(color.opacity(0.2))
                 .strokeBorder(selection.contains(loop.groupID) ? Color.white : color, style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                 .overlay(alignment: .leading) {
-                    Label(loopTitle(loop.mode), systemImage: "arrow.triangle.2.circlepath")
+                    Label(loopTitle(loop), systemImage: "arrow.triangle.2.circlepath")
                         .font(.caption2)
                         .lineLimit(1)
                         .padding(.horizontal, Theme.Spacing.xs)
@@ -74,11 +74,12 @@ struct TimelineItemView: View {
         }
     }
 
-    private func loopTitle(_ mode: CueGroup.Mode) -> String {
-        switch mode {
+    private func loopTitle(_ loop: TimelineLoop) -> String {
+        let title = switch loop.mode {
         case .loop: String(localized: "Loop")
         case .repeatCount(let count): String(localized: "\(count) Durchläufe")
         }
+        return loop.isShuffled ? String(localized: "\(title) · Zufall") : title
     }
 
     // MARK: Bausteine
@@ -114,7 +115,7 @@ struct TimelineItemView: View {
             let end = bar.end.map(TimeFormat.string(from:)) ?? "…"
             return "\(cueNames(bar.cueID)): \(TimeFormat.string(from: bar.start)) – \(end)"
         case .loop(let loop):
-            return "\(loopTitle(loop.mode)) ab \(TimeFormat.string(from: loop.start))"
+            return "\(loopTitle(loop)) ab \(TimeFormat.string(from: loop.start))"
         }
     }
 }

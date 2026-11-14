@@ -68,6 +68,7 @@ struct ShowGroup: Equatable {
     let range: ClosedRange<Int>
     var mode: CueGroup.Mode
     var crossfade: TimeInterval
+    var isShuffled = false
 }
 
 extension ProjectDocument {
@@ -78,7 +79,7 @@ extension ProjectDocument {
             showCue(cue, in: packageURL, primaryOutputID: primary, mediaLength: mediaLength)
         }
         let groups = project.groups.compactMap { group in
-            project.cueRange(of: group).map { ShowGroup(id: group.id, range: $0, mode: group.mode, crossfade: group.crossfade) }
+            project.cueRange(of: group).map { ShowGroup(id: group.id, range: $0, mode: group.mode, crossfade: group.crossfade, isShuffled: group.isShuffled) }
         }
         return CueShow(cues: cues, groups: groups, primaryOutputID: primary, outputs: project.outputs)
     }

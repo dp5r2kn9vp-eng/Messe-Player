@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Kopfzeile einer Gruppe: ┌ Name, Modus (Loop ∞ / n-mal), Überblendung, Ausgang, Σ Dauer, Zuklappen.
+/// Kopfzeile einer Gruppe: ┌ Name, Modus (Loop ∞ / n-mal), Zufall, Überblendung, Ausgang, Σ Dauer, Zuklappen.
 struct CueGroupHeaderRow: View {
     @Binding var group: CueGroup
     let status: CueStatus?
@@ -20,6 +20,7 @@ struct CueGroupHeaderRow: View {
                 .font(.headline)
                 .frame(minWidth: 100)
             modePicker
+            shuffleToggle
             Text("Überbl.").font(.caption).foregroundStyle(Color.mutedLight)
             DurationField(seconds: $group.crossfade, range: CueGroup.crossfadeRange)
                 .help("Überblendung zwischen den Cues der Gruppe (0 = harter Schnitt)")
@@ -51,6 +52,18 @@ struct CueGroupHeaderRow: View {
                 .help("Wie oft die Gruppe läuft, danach gilt „Danach“ des letzten Cues")
             }
         }
+    }
+
+    private var shuffleToggle: some View {
+        Toggle(isOn: $group.isShuffled) {
+            Image(systemName: "shuffle")
+        }
+        .toggleStyle(.button)
+        .buttonStyle(.borderless)
+        .accessibilityLabel("Zufällige Reihenfolge")
+        .help(group.isShuffled
+            ? "Zufällige Reihenfolge an: jeder Durchlauf neu gemischt"
+            : "Zufällige Reihenfolge aus: Cues laufen in Listenfolge")
     }
 
     private var outputPicker: some View {

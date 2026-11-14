@@ -36,6 +36,7 @@ struct CueModelTests {
         group.mode = .repeatCount(3)
         group.crossfade = 2
         group.isCollapsed = true
+        group.isShuffled = true
         project.groups = [group]
 
         #expect(try ProjectCodec.decode(ProjectCodec.encode(project)) == project)
@@ -52,7 +53,7 @@ struct CueModelTests {
         #expect(cue == Cue(id: cueID, number: "1"))
         #expect(cue.stillDuration == 5 && cue.followAction == .hold && cue.volume == 1)
         let group = try #require(project.groups.first)
-        #expect(group.mode == .loop && group.crossfade == CueGroup.defaultCrossfade && !group.isCollapsed)
+        #expect(group.mode == .loop && group.crossfade == CueGroup.defaultCrossfade && !group.isCollapsed && !group.isShuffled)
         #expect(project.outputs.map(\.name) == ["Ausgang 1"])
         #expect(project.media.isEmpty)
     }
