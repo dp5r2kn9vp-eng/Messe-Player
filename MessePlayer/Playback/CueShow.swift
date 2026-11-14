@@ -30,6 +30,9 @@ struct ShowCue: Equatable {
 
     let id: Cue.ID
     var content: Content
+    /// Nummer und Anzeigename (für Fernsteuerung und Meldungen).
+    var number = ""
+    var title = ""
     /// `nil` bei Audio; sonst der Ausgang, auf dem der Inhalt erscheint.
     var outputID: OutputDefinition.ID?
     var wait: TimeInterval = 0
@@ -89,9 +92,17 @@ extension ProjectDocument {
         return CueShow(cues: cues, groups: groups, primaryOutputID: primary, outputs: project.outputs)
     }
 
+    private func displayTitle(of cue: Cue) -> String {
+        if !cue.name.isEmpty { return cue.name }
+        if let action = cue.action { return project.title(of: action) }
+        return cue.mediumID.flatMap(project.medium(withID:))?.displayName ?? String(localized: "Steuer-Cue")
+    }
+
     private func showCue(_ cue: Cue, in packageURL: URL?, primaryOutputID: OutputDefinition.ID?, mediaLength: (URL) -> TimeInterval?) -> ShowCue {
         var show = ShowCue(id: cue.id, content: .control, wait: cue.wait, duration: 0, followAction: cue.followAction)
         show.postWait = cue.postWait
+        show.number = cue.number
+        show.title = displayTitle(of: cue)
         show.action = cue.action
         show.schedule = cue.schedule
         show.blendIn = cue.blendIn

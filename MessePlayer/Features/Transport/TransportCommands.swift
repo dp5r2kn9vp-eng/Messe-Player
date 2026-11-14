@@ -6,6 +6,8 @@ enum TransportSettings {
     static let tradeShowModeKey = "isTradeShowMode"
     /// Der einmalige Hinweis auf die geänderten Tasten (Leertaste/P) wurde bestätigt.
     static let keyChangeNoticeKey = "didAcknowledgeKeyChange"
+    /// Fernsteuerung im lokalen Netz eingeschaltet.
+    static let remoteEnabledKey = "isRemoteEnabled"
     /// Zeitplan auch außerhalb des Messe-Modus aktiv.
     static let scheduleActiveKey = "isScheduleActive"
 
