@@ -9,6 +9,7 @@
 - Black (**B**) und Notfall-Stopp (**⌘.**) ausprobieren.
 - Messe-Modus mit **⇧⌘M** einschalten, damit niemand die Liste ändert.
 - Bei Cues mit Uhrzeit prüfen, ob die Transportleiste den richtigen nächsten Start zeigt. Die Mac-Uhrzeit muss stimmen.
+- Bei Fernsteuerung: Mac und iPad im selben WLAN, Fernsteuerung einschalten, am iPad einmal GO und Black ausprobieren.
 - In macOS „Nicht stören“ einschalten, damit keine Mitteilungen erscheinen.
 - Eine Sicherung des Projekts als Zip auf einem USB-Stick dabeihaben.
 

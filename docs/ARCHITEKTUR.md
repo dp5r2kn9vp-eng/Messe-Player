@@ -6,9 +6,10 @@ CueView ist ein Cue-Player (ab v2.0): eine nummerierte Cue-Liste, eine Cue-Engin
 - **App/** – Einstieg, Dokument-Szene (`DocumentGroup`), Fenster (Steuer, Willkommen, Hilfe, Über). `AppDelegate` hält die app-weiten Dienste (eine `CueEngine` für alle offenen Projekte).
 - **Core/Model/** – Datenmodell (`Project`, `Medium`, `Cue`, `CueGroup`, `OutputDefinition`, `Layer`), Bearbeiten der Liste (`CueListEditing`, `CueTrim`, `OutputEditing`), `TimeFormat` (`m:ss.cc`), `OutputState`.
 - **Core/Storage/** – `.klangshow`-Paket (FileWrapper), `MediaStore` (einziger Medienzugriff), `ProjectCodec` (Schema-Version, Migration v1 → v2 über `ProjectFormat1`), Zip-Export/Import.
-- **Playback/** – `CueEngine` (Zustandsautomat, Zeit über `StepScheduler` und `now` injizierbar), `CueShow` (Liste aufbereitet für die Engine), `AudioCuePlayer(s)`, `ShowSimulation` (Zeitstrahl, fährt die echte Engine mit `VirtualClock`), `SessionRestore`.
+- **Playback/** – `CueEngine` (Zustandsautomat, Zeit über `StepScheduler` und `now` injizierbar), `CueShow` (Liste aufbereitet für die Engine), `AudioCuePlayer(s)`, `ShowSimulation` (Zeitstrahl, fährt die echte Engine mit `VirtualClock`), `CueTimetable` (Start nach Uhrzeit), `GroupOrder` (Zufallsreihenfolge), `SessionRestore`.
+- **Remote/** – Fernsteuerung: `RemoteServer` (Network.framework, HTTP + WebSocket + Bonjour), `RemoteRouter` (Befehle, ohne Netz testbar), `RemotePairing` (PIN/Token), `RemoteState` (JSON). API: `docs/REMOTE-API.md`.
 - **Rendering/** – `FrameView`/`MediaView`/`VideoSurface`: EIN Renderer für Ausgänge, Vorschau und Editor.
-- **Features/** – `CueList`, `Inspector`, `Trim`, `Timeline`, `Transport` (Leiste + Menü „Wiedergabe“), `Outputs` (Ausgangsleiste, Zuordnung), `Output` (Ausgabefenster je Ausgang), `Control` (Steuerfenster, Black-Schaltflächen), `Library`, `LayerEditor`, `Help`, `Info`, `Welcome`, `Archive`.
+- **Features/** – `CueList`, `Inspector`, `Trim`, `Timeline`, `Transport` (Leiste + Menü „Wiedergabe“), `Outputs` (Ausgangsleiste, Zuordnung), `Output` (Ausgabefenster je Ausgang), `Control` (Steuerfenster, Black-Schaltflächen), `Library`, `LayerEditor`, `Help`, `Info`, `Welcome`, `Archive`, `Remote` (Fenster „Fernsteuerung“).
 - **UI/** – `Theme` (Farb-Tokens), `ReorderableList`, `DurationField`, `PanelHeader`, gemeinsame Komponenten.
 - **System/** – `DisplayService` (Hotplug), `OutputRouting` (Ausgang ↔ Bildschirm je Rechner), `HotkeyService` (Ein-Tasten-Kürzel), `SessionStore`, `SleepGuard`.
 
@@ -19,6 +20,8 @@ flowchart LR
   Show --> Engine
   Engine --> State[OutputState je Ausgang]
   Engine --> Audio[AudioCuePlayers]
+  Remote[RemoteServer] --> Engine
+  Timetable[CueTimetable] --> Engine
   State --> Renderer[FrameView]
   Routing[OutputRouting] --> Windows[OutputWindowManager]
   Renderer --> Windows

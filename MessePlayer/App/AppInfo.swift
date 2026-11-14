@@ -26,4 +26,5 @@ enum WindowID {
     static let about = "about"
     static let help = "help"
     static let shortcuts = "shortcuts"
+    static let remote = "remote"
 }

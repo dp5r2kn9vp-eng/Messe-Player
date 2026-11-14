@@ -11,7 +11,7 @@ Unten steuerst du die Show: GO, „Als Nächstes“ (der Cue am Abspielkopf), Pa
 
 ## Menü Wiedergabe
 
-Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Loop beenden, Stopp alle, Black alle, Notfall-Stopp (⌘.), Messe-Modus und Zeitplan aktiv.
+Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Loop beenden, Stopp alle, Black alle, Notfall-Stopp (⌘.), Messe-Modus, Zeitplan aktiv und Fernsteuerung.
 
 ## Tasten
 
@@ -43,6 +43,17 @@ Ein Cue kann zu einer festen Uhrzeit starten, zum Beispiel täglich um 14:00 die
 - Die Transportleiste zeigt den nächsten geplanten Start.
 - Eine verpasste Zeit wird nicht nachgeholt, zum Beispiel wenn CueView erst danach gestartet wurde.
 - Während einer Pause entfällt der Start. Die Transportleiste meldet das. Nach „Stopp alle“ bleibt der Zeitplan aktiv.
+
+## Fernsteuerung vom iPad
+
+Mit „CueView Remote“ auf dem iPad steuerst du GO, Stopp, Black, Notfall-Stopp und Loop beenden und siehst, was gerade läuft.
+
+- Öffne Wiedergabe → „Fernsteuerung …“ und schalte „Fernsteuerung im lokalen Netz“ ein. macOS fragt beim ersten Mal nach dem lokalen Netzwerk und eingehenden Verbindungen. Erlaube beides.
+- Wähle auf dem iPad diesen Mac und gib die angezeigte PIN ein. Nach jeder Kopplung gilt eine neue PIN.
+- Gekoppelte Geräte stehen im Fenster und lassen sich dort entfernen.
+- Solange die Fernsteuerung läuft, zeigt die Transportleiste ein Antennen-Symbol mit der Zahl der verbundenen Geräte.
+- Die Befehle wirken auch im Messe-Modus.
+- Mac und iPad müssen im selben WLAN sein. Auf der Messe am besten ein eigenes WLAN oder einen eigenen Hotspot nutzen.
 
 ## Hinweis beim ersten Start
 
