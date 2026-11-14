@@ -10,10 +10,12 @@ struct StepProgressBar: View {
             let remaining = max(progress.duration - elapsed, 0)
             HStack(spacing: Theme.Spacing.s) {
                 bar(fraction: progress.duration > 0 ? min(elapsed / progress.duration, 1) : 1)
-                Text(progress.pausedAt == nil ? "noch \(Int(remaining.rounded(.up))) s" : "Pause")
+                Text(progress.pausedAt == nil ? TimeFormat.countdown(from: remaining) : String(localized: "Pause"))
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(Color.brandOrange)
-                    .frame(minWidth: 52, alignment: .trailing)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .frame(width: 44, alignment: .trailing)
             }
         }
         .help("Restzeit bis zum nächsten Eintrag")

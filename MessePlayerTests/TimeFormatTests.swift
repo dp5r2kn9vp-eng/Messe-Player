@@ -28,4 +28,11 @@ struct TimeFormatTests {
             #expect(abs((TimeFormat.seconds(from: TimeFormat.string(from: value)) ?? -1) - value) < 0.000_001)
         }
     }
+
+    @Test(arguments: [
+        (0.0, "0:00"), (0.2, "0:01"), (42.0, "0:42"), (59.5, "1:00"), (125.0, "2:05"), (-3.0, "0:00"),
+    ])
+    func countdownIsCompact(seconds: Double, expected: String) {
+        #expect(TimeFormat.countdown(from: seconds) == expected)
+    }
 }

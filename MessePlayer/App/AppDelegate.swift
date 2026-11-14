@@ -10,12 +10,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) lazy var outputWindows = OutputWindowManager(engine: engine, displays: displays, routing: routing)
     private let sleepGuard = SleepGuard()
 
+    /// Keine Fenster-Wiederherstellung durch macOS: Der Start zeigt das Willkommensfenster,
+    /// nur nach einem Absturz öffnet CueView selbst das letzte Projekt.
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         _ = outputWindows
         sleepGuard.start()
         registerHotkeys()
         hotkeys.start()
-        if SessionStore.beginRun() { reopenLastProject() }
+        // Ohne diese Ausnahme sähe jeder Testlauf beim nächsten echten Start wie ein Absturz aus.
+        if !AppInfo.isTestHost, SessionStore.beginRun() { reopenLastProject() }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -23,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        guard !AppInfo.isTestHost else { return }
         SessionStore.endRun()
     }
 

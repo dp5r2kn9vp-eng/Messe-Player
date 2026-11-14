@@ -10,6 +10,12 @@ nonisolated enum TimeFormat {
         return String(format: "%d:%02d.%02d", minutes, rest / 100, rest % 100)
     }
 
+    /// Kompakte Restzeit `m:ss`, auf volle Sekunden aufgerundet (`0:00` erst am Ende).
+    static func countdown(from seconds: TimeInterval) -> String {
+        let total = Int(max(seconds, 0).rounded(.up))
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
     /// Tolerante Eingabe: `42`, `42.5`, `42,5`, `1:05`, `0:42.3`, `1:02:03` (h:m:s).
     /// `nil` bei unlesbarer oder negativer Eingabe sowie bei Sekunden/Minuten ≥ 60 hinter einem Doppelpunkt.
     static func seconds(from text: String) -> TimeInterval? {

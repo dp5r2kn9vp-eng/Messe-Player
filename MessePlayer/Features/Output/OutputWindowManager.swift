@@ -44,6 +44,11 @@ final class OutputWindowManager {
         return .preview
     }
 
+    /// Nur auf einem externen Bildschirm sieht das Publikum den Ausgang – nur dort lohnt Black je Ausgang.
+    func showsOnExternalScreen(_ outputID: OutputDefinition.ID) -> Bool {
+        routing.display(for: outputID, in: displays.displays).map { !$0.isControlScreen } ?? false
+    }
+
     /// Ein laufender Ausgang verdeckt das Steuerfenster (dann beendet Esc die Wiedergabe).
     var blocksControlScreen: Bool {
         controllers.values.contains { $0.sharesControlScreen && !$0.isIdle }

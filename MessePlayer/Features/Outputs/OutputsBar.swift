@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Leiste über dem Transport: je Ausgang Status, Black je Ausgang und – ohne Bildschirm – die Vorschau.
+/// Leiste über dem Transport: je Ausgang Status, Black je Ausgang (nur auf externem Bildschirm) und – ohne Bildschirm – die Vorschau.
 struct OutputsBar: View {
     @Environment(CueEngine.self) private var engine
     @Environment(OutputWindowManager.self) private var outputWindows
@@ -11,7 +11,12 @@ struct OutputsBar: View {
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Spacing.l) {
             ForEach(Array(outputWindows.outputs.enumerated()), id: \.element.id) { index, output in
-                OutputTile(output: output, colorIndex: index, status: outputWindows.status(of: output.id))
+                OutputTile(
+                    output: output,
+                    colorIndex: index,
+                    status: outputWindows.status(of: output.id),
+                    offersBlack: outputWindows.showsOnExternalScreen(output.id)
+                )
             }
             Spacer(minLength: 0)
             if engine.parallelVideoCount > Self.parallelVideoWarningLimit {
@@ -29,6 +34,7 @@ private struct OutputTile: View {
     let output: OutputDefinition
     let colorIndex: Int
     let status: OutputStatus
+    let offersBlack: Bool
 
     @Environment(CueEngine.self) private var engine
 
@@ -37,10 +43,12 @@ private struct OutputTile: View {
             HStack(spacing: Theme.Spacing.s) {
                 Circle().fill(Color.output(at: colorIndex)).frame(width: 10, height: 10)
                 Text(output.name).font(.headline).lineLimit(1)
-                BlackButton(isActive: engine.blackOutputIDs.contains(output.id), isCompact: true) {
-                    engine.toggleBlack(output: output.id)
+                if offersBlack {
+                    BlackButton(isActive: engine.blackOutputIDs.contains(output.id), isCompact: true) {
+                        engine.toggleBlack(output: output.id)
+                    }
+                    .help("Nur diesen Ausgang schwarz schalten (⇧B für den Ausgang am Abspielkopf)")
                 }
-                .help("Nur diesen Ausgang schwarz schalten (⇧B für den Ausgang am Abspielkopf)")
             }
             statusLabel
             if status.isPreview {
