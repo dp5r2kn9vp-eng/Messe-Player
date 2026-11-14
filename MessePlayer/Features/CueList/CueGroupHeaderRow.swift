@@ -8,6 +8,8 @@ struct CueGroupHeaderRow: View {
     let outputID: OutputDefinition.ID?
     let outputs: [OutputDefinition]
     let totalDuration: TimeInterval?
+    /// Gesetzt nach „Loop beenden“, solange die Gruppe ausläuft.
+    var ending: LoopEnding?
     let onSetOutput: (OutputDefinition.ID?) -> Void
 
     var body: some View {
@@ -21,6 +23,7 @@ struct CueGroupHeaderRow: View {
                 .frame(minWidth: 100)
             modePicker
             shuffleToggle
+            if let ending { endingBadge(ending) }
             Text("Überbl.").font(.caption).foregroundStyle(Color.mutedLight)
             DurationField(seconds: $group.crossfade, range: CueGroup.crossfadeRange)
                 .help("Überblendung zwischen den Cues der Gruppe (0 = harter Schnitt)")
@@ -52,6 +55,13 @@ struct CueGroupHeaderRow: View {
                 .help("Wie oft die Gruppe läuft, danach gilt „Danach“ des letzten Cues")
             }
         }
+    }
+
+    private func endingBadge(_ ending: LoopEnding) -> some View {
+        Label(ending == .afterPass ? "endet nach Durchlauf" : "endet nach Cue", systemImage: "arrow.turn.down.right")
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color.brandOrange)
+            .help("„Loop beenden“: danach gilt „Danach“ des letzten Cues der Gruppe")
     }
 
     private var shuffleToggle: some View {

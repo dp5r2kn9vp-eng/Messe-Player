@@ -215,10 +215,11 @@ nonisolated extension Project {
         }
     }
 
-    /// In Gruppen gilt „Weiter nach Ende“; nur der letzte Cue einer n-mal-Gruppe bestimmt, was danach passiert.
+    /// In Gruppen gilt „Weiter nach Ende“; nur der letzte Cue bestimmt, was nach der Gruppe passiert
+    /// (nach n Durchläufen bzw. nach „Loop beenden“).
     func followActionIsSetByGroup(_ cue: Cue) -> Bool {
         guard let group = group(containing: cue.id) else { return false }
-        return group.mode == .loop || group.lastCueID != cue.id
+        return group.lastCueID != cue.id
     }
 
     /// Nachwarten wirkt nur bei „Mit nächstem starten“ außerhalb von Gruppen.

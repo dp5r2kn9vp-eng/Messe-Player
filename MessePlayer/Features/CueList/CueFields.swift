@@ -76,7 +76,9 @@ struct CueFollowPicker: View {
         }
         .labelsHidden()
         .disabled(model.followIsSetByGroup)
-        .help(model.followIsSetByGroup ? "In einer Loop-Gruppe geht es immer weiter nach Ende." : "Was nach dem Cue passiert")
+        .help(model.followIsSetByGroup
+            ? "In einer Gruppe geht es immer weiter nach Ende; der letzte Cue bestimmt, was nach der Gruppe passiert."
+            : "Was nach dem Cue passiert")
     }
 }
 

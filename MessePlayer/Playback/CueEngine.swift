@@ -20,6 +20,14 @@ struct RunningCue: Equatable {
     var appearedAt: Date?
 }
 
+/// Wann eine laufende Gruppe auf „Loop beenden“ hin aufhört.
+enum LoopEnding: Equatable {
+    /// Der laufende Durchlauf spielt zu Ende.
+    case afterPass
+    /// Nur der laufende Cue spielt zu Ende.
+    case afterCue
+}
+
 /// Durchlauf einer Gruppe: Reihenfolge, Zähler für „n-mal“ und Schutz vor Endlosschleifen ohne Inhalt.
 struct GroupRun: Equatable {
     let groupID: CueGroup.ID
@@ -29,6 +37,8 @@ struct GroupRun: Equatable {
     var order: [Cue.ID] = []
     /// Stelle des laufenden Cues in `order`.
     var position = 0
+    /// Gesetzt durch „Loop beenden“: keine weiteren Durchläufe, danach „Danach“ des letzten Cues.
+    var ending: LoopEnding?
 
     /// Folgender Cue im Durchlauf; `nil` am Ende des Durchlaufs.
     var nextCueID: Cue.ID? {
@@ -195,6 +205,33 @@ final class CueEngine {
         if blackOutputIDs.remove(id) == nil {
             blackOutputIDs.insert(id)
         }
+    }
+
+    /// Gruppen, die „Loop beenden“ trifft: die laufende Gruppe am Abspielkopf, sonst alle laufenden Gruppen.
+    var loopTargets: Set<CueGroup.ID> {
+        let runningGroups = Set(running.values.compactMap { $0.groupRun?.groupID })
+        if let index = playheadIndex, let group = show.group(at: index), runningGroups.contains(group.id) {
+            return [group.id]
+        }
+        return runningGroups
+    }
+
+    /// Wie eine laufende Gruppe endet; `nil`, solange sie normal weiterläuft.
+    func loopEnding(of groupID: CueGroup.ID) -> LoopEnding? {
+        running.values.lazy.compactMap(\.groupRun).first { $0.groupID == groupID }?.ending
+    }
+
+    /// „Loop beenden“: Die Gruppe spielt den Durchlauf (bzw. den laufenden Cue) zu Ende,
+    /// danach gilt „Danach“ ihres letzten Cues. `false`, wenn keine Gruppe läuft.
+    @discardableResult
+    func endLoop(_ ending: LoopEnding = .afterPass) -> Bool {
+        let targets = loopTargets
+        guard !targets.isEmpty else { return false }
+        for (id, runningCue) in running {
+            guard let groupID = runningCue.groupRun?.groupID, targets.contains(groupID) else { continue }
+            running[id]?.groupRun?.ending = ending
+        }
+        return true
     }
 
     // MARK: Renderer
@@ -377,11 +414,11 @@ final class CueEngine {
     /// Mitglieder laufen in der Folge des Durchlaufs weiter; am Ende Rücksprung (Loop/n-mal),
     /// danach „Danach“ des letzten Cues der Gruppe in der Liste.
     private func finishInGroup(_ group: ShowGroup, at index: Int, run: GroupRun) {
-        if let (nextIndex, nextRun) = nextInRun(run, of: group) {
+        if run.ending != .afterCue, let (nextIndex, nextRun) = nextInRun(run, of: group) {
             launch(at: nextIndex, groupRun: nextRun, manual: false)
             return
         }
-        if run.hasPlayed, repeats(group, after: run.pass) {
+        if run.ending == nil, run.hasPlayed, repeats(group, after: run.pass) {
             let nextRun = makeRun(group, pass: run.pass + 1, previousLast: run.order.last)
             launch(at: nextRun.order.first.flatMap(show.index(of:)) ?? group.range.lowerBound, groupRun: nextRun, manual: false)
         } else if show.cues[group.range.upperBound].followAction != .hold {

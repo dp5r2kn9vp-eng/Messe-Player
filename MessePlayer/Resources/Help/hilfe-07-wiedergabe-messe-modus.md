@@ -7,15 +7,18 @@ Unten steuerst du die Show: GO, „Als Nächstes“ (der Cue am Abspielkopf), Pa
 - GO startet den Cue am Abspielkopf.
 - Stopp alle beendet die Wiedergabe. Der Abspielkopf bleibt stehen.
 - Black alle schaltet alle Ausgänge auf Schwarz. Ein weiterer Druck zeigt wieder das Bild.
+- „Loop beenden“ erscheint, solange eine Gruppe läuft. Es trifft die Gruppe am Abspielkopf, sonst alle laufenden Gruppen. Mit ⌥-Klick endet sie schon nach dem laufenden Cue. Die Gruppenzeile zeigt „endet nach Durchlauf“.
 
 ## Menü Wiedergabe
 
-Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Stopp alle, Black alle, Notfall-Stopp (⌘.) und Messe-Modus.
+Das Menü Wiedergabe enthält GO, Pause/Fortsetzen, Loop beenden, Stopp alle, Black alle, Notfall-Stopp (⌘.) und Messe-Modus.
 
 ## Tasten
 
 - **Leertaste**: GO
 - **P**: Pause oder Fortsetzen
+- **L**: Loop beenden – der laufende Durchlauf spielt zu Ende, danach gilt „Danach“ des letzten Cues der Gruppe
+- **⇧L**: Loop nach dem laufenden Cue beenden
 - **B**: Black alle
 - **⇧B**: Black des Ausgangs vom Cue am Abspielkopf
 - **⌘.**: Notfall-Stopp, wirkt immer
